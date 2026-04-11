@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
+import type { GridColDef, GridPaginationModel } from '@mui/x-data-grid';
 import { User, Mail, Shield, BookOpen } from 'lucide-react';
 
 // Column definition remains static for the DataGrid
@@ -16,7 +17,7 @@ export default function AccountPage() {
   const [profileLoading, setProfileLoading] = useState(true);
 
   // MUI DataGrid Server-Side Pagination State
-  const [activities, setActivities] = useState<any[]>([]);
+  const [activities, setActivities] = useState<Record<string, unknown>[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
   const [totalRows, setTotalRows] = useState(0);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({

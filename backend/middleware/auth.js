@@ -27,7 +27,20 @@ export const authenticate = (req, res, next) => {
 };
 
 // Middleware for RBAC
-export const requireRole = (roles) => {
+export const requireRole = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !req.user.role) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'User role not found' });
+    }
+    
+    // Ensure role matches at least one allowed role (case-insensitive for safety)
+    const userRole = req.user.role.toUpperCase();
+    if (!allowedRoles.map(r => r.toUpperCase()).includes(userRole)) {
+      return res.status(403).json({ error: 'Forbidden', message: 'Insufficient permissions' });
+    }
+    next();
+  };
+};
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({ error: 'Forbidden', message: 'Insufficient permissions' });
