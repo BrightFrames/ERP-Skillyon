@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef, GridPaginationModel } from '@mui/x-data-grid';
-import { School, Search, Plus } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 90 },

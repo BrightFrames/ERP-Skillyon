@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+const fs = require('fs');
+
+const content = `import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef, GridPaginationModel } from '@mui/x-data-grid';
 import { User, Mail, Shield, BookOpen } from 'lucide-react';
@@ -9,8 +11,8 @@ const columns: GridColDef[] = [
   { field: 'activity', headerName: 'Activity', width: 300 },
   { field: 'status', headerName: 'Status', width: 130,
     renderCell: (params) => (
-      <span className={`px-2 py-1 rounded-full text-xs font-semibold
-        ${params.value === 'Completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
+      <span className={\`px-2 py-1 rounded-full text-xs font-semibold
+        \${params.value === 'Completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}\`}>
         {params.value}
       </span>
     )
@@ -144,3 +146,8 @@ export default function AccountPage() {
     </div>
   );
 }
+\`;
+
+// Force write securely to the actual file location
+fs.writeFileSync('c:\\\\Users\\\\soura\\\\Erp-Skillyon\\\\frontend\\\\src\\\\AccountPage.tsx', content);
+console.log("Overwritten successfully");

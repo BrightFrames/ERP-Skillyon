@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import os
+
+content = """import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef, GridPaginationModel } from '@mui/x-data-grid';
 import { User, Mail, Shield, BookOpen } from 'lucide-react';
@@ -143,4 +145,7 @@ export default function AccountPage() {
       </div>
     </div>
   );
-}
+}"""
+
+with open(r"c:\Users\soura\Erp-Skillyon\frontend\src\AccountPage.tsx", "w", encoding="utf-8") as f:
+    f.write(content)
