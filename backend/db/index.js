@@ -1,13 +1,13 @@
 import pkg from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
+
 const { Pool } = pkg;
 
-// MOCK: Replace with real PostgreSQL URI
+// Use the DATABASE_URL connection string directly for Supabase/PostgreSQL (Postgres URI)
 const pool = new Pool({
-  user: process.env.PG_USER || 'postgres',
-  host: process.env.PG_HOST || 'localhost',
-  database: process.env.PG_DATABASE || 'erp_school',
-  password: process.env.PG_PASSWORD || 'password',
-  port: process.env.PG_PORT || 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 });
 
 export default pool;

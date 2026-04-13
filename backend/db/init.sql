@@ -6,12 +6,14 @@ DROP TABLE IF EXISTS students CASCADE;
 DROP TABLE IF EXISTS staff CASCADE;
 DROP TABLE IF EXISTS classes CASCADE;
 
--- Staff (Teachers & Admin)
+-- Staff (Teachers, Admins, Workers)
+-- Added 'subject' field uniquely for Teachers, 'domain' for Workers
 CREATE TABLE staff (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN', 'TEACHER', 'STAFF')),
+    role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN', 'TEACHER', 'STAFF', 'SECURITY')),
+    subject VARCHAR(150), -- Used if role is 'TEACHER'
     join_date DATE DEFAULT CURRENT_DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -71,3 +73,7 @@ CREATE TABLE marks (
 
 -- Insert Demo Admin
 INSERT INTO staff (name, email, role) VALUES ('System Admin', 'admin@school.erp', 'ADMIN');
+INSERT INTO staff (name, email, role, subject) VALUES ('Sarah Jenkins', 'sarah.j@school.edu', 'TEACHER', 'Mathematics');
+INSERT INTO staff (name, email, role, subject) VALUES ('Michael Chen', 'michael.c@school.edu', 'TEACHER', 'Science');
+INSERT INTO staff (name, email, role) VALUES ('Janice Doe', 'janice.d@school.edu', 'STAFF');
+INSERT INTO staff (name, email, role) VALUES ('Greg House', 'greg.guard@school.edu', 'SECURITY');

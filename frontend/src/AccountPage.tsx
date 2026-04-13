@@ -10,7 +10,7 @@ const columns: GridColDef[] = [
   { field: 'status', headerName: 'Status', width: 130,
     renderCell: (params) => (
       <span className={`px-2 py-1 rounded-full text-xs font-semibold
-        ${params.value === 'Completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
+        ${params.value === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
         {params.value}
       </span>
     )
@@ -69,56 +69,56 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 h-full min-h-[400px] text-zinc-900 dark:text-zinc-50">
+    <div className="flex flex-col gap-8 text-zinc-900">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
-        <p className="text-zinc-500 dark:text-zinc-400 mt-2">Welcome back, {profile?.name || 'System Admin'}.</p>
+        <p className="text-zinc-500 mt-2">Welcome back, {profile?.name || 'System Admin'}.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
             <User size={24} />
           </div>
           <div>
-             <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Total Students</p>
+             <p className="text-sm font-medium text-zinc-500">Total Students</p>
              <p className="text-2xl font-bold">1,248</p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
             <Shield size={24} />
           </div>
           <div>
-             <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Staff Members</p>
+             <p className="text-sm font-medium text-zinc-500">Staff Members</p>
              <p className="text-2xl font-bold">84</p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
             <BookOpen size={24} />
           </div>
           <div>
-             <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Active Classes</p>
+             <p className="text-sm font-medium text-zinc-500">Active Classes</p>
              <p className="text-2xl font-bold">42</p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
             <Mail size={24} />
           </div>
           <div>
-             <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Unread Messages</p>
+             <p className="text-sm font-medium text-zinc-500">Unread Messages</p>
              <p className="text-2xl font-bold">12</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden">
-        <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="bg-white rounded-xl shadow-sm border border-zinc-200 flex flex-col overflow-hidden">
+        <div className="p-6 border-b border-zinc-200">
            <h3 className="font-bold text-lg">Recent User Activities</h3>
         </div>
         <div className="flex-1 min-h-[400px] w-full p-0">

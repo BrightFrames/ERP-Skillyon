@@ -33,23 +33,23 @@ export default function ClassesPage() {
   }, [paginationModel]);
 
   return (
-    <div className="flex flex-col gap-8 h-full min-h-[calc(100vh-12rem)]">
-      <div className="flex justify-between items-end">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Classes & Sections</h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage grades, classrooms, and homeroom teachers.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Classes & Sections</h1>
+          <p className="text-zinc-500 mt-2">Manage grades, classrooms, and homeroom teachers.</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg transition-colors shadow-sm font-medium text-sm">
+        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg transition-colors shadow-sm font-medium text-sm whitespace-nowrap">
           <Plus size={18} />
           New Class
         </button>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 flex flex-col overflow-hidden">
-        <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-4">
+      <div className="bg-white rounded-xl shadow-sm border border-zinc-200 flex flex-col overflow-hidden">
+        <div className="p-5 border-b border-zinc-200 flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 h-4 w-4" />
-             <input type="text" placeholder="Search classes..." className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+             <input type="text" placeholder="Search classes..." className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
           </div>
         </div>
 
