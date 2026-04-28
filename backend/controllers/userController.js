@@ -1,74 +1,70 @@
-// Secure PostgreSQL queries according to secure-fullstack-dev using parameterized values
-import pool from '../db/index.js';
+﻿import pool from '../db/index.js';
+import jwt from 'jsonwebtoken';
 
-/**
- * Controller: Get Profile View
- * Security: Validates session to fetch precise user information
- */
+// Use a fallback secret for development if not in .env
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
+
+export const login = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    // In a real app, verify passwords here (bcrypt.compare)
+    // For this ERP, Admin provisions users, we'll authenticate via email for the prototype
+    const { rows } = await pool.query('SELECT id, name, email, role, subject FROM staff WHERE email = ', [email]);
+    
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const user = rows[0];
+    
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (error) {
+    console.error('Login Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 export const getProfile = async (req, res, next) => {
   const userId = req.user.id;
 
   try {
-    // MOCK PostgreSQL Queries: Uses parameterized queries to stop SQL Injection
-    // const result = await pool.query('SELECT id, name, email, role_type as role FROM users WHERE id = $1', [userId]);
+    // Secure Parameterized Query
+    const { rows } = await pool.query(
+      'SELECT id, name, email, role, subject, join_date FROM staff WHERE id = ', 
+      [userId]
+    );
 
-    // Mocking response to match AccountPage.tsx
-    const mockDbResponse = {
-      name: "Sarah Jenkins",
-      email: "sarah.j@school.edu",
-      role: "Teacher",
-      className: "Grade 10 - Section B",
-      subject: "Mathematics & History",
-      joinDate: "Aug 15, 2024"
-    };
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    res.status(200).json(mockDbResponse);
-
+    res.status(200).json(rows[0]);
   } catch (error) {
-    console.error("DB Query Error [getProfile]:", error);
-    // Passing error to middleware (does not leak db schema structure)
+    console.error('DB Query Error [getProfile]:', error);
     next(new Error('Failed to retrieve user profile'));
   }
 };
 
-/**
- * Controller: Get Server-Side Paginated Activities
- * Features: Pagination & Role-based scoping
- */
 export const getActivities = async (req, res, next) => {
-  const userId = req.user.id;
-  const page = parseInt(req.query.page, 10);
-  const limit = parseInt(req.query.limit, 10);
-  const offset = page * limit;
-
-  try {
-    // PostgreSQL Server Pagination structure:
-    // const totalCountQuery = await pool.query('SELECT count(*) FROM user_activities WHERE user_id = $1', [userId]);
-    // const dataQuery = await pool.query(
-    //   'SELECT id, date, activity, status FROM user_activities WHERE user_id = $1 ORDER BY date DESC LIMIT $2 OFFSET $3',
-    //   [userId, limit, offset]
-    // );
-
-    // Mocking response to match AccountPage.tsx server pagination
-    const fakeDatabase = [
-      { id: 1, date: '2026-04-10', activity: 'Updated History Lesson Plan', status: 'Completed' },
-      { id: 2, date: '2026-04-09', activity: 'Graded Midterm Exams', status: 'Pending' },
-      { id: 3, date: '2026-04-08', activity: 'Parent-Teacher Conference', status: 'Scheduled' },
-      { id: 4, date: '2026-04-07', activity: 'Uploaded Math Worksheet', status: 'Completed' },
-      { id: 5, date: '2026-04-06', activity: 'Attended Staff Meeting', status: 'Completed' },
-      { id: 6, date: '2026-04-05', activity: 'Submitted Term 1 Grades', status: 'Completed' },
-      { id: 7, date: '2026-04-04', activity: 'Updated Attendance Record', status: 'Completed' },
-    ];
-
-    const data = fakeDatabase.slice(offset, offset + limit);
-
-    res.status(200).json({
-      data,
-      totalCount: fakeDatabase.length
-    });
-
-  } catch (error) {
-    console.error("DB Query Error [getActivities]:", error);
-    next(new Error('Failed to load user activities.'));
-  }
+  // Activity mock for now since we don't have an activities table yet
+  const offset = parseInt(req.query.page || '0', 10) * parseInt(req.query.limit || '10', 10);
+  const limit = parseInt(req.query.limit || '10', 10);
+  res.status(200).json({ data: [], totalCount: 0 });
 };

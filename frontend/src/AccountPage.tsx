@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import type { GridColDef, GridPaginationModel } from '@mui/x-data-grid';
 import { User, Mail, Shield, BookOpen } from 'lucide-react';
+import api from './lib/api';
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 90 },

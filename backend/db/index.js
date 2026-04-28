@@ -10,4 +10,13 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 });
 
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('Error acquiring client from db pool:', err.stack);
+  } else {
+    console.log('Successfully connected to the database.');
+    release();
+  }
+});
+
 export default pool;
