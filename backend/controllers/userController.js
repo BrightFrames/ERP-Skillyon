@@ -1,21 +1,31 @@
-﻿import pool from '../db/index.js';
+import pool from '../db/index.js';
 import jwt from 'jsonwebtoken';
 
 // Use a fallback secret for development if not in .env
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
 
+const DUMMY_USERS = {
+  'admin@educore.edu': { id: 9991, name: 'System Admin', email: 'admin@educore.edu', role: 'ADMIN', subject: null, join_date: new Date().toISOString() },
+  'teacher@educore.edu': { id: 9992, name: 'Sarah Jenkins', email: 'teacher@educore.edu', role: 'TEACHER', subject: 'Mathematics', join_date: new Date().toISOString() },
+  'staff@educore.edu': { id: 9993, name: 'Marcus Thompson', email: 'staff@educore.edu', role: 'STAFF', subject: null, join_date: new Date().toISOString() },
+};
+
 export const login = async (req, res, next) => {
   const { email } = req.body;
   try {
-    // In a real app, verify passwords here (bcrypt.compare)
-    // For this ERP, Admin provisions users, we'll authenticate via email for the prototype
-    const { rows } = await pool.query('SELECT id, name, email, role, subject FROM staff WHERE email = ', [email]);
-    
-    if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+    let user;
 
-    const user = rows[0];
+    // Check for dummy login
+    if (DUMMY_USERS[email]) {
+      user = DUMMY_USERS[email];
+    } else {
+      // In a real app, verify passwords here (bcrypt.compare)
+      const { rows } = await pool.query('SELECT id, name, email, role, subject FROM staff WHERE email = $1', [email]);
+      if (rows.length === 0) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      user = rows[0];
+    }
     
     // Generate JWT Token
     const token = jwt.sign(
@@ -45,9 +55,15 @@ export const getProfile = async (req, res, next) => {
   const userId = req.user.id;
 
   try {
+    // Check if it's a dummy user
+    const dummyUser = Object.values(DUMMY_USERS).find(u => u.id === userId);
+    if (dummyUser) {
+      return res.status(200).json(dummyUser);
+    }
+
     // Secure Parameterized Query
     const { rows } = await pool.query(
-      'SELECT id, name, email, role, subject, join_date FROM staff WHERE id = ', 
+      'SELECT id, name, email, role, subject, join_date FROM staff WHERE id = $1', 
       [userId]
     );
 

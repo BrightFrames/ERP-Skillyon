@@ -1,170 +1,247 @@
-import { useState, useEffect } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import type { GridColDef, GridPaginationModel } from '@mui/x-data-grid';
-import { UserPlus, Search, X } from 'lucide-react';
-
-const columns: GridColDef[] = [
-  { field: 'id', headerName: 'ID', width: 90 },
-  { field: 'name', headerName: 'Student Name', width: 200 },
-  { field: 'email', headerName: 'Email', width: 250 },
-  { field: 'class_name', headerName: 'Class', width: 130 },
-  { field: 'enrollment_date', headerName: 'Enrollment Date', width: 150 },
-  { field: 'parent_email', headerName: 'Parent Email', width: 250 },
-];
+import { 
+  UserPlus, 
+  Filter, 
+  MoreVertical, 
+  ChevronLeft, 
+  ChevronRight,
+  Users,
+  GraduationCap
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [totalRowCount, setTotalRowCount] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newStudent, setNewStudent] = useState({ name: '', email: '', class_name: '', parent_email: '' });
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: 0,
-    pageSize: 10,
-  });
-
-  const fetchStudents = async () => {
-    setLoading(true);
-    try {
-      // Mock data so the table isn't completely empty for demo purposes if backend isn't up
-      setStudents([
-        { id: 1, name: 'Alice Smith', email: 'alice@student.edu', class_name: 'Grade 10 - A', enrollment_date: '2024-09-01', parent_email: 'parent.alice@mail.com' },
-        { id: 2, name: 'Bob Jones', email: 'bob@student.edu', class_name: 'Grade 10 - B', enrollment_date: '2024-09-02', parent_email: 'parent.bob@mail.com' }
-      ]);
-      setTotalRowCount(2);
-      
-      const response = await fetch(`http://localhost:5000/api/students?page=${paginationModel.page}&limit=${paginationModel.pageSize}`, {
-        headers: {
-          'Authorization': 'Bearer sample-token-here'
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setStudents(data.data || []);
-        setTotalRowCount(data.total || 0);
-      }
-    } catch (error) {
-      console.error('Failed to fetch students, using mock data fallback', error);
-    } finally {
-      setLoading(false);
+  const students = [
+    {
+      id: '#STU-2024-001',
+      name: 'Alexander Bennett',
+      email: 'alexander.b@school.edu',
+      grade: 'Grade 11 - A',
+      gender: 'Male',
+      status: 'Active',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+    },
+    {
+      id: '#STU-2024-042',
+      name: 'Eleanor Vance',
+      email: 'e.vance@school.edu',
+      grade: 'Grade 10 - B',
+      gender: 'Female',
+      status: 'Inactive',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+    },
+    {
+      id: '#STU-2024-118',
+      name: 'Marcus Thorne',
+      email: 'm.thorne@school.edu',
+      grade: 'Grade 12 - A',
+      gender: 'Male',
+      status: 'Active',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+    },
+    {
+      id: '#STU-2024-205',
+      name: 'Sophia Lin',
+      email: 'sophia.lin@school.edu',
+      grade: 'Grade 9 - C',
+      gender: 'Female',
+      status: 'Active',
+      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
     }
-  };
-
-  useEffect(() => {
-    fetchStudents();
-  }, [paginationModel]);
-
-  const handleAddStudent = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newId = students.length ? Math.max(...students.map(s => s.id)) + 1 : 1;
-    const addedStudent = {
-      id: newId,
-      ...newStudent,
-      enrollment_date: new Date().toISOString().split('T')[0]
-    };
-    
-    setStudents([addedStudent, ...students]);
-    setTotalRowCount(prev => prev + 1);
-    setIsModalOpen(false);
-    setNewStudent({ name: '', email: '', class_name: '', parent_email: '' });
-  };
+  ];
 
   return (
-    <div className="flex flex-col gap-8 text-zinc-900 relative">
-      {/* Add Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden">
-            <div className="flex justify-between items-center p-5 border-b border-zinc-200">
-              <h2 className="text-xl font-bold">Add New Student</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-zinc-600">
-                <X size={20} />
-              </button>
-            </div>
-            <form onSubmit={handleAddStudent} className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">Full Name</label>
-                <input 
-                  type="text" required 
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                  value={newStudent.name} onChange={e => setNewStudent({...newStudent, name: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">Student Email</label>
-                <input 
-                  type="email" required 
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                  value={newStudent.email} onChange={e => setNewStudent({...newStudent, email: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">Class / Section</label>
-                <input 
-                  type="text" required placeholder="e.g. Grade 10 - A"
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                  value={newStudent.class_name} onChange={e => setNewStudent({...newStudent, class_name: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1">Parent Email</label>
-                <input 
-                  type="email" required 
-                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                  value={newStudent.parent_email} onChange={e => setNewStudent({...newStudent, parent_email: e.target.value})}
-                />
-              </div>
-              <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-zinc-300 text-zinc-700 rounded-lg hover:bg-zinc-50">
-                  Cancel
-                </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  Save Student
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div className="flex flex-col gap-6 text-zinc-900 pb-10 min-h-full">
+      
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Students Management</h1>
-          <p className="text-zinc-500 mt-2">Manage all student records, classes, and details in the ERP system.</p>
+          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-500 mb-2">
+            <span>Dashboard</span>
+            <span>&gt;</span>
+            <span className="text-zinc-900">Student Management</span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Student Management</h1>
+          <p className="text-zinc-500 font-medium">Oversee and manage the student population records and academic enrollment.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg transition-colors shadow-sm font-medium text-sm whitespace-nowrap">
+        <button className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-lg text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm">
           <UserPlus size={18} />
-          Add Student
+          Add New Student
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-zinc-200 flex flex-col overflow-hidden">
-        <div className="p-5 border-b border-zinc-200 flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 h-4 w-4" />
-             <input type="text" placeholder="Search students..." className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+      {/* Main Table Container */}
+      <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 flex flex-col overflow-hidden">
+        
+        {/* Filters Bar */}
+        <div className="p-6 border-b border-zinc-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-50/30">
+           <div className="flex items-center gap-3">
+             <span className="text-sm font-bold text-zinc-600">Filter by:</span>
+             <button className="px-4 py-1.5 bg-white border border-zinc-200 rounded-full text-xs font-bold text-zinc-600 shadow-sm hover:bg-zinc-50">
+               All Grades
+             </button>
+             <button className="px-4 py-1.5 bg-white border border-zinc-200 rounded-full text-xs font-bold text-zinc-600 shadow-sm hover:bg-zinc-50">
+               All Status
+             </button>
+             <button className="flex items-center gap-1.5 text-xs font-bold text-[#3b3dbf] hover:text-[#2c2eb5] ml-2">
+               <Filter size={14} />
+               Clear Filters
+             </button>
+           </div>
+           <div className="text-sm font-semibold text-zinc-500">
+             Showing <span className="font-bold text-zinc-800">1-10</span> of <span className="font-bold text-zinc-800">450</span> students
+           </div>
+        </div>
+
+        {/* Table Content */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm text-zinc-600">
+            <thead className="bg-zinc-50/50 text-zinc-500 font-bold border-b border-zinc-100">
+              <tr>
+                <th className="px-6 py-4">Student Name</th>
+                <th className="px-6 py-4">Student ID</th>
+                <th className="px-6 py-4">Grade/Class</th>
+                <th className="px-6 py-4">Gender</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100 font-semibold">
+              {students.map((student, index) => (
+                <tr key={index} className="hover:bg-zinc-50/50 transition-colors">
+                  <td className="px-6 py-4">
+                    <Link to={`/students/${student.id.replace('#', '')}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                      <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full bg-zinc-200 object-cover" />
+                      <div>
+                        <div className="text-zinc-900 font-bold hover:text-[#3b3dbf] transition-colors">{student.name}</div>
+                        <div className="text-xs text-zinc-500">{student.email}</div>
+                      </div>
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 text-zinc-500">{student.id}</td>
+                  <td className="px-6 py-4">
+                    <span className="px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full text-xs font-bold whitespace-nowrap">
+                      {student.grade}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-zinc-700">{student.gender}</td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                      student.status === 'Active' 
+                        ? 'bg-indigo-50 text-[#3b3dbf]' 
+                        : 'bg-red-50 text-red-500'
+                    }`}>
+                      {student.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button className="text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 p-2 rounded-lg transition-colors inline-flex">
+                      <MoreVertical size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="p-4 md:px-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-zinc-50/50">
+          <button className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors shadow-sm">
+            <ChevronLeft size={16} />
+            Previous
+          </button>
+          
+          <div className="flex items-center gap-1">
+            <button className="w-8 h-8 flex items-center justify-center bg-[#3b3dbf] text-white rounded-lg text-sm font-bold shadow-sm">
+              1
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-100 rounded-lg text-sm font-bold transition-colors">
+              2
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-100 rounded-lg text-sm font-bold transition-colors">
+              3
+            </button>
+            <span className="w-8 h-8 flex items-center justify-center text-zinc-400 text-sm font-bold">
+              ...
+            </span>
+            <button className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-100 rounded-lg text-sm font-bold transition-colors">
+              45
+            </button>
+          </div>
+
+          <button className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors shadow-sm">
+            Next
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom Metrics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-2">
+        {/* Total Students */}
+        <div className="bg-[#595cdb] p-6 rounded-2xl shadow-lg text-white flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-6">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <Users size={20} />
+            </div>
+            <div className="text-xs font-semibold text-indigo-100">+12% Monthly</div>
+          </div>
+          <div>
+            <p className="text-3xl font-bold mb-1">450</p>
+            <p className="text-sm font-semibold text-indigo-100">Total Students</p>
           </div>
         </div>
 
-        <div className="flex-1 min-h-[500px] w-full p-0">
-          <DataGrid
-            rows={students}
-            columns={columns}
-            rowCount={totalRowCount}
-            loading={loading}
-            pageSizeOptions={[10, 25, 50]}
-            paginationModel={paginationModel}
-            paginationMode="server"
-            onPaginationModelChange={setPaginationModel}
-            disableRowSelectionOnClick
-            sx={{
-              border: 0,
-              '& .MuiDataGrid-cell': { borderBottom: '1px solid #e4e4e7' },
-              '& .MuiDataGrid-columnHeaders': { borderBottom: '1px solid #e4e4e7', backgroundColor: '#fafafa' },
-            }}
-          />
+        {/* Male Students */}
+        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#3b3dbf] flex items-center justify-center mb-6">
+            {/* Custom SVG for Male symbol */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="10" cy="14" r="5"></circle>
+              <line x1="13.5" y1="10.5" x2="21" y2="3"></line>
+              <polyline points="16 3 21 3 21 8"></polyline>
+            </svg>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">235</p>
+            <p className="text-sm font-semibold text-zinc-500">Male Students</p>
+          </div>
+        </div>
+
+        {/* Female Students */}
+        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-6">
+            {/* Custom SVG for Female symbol */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="9" r="5"></circle>
+              <line x1="12" y1="14" x2="12" y2="22"></line>
+              <line x1="9" y1="19" x2="15" y2="19"></line>
+            </svg>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">215</p>
+            <p className="text-sm font-semibold text-zinc-500">Female Students</p>
+          </div>
+        </div>
+
+        {/* New Enrollments */}
+        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center mb-6">
+            <GraduationCap size={20} strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">42</p>
+            <p className="text-sm font-semibold text-zinc-500">New Enrollments</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Global Footer */}
+      <div className="mt-auto pt-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center text-xs font-semibold text-zinc-500 gap-4">
+        <p>© 2024 EduCore ERP. All Rights Reserved.</p>
+        <div className="flex gap-6">
+          <a href="#" className="hover:text-zinc-800 transition-colors">Privacy Policy</a>
+          <a href="#" className="hover:text-zinc-800 transition-colors">Terms of Service</a>
         </div>
       </div>
     </div>

@@ -3,9 +3,12 @@ import Layout from './Layout';
 import LoginPage from './LoginPage';
 import AccountPage from './AccountPage';
 import StudentsPage from './StudentsPage';
+import StudentProfilePage from './StudentProfilePage';
 import TeachersPage from './TeachersPage';
 import WorkersPage from './WorkersPage';
 import ClassesPage from './ClassesPage';
+import MessagesPage from './MessagesPage';
+import FeesPage from './FeesPage';
 import './App.css';
 
 // Protected Route Component to require JWT Auth
@@ -34,13 +37,16 @@ function App() {
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<AccountPage />} />
           <Route path="students" element={<ProtectedRoute roles={['ADMIN', 'TEACHER']}><StudentsPage /></ProtectedRoute>} />
+          <Route path="students/:id" element={<ProtectedRoute roles={['ADMIN', 'TEACHER']}><StudentProfilePage /></ProtectedRoute>} />
           <Route path="teachers" element={<ProtectedRoute roles={['ADMIN']}><TeachersPage /></ProtectedRoute>} />
           <Route path="workers" element={<ProtectedRoute roles={['ADMIN']}><WorkersPage /></ProtectedRoute>} />
           <Route path="classes" element={<ProtectedRoute roles={['ADMIN', 'TEACHER']}><ClassesPage /></ProtectedRoute>} />
           <Route path="departments" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Departments Management</h1><p className="text-zinc-500">Coming soon.</p></div>} />
-          <Route path="attendance" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Attendance Module</h1><p className="text-zinc-500">Coming soon.</p></div>} />
-          <Route path="fees" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Fees Module</h1><p className="text-zinc-500">Coming soon.</p></div>} />
+          <Route path="messages" element={<ProtectedRoute roles={['ADMIN', 'TEACHER', 'STAFF']}><MessagesPage /></ProtectedRoute>} />
+          <Route path="fees" element={<ProtectedRoute roles={['ADMIN', 'STAFF']}><FeesPage /></ProtectedRoute>} />
           <Route path="exams" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Exams & Results</h1><p className="text-zinc-500">Coming soon.</p></div>} />
+          <Route path="reports" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Reports</h1><p className="text-zinc-500">Coming soon.</p></div>} />
+          <Route path="settings" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Settings</h1><p className="text-zinc-500">Coming soon.</p></div>} />
           <Route path="notices" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Notice Board</h1><p className="text-zinc-500">Coming soon.</p></div>} />
         </Route>
       </Routes>
