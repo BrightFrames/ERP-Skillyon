@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import userRoutes from './routes/user.js';
 import studentRoutes from './routes/students.js';
 import staffRoutes from './routes/staff.js';
+import classesRoutes from './routes/classes.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use('/api/user', userRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/classes', classesRoutes);
 
 // Global Error Handler (secure-fullstack-dev requirement: No sensitive DB fields are leaked)
 app.use((err, req, res, next) => {

@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   UserPlus, 
   Filter, 
@@ -5,49 +7,102 @@ import {
   ChevronLeft, 
   ChevronRight,
   Users,
-  GraduationCap
+  GraduationCap,
+  X,
+  Trash2,
+  Eye,
+  Edit2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from './lib/api';
 
 export default function StudentsPage() {
-  const students = [
-    {
-      id: '#STU-2024-001',
-      name: 'Alexander Bennett',
-      email: 'alexander.b@school.edu',
-      grade: 'Grade 11 - A',
-      gender: 'Male',
-      status: 'Active',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-    },
-    {
-      id: '#STU-2024-042',
-      name: 'Eleanor Vance',
-      email: 'e.vance@school.edu',
-      grade: 'Grade 10 - B',
-      gender: 'Female',
-      status: 'Inactive',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-    },
-    {
-      id: '#STU-2024-118',
-      name: 'Marcus Thorne',
-      email: 'm.thorne@school.edu',
-      grade: 'Grade 12 - A',
-      gender: 'Male',
-      status: 'Active',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-    },
-    {
-      id: '#STU-2024-205',
-      name: 'Sophia Lin',
-      email: 'sophia.lin@school.edu',
-      grade: 'Grade 9 - C',
-      gender: 'Female',
-      status: 'Active',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    parent_email: '',
+    class_id: '',
+    gender: 'Male',
+    status: 'Active',
+    avatar: ''
+  });
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [metrics, setMetrics] = useState({ male: 0, female: 0, newEnrollments: 0 });
+  const [currentPage, setCurrentPage] = useState(0);
+  const [classesList, setClassesList] = useState<any[]>([]);
+  const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
+  const limit = 10;
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const searchQuery = searchParams.get('search') || '';
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const [studentsRes, classesRes] = await Promise.all([
+        api.get(`/students?page=${currentPage}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`),
+        api.get('/classes')
+      ]);
+      setStudents(studentsRes.data.data || []);
+      setTotalStudents(studentsRes.data.total || 0);
+      setMetrics(studentsRes.data.metrics || { male: 0, female: 0, newEnrollments: 0 });
+      setClassesList(classesRes.data || []);
+    } catch (error) {
+      console.error('Failed to fetch data', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, [currentPage, searchQuery]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post('/students', {
+        ...formData,
+        class_id: formData.class_id ? parseInt(formData.class_id) : undefined
+      });
+      setIsModalOpen(false);
+      setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '' });
+      fetchStudents();
+    } catch (error) {
+      console.error('Failed to add student', error);
+      alert('Failed to add student. Please check your inputs.');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure you want to delete this student?')) {
+      try {
+        await api.delete(`/students/${id}`);
+        fetchStudents();
+        setActiveMenuId(null);
+      } catch (error) {
+        console.error('Failed to delete student', error);
+        alert('Failed to delete student.');
+      }
+    }
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   return (
     <div className="flex flex-col gap-6 text-zinc-900 pb-10 min-h-full">
@@ -63,7 +118,10 @@ export default function StudentsPage() {
           <h1 className="text-3xl font-bold tracking-tight mb-2">Student Management</h1>
           <p className="text-zinc-500 font-medium">Oversee and manage the student population records and academic enrollment.</p>
         </div>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-lg text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-lg text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm"
+        >
           <UserPlus size={18} />
           Add New Student
         </button>
@@ -88,7 +146,7 @@ export default function StudentsPage() {
              </button>
            </div>
            <div className="text-sm font-semibold text-zinc-500">
-             Showing <span className="font-bold text-zinc-800">1-10</span> of <span className="font-bold text-zinc-800">450</span> students
+             Showing <span className="font-bold text-zinc-800">{students.length > 0 ? currentPage * limit + 1 : 0}-{currentPage * limit + students.length}</span> of <span className="font-bold text-zinc-800">{totalStudents}</span> students
            </div>
         </div>
 
@@ -106,37 +164,73 @@ export default function StudentsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 font-semibold">
-              {students.map((student, index) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-zinc-500 font-medium">Loading students...</td>
+                </tr>
+              ) : students.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-zinc-500 font-medium">No students found. Add a new student to get started.</td>
+                </tr>
+              ) : students.map((student, index) => (
                 <tr key={index} className="hover:bg-zinc-50/50 transition-colors">
                   <td className="px-6 py-4">
-                    <Link to={`/students/${student.id.replace('#', '')}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
-                      <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full bg-zinc-200 object-cover" />
+                    <Link to={`/students/${student.id}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                      <img 
+                        src={student.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=random`} 
+                        alt={student.name} 
+                        className="w-10 h-10 rounded-full bg-zinc-200 object-cover" 
+                      />
                       <div>
                         <div className="text-zinc-900 font-bold hover:text-[#3b3dbf] transition-colors">{student.name}</div>
-                        <div className="text-xs text-zinc-500">{student.email}</div>
+                        <div className="text-xs text-zinc-500">{student.email || 'N/A'}</div>
                       </div>
                     </Link>
                   </td>
-                  <td className="px-6 py-4 text-zinc-500">{student.id}</td>
+                  <td className="px-6 py-4 text-zinc-500">
+                    {student.id >= 1000 ? student.id : `#STU-2024-${student.id.toString().padStart(3, '0')}`}
+                  </td>
                   <td className="px-6 py-4">
                     <span className="px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full text-xs font-bold whitespace-nowrap">
-                      {student.grade}
+                      {student.class_name || 'Not Assigned'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-zinc-700">{student.gender}</td>
+                  <td className="px-6 py-4 text-zinc-700">{student.gender || 'Unknown'}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
                       student.status === 'Active' 
                         ? 'bg-indigo-50 text-[#3b3dbf]' 
-                        : 'bg-red-50 text-red-500'
+                        : student.status === 'Inactive'
+                        ? 'bg-red-50 text-red-500'
+                        : 'bg-zinc-100 text-zinc-600'
                     }`}>
-                      {student.status}
+                      {student.status || 'Active'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <button className="text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 p-2 rounded-lg transition-colors inline-flex">
+                  <td className="px-6 py-4 text-center relative">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === student.id ? null : student.id); }}
+                      className="text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 p-2 rounded-lg transition-colors inline-flex"
+                    >
                       <MoreVertical size={18} />
                     </button>
+                    {activeMenuId === student.id && (
+                      <div className="absolute right-10 top-10 w-48 bg-white border border-zinc-200 rounded-xl shadow-lg z-10 py-2 overflow-hidden flex flex-col items-start text-sm">
+                        <Link to={`/students/${student.id}`} className="w-full px-4 py-2 text-left hover:bg-zinc-50 flex items-center gap-2 text-zinc-700 font-semibold transition-colors">
+                          <Eye size={16} /> View Profile
+                        </Link>
+                        <button className="w-full px-4 py-2 text-left hover:bg-zinc-50 flex items-center gap-2 text-zinc-700 font-semibold transition-colors">
+                          <Edit2 size={16} /> Edit Student
+                        </button>
+                        <div className="w-full h-px bg-zinc-100 my-1"></div>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleDelete(student.id); }}
+                          className="w-full px-4 py-2 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 font-semibold transition-colors"
+                        >
+                          <Trash2 size={16} /> Delete Student
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -146,30 +240,50 @@ export default function StudentsPage() {
 
         {/* Pagination */}
         <div className="p-4 md:px-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-zinc-50/50">
-          <button className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors shadow-sm">
+          <button 
+            disabled={currentPage === 0}
+            onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+            className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <ChevronLeft size={16} />
             Previous
           </button>
           
           <div className="flex items-center gap-1">
-            <button className="w-8 h-8 flex items-center justify-center bg-[#3b3dbf] text-white rounded-lg text-sm font-bold shadow-sm">
-              1
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-100 rounded-lg text-sm font-bold transition-colors">
-              2
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-100 rounded-lg text-sm font-bold transition-colors">
-              3
-            </button>
-            <span className="w-8 h-8 flex items-center justify-center text-zinc-400 text-sm font-bold">
-              ...
-            </span>
-            <button className="w-8 h-8 flex items-center justify-center text-zinc-600 hover:bg-zinc-100 rounded-lg text-sm font-bold transition-colors">
-              45
-            </button>
+            {Array.from({ length: Math.min(3, Math.ceil(totalStudents / limit)) }).map((_, i) => (
+              <button 
+                key={i}
+                onClick={() => setCurrentPage(i)}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+                  currentPage === i ? 'bg-[#3b3dbf] text-white shadow-sm' : 'text-zinc-600 hover:bg-zinc-100'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            
+            {Math.ceil(totalStudents / limit) > 3 && (
+              <>
+                <span className="w-8 h-8 flex items-center justify-center text-zinc-400 text-sm font-bold">
+                  ...
+                </span>
+                <button 
+                  onClick={() => setCurrentPage(Math.ceil(totalStudents / limit) - 1)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+                    currentPage === Math.ceil(totalStudents / limit) - 1 ? 'bg-[#3b3dbf] text-white shadow-sm' : 'text-zinc-600 hover:bg-zinc-100'
+                  }`}
+                >
+                  {Math.ceil(totalStudents / limit)}
+                </button>
+              </>
+            )}
           </div>
 
-          <button className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors shadow-sm">
+          <button 
+            disabled={currentPage >= Math.ceil(totalStudents / limit) - 1}
+            onClick={() => setCurrentPage(prev => prev + 1)}
+            className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Next
             <ChevronRight size={16} />
           </button>
@@ -187,7 +301,7 @@ export default function StudentsPage() {
             <div className="text-xs font-semibold text-indigo-100">+12% Monthly</div>
           </div>
           <div>
-            <p className="text-3xl font-bold mb-1">450</p>
+            <p className="text-3xl font-bold mb-1">{totalStudents}</p>
             <p className="text-sm font-semibold text-indigo-100">Total Students</p>
           </div>
         </div>
@@ -203,7 +317,7 @@ export default function StudentsPage() {
             </svg>
           </div>
           <div>
-            <p className="text-3xl font-bold text-zinc-900 mb-1">235</p>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.male}</p>
             <p className="text-sm font-semibold text-zinc-500">Male Students</p>
           </div>
         </div>
@@ -219,7 +333,7 @@ export default function StudentsPage() {
             </svg>
           </div>
           <div>
-            <p className="text-3xl font-bold text-zinc-900 mb-1">215</p>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.female}</p>
             <p className="text-sm font-semibold text-zinc-500">Female Students</p>
           </div>
         </div>
@@ -230,7 +344,7 @@ export default function StudentsPage() {
             <GraduationCap size={20} strokeWidth={2.5} />
           </div>
           <div>
-            <p className="text-3xl font-bold text-zinc-900 mb-1">42</p>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.newEnrollments}</p>
             <p className="text-sm font-semibold text-zinc-500">New Enrollments</p>
           </div>
         </div>
@@ -244,6 +358,123 @@ export default function StudentsPage() {
           <a href="#" className="hover:text-zinc-800 transition-colors">Terms of Service</a>
         </div>
       </div>
+      {/* Add Student Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-700 transition-colors"
+            >
+              <X size={24} />
+            </button>
+            <h2 className="text-2xl font-bold mb-6 text-zinc-900">Add New Student</h2>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Student Name *</label>
+                <input 
+                  required
+                  type="text" 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                  placeholder="e.g. John Doe"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Student Email</label>
+                <input 
+                  type="email" 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                  placeholder="e.g. student@school.edu"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Parent Email</label>
+                <input 
+                  type="email" 
+                  name="parent_email"
+                  value={formData.parent_email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                  placeholder="e.g. parent@email.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Class/Grade</label>
+                <select 
+                  name="class_id"
+                  value={formData.class_id}
+                  onChange={(e: any) => handleInputChange(e)}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all bg-white"
+                >
+                  <option value="">Select a class...</option>
+                  {classesList.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1">Gender</label>
+                  <select 
+                    name="gender"
+                    value={formData.gender}
+                    onChange={(e: any) => handleInputChange(e)}
+                    className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all bg-white"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1">Status</label>
+                  <select 
+                    name="status"
+                    value={formData.status}
+                    onChange={(e: any) => handleInputChange(e)}
+                    className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all bg-white"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Avatar URL (Optional)</label>
+                <input 
+                  type="url" 
+                  name="avatar"
+                  value={formData.avatar}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                  placeholder="e.g. https://images.unsplash.com/..."
+                />
+              </div>
+              <div className="mt-4 flex gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-2 border border-zinc-200 text-zinc-700 rounded-lg font-bold hover:bg-zinc-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-[#3b3dbf] text-white rounded-lg font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm"
+                >
+                  Save Student
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

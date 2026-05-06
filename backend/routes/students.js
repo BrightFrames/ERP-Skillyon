@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate, requireRole } from '../middleware/auth.js';
-import { createStudent, getStudents } from '../controllers/studentController.js';
+import { createStudent, getStudents, deleteStudent } from '../controllers/studentController.js';
 
 const router = Router();
 
@@ -9,5 +9,8 @@ router.get('/', authenticate, requireRole(['ADMIN', 'TEACHER']), getStudents);
 
 // Create single student - Accessible by Admin only
 router.post('/', authenticate, requireRole(['ADMIN']), createStudent);
+
+// Delete student - Accessible by Admin only
+router.delete('/:id', authenticate, requireRole(['ADMIN']), deleteStudent);
 
 export default router;

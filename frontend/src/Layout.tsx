@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users,
@@ -31,6 +31,23 @@ const navItems = [
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const currentSearch = searchParams.get('search') || '';
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (location.pathname !== '/students') {
+      navigate(`/students?search=${encodeURIComponent(val)}`);
+    } else {
+      if (val) {
+        navigate(`/students?search=${encodeURIComponent(val)}`, { replace: true });
+      } else {
+        navigate(`/students`, { replace: true });
+      }
+    }
+  };
 
   return (
     <div className="flex h-screen bg-zinc-50 font-sans text-zinc-900 overflow-hidden">
@@ -121,6 +138,8 @@ export default function Layout() {
               </div>
               <input 
                 type="text" 
+                value={currentSearch}
+                onChange={handleSearchChange}
                 placeholder="Search students, staff or records..."
                 className="w-full pl-11 pr-4 py-2.5 bg-zinc-100/80 border-transparent rounded-xl text-sm focus:border-zinc-300 focus:bg-white focus:ring-0 transition-all placeholder:text-zinc-400 font-medium"
               />
