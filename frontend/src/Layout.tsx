@@ -20,13 +20,13 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-  { name: 'Students', path: '/students', icon: Users },
-  { name: 'Academic', path: '/classes', icon: BookOpen },
-  { name: 'Messages', path: '/messages', icon: MessageSquare },
-  { name: 'Fees', path: '/fees', icon: CreditCard },
-  { name: 'Reports', path: '/reports', icon: BarChart2 },
-  { name: 'Settings', path: '/settings', icon: Settings },
+  { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
+  { name: 'Students', path: '/students', icon: Users, roles: ['ADMIN', 'TEACHER'] },
+  { name: 'Academic', path: '/classes', icon: BookOpen, roles: ['ADMIN', 'TEACHER'] },
+  { name: 'Messages', path: '/messages', icon: MessageSquare, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
+  { name: 'Fees', path: '/fees', icon: CreditCard, roles: ['ADMIN', 'STAFF'] },
+  { name: 'Reports', path: '/reports', icon: BarChart2, roles: ['ADMIN'] },
+  { name: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
 ];
 
 export default function Layout() {
@@ -36,17 +36,33 @@ export default function Layout() {
   const searchParams = new URLSearchParams(location.search);
   const currentSearch = searchParams.get('search') || '';
 
+  let roleDisplay = 'ADMIN PORTAL';
+  let userRole = 'ADMIN';
+  const userStr = localStorage.getItem('user');
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      userRole = user.role || 'ADMIN';
+      if (user.role === 'TEACHER') roleDisplay = 'TEACHER PORTAL';
+      else if (user.role === 'STAFF') roleDisplay = 'STAFF PORTAL';
+    } catch(e) {}
+  }
+
+  const filteredNavItems = navItems.filter(item => item.roles.includes(userRole));
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    if (location.pathname !== '/students') {
-      navigate(`/students?search=${encodeURIComponent(val)}`);
+    const currentPath = location.pathname;
+    
+    const newSearchParams = new URLSearchParams(location.search);
+    if (val) {
+      newSearchParams.set('search', val);
     } else {
-      if (val) {
-        navigate(`/students?search=${encodeURIComponent(val)}`, { replace: true });
-      } else {
-        navigate(`/students`, { replace: true });
-      }
+      newSearchParams.delete('search');
     }
+
+    const searchString = newSearchParams.toString();
+    navigate(`${currentPath}${searchString ? '?' + searchString : ''}`, { replace: true });
   };
 
   return (
@@ -70,7 +86,7 @@ export default function Layout() {
               <h2 className="text-xl font-bold tracking-tight text-white leading-tight">
                 EduCore ERP
               </h2>
-              <p className="text-[10px] font-bold text-zinc-400 tracking-wider">ADMIN PORTAL</p>
+              <p className="text-[10px] font-bold text-zinc-400 tracking-wider">{roleDisplay}</p>
             </div>
             <button 
               className="md:hidden text-zinc-400 hover:text-white ml-auto"
@@ -82,7 +98,7 @@ export default function Layout() {
         </div>
         
         <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto mt-2">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}

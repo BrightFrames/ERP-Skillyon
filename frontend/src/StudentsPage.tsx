@@ -20,6 +20,7 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingStudentId, setEditingStudentId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -38,12 +39,18 @@ export default function StudentsPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search') || '';
+  const [selectedClass, setSelectedClass] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
 
   const fetchStudents = async () => {
     try {
       setLoading(true);
+      let queryParams = `?page=${currentPage}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`;
+      if (selectedClass) queryParams += `&class_id=${selectedClass}`;
+      if (selectedStatus) queryParams += `&status=${selectedStatus}`;
+      
       const [studentsRes, classesRes] = await Promise.all([
-        api.get(`/students?page=${currentPage}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`),
+        api.get(`/students${queryParams}`),
         api.get('/classes')
       ]);
       setStudents(studentsRes.data.data || []);
@@ -59,7 +66,7 @@ export default function StudentsPage() {
 
   useEffect(() => {
     fetchStudents();
-  }, [currentPage, searchQuery]);
+  }, [currentPage, searchQuery, selectedClass, selectedStatus]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -68,19 +75,48 @@ export default function StudentsPage() {
     });
   };
 
+  const openAddModal = () => {
+    setEditingStudentId(null);
+    setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '' });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (student: any) => {
+    setEditingStudentId(student.id);
+    setFormData({
+      name: student.name || '',
+      email: student.email || '',
+      parent_email: student.parent_email || '',
+      class_id: student.class_id || '',
+      gender: student.gender || 'Unknown',
+      status: student.status || 'Active',
+      avatar: student.avatar || ''
+    });
+    setActiveMenuId(null);
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/students', {
+      const payload = {
         ...formData,
         class_id: formData.class_id ? parseInt(formData.class_id) : undefined
-      });
+      };
+      
+      if (editingStudentId) {
+        await api.put(`/students/${editingStudentId}`, payload);
+      } else {
+        await api.post('/students', payload);
+      }
+      
       setIsModalOpen(false);
+      setEditingStudentId(null);
       setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '' });
       fetchStudents();
     } catch (error) {
-      console.error('Failed to add student', error);
-      alert('Failed to add student. Please check your inputs.');
+      console.error('Failed to save student', error);
+      alert('Failed to save student. Please check your inputs.');
     }
   };
 
@@ -119,12 +155,72 @@ export default function StudentsPage() {
           <p className="text-zinc-500 font-medium">Oversee and manage the student population records and academic enrollment.</p>
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={openAddModal}
           className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-lg text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm"
         >
           <UserPlus size={18} />
           Add New Student
         </button>
+      </div>
+
+      {/* Top Metrics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-2">
+        {/* Total Students */}
+        <div className="bg-[#595cdb] p-6 rounded-2xl shadow-lg text-white flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-6">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <Users size={20} />
+            </div>
+            <div className="text-xs font-semibold text-indigo-100">+12% Monthly</div>
+          </div>
+          <div>
+            <p className="text-3xl font-bold mb-1">{totalStudents}</p>
+            <p className="text-sm font-semibold text-indigo-100">Total Students</p>
+          </div>
+        </div>
+
+        {/* Male Students */}
+        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#3b3dbf] flex items-center justify-center mb-6">
+            {/* Custom SVG for Male symbol */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="10" cy="14" r="5"></circle>
+              <line x1="13.5" y1="10.5" x2="21" y2="3"></line>
+              <polyline points="16 3 21 3 21 8"></polyline>
+            </svg>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.male}</p>
+            <p className="text-sm font-semibold text-zinc-500">Male Students</p>
+          </div>
+        </div>
+
+        {/* Female Students */}
+        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-6">
+            {/* Custom SVG for Female symbol */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="9" r="5"></circle>
+              <line x1="12" y1="14" x2="12" y2="22"></line>
+              <line x1="9" y1="19" x2="15" y2="19"></line>
+            </svg>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.female}</p>
+            <p className="text-sm font-semibold text-zinc-500">Female Students</p>
+          </div>
+        </div>
+
+        {/* New Enrollments */}
+        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center mb-6">
+            <GraduationCap size={20} strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.newEnrollments}</p>
+            <p className="text-sm font-semibold text-zinc-500">New Enrollments</p>
+          </div>
+        </div>
       </div>
 
       {/* Main Table Container */}
@@ -134,13 +230,29 @@ export default function StudentsPage() {
         <div className="p-6 border-b border-zinc-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-50/30">
            <div className="flex items-center gap-3">
              <span className="text-sm font-bold text-zinc-600">Filter by:</span>
-             <button className="px-4 py-1.5 bg-white border border-zinc-200 rounded-full text-xs font-bold text-zinc-600 shadow-sm hover:bg-zinc-50">
-               All Grades
-             </button>
-             <button className="px-4 py-1.5 bg-white border border-zinc-200 rounded-full text-xs font-bold text-zinc-600 shadow-sm hover:bg-zinc-50">
-               All Status
-             </button>
-             <button className="flex items-center gap-1.5 text-xs font-bold text-[#3b3dbf] hover:text-[#2c2eb5] ml-2">
+             <select 
+               value={selectedClass}
+               onChange={(e) => { setSelectedClass(e.target.value); setCurrentPage(0); }}
+               className="px-4 py-1.5 bg-white border border-zinc-200 rounded-full text-xs font-bold text-zinc-600 shadow-sm hover:bg-zinc-50 focus:outline-none cursor-pointer"
+             >
+               <option value="">All Grades</option>
+               {classesList.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+             </select>
+             
+             <select 
+               value={selectedStatus}
+               onChange={(e) => { setSelectedStatus(e.target.value); setCurrentPage(0); }}
+               className="px-4 py-1.5 bg-white border border-zinc-200 rounded-full text-xs font-bold text-zinc-600 shadow-sm hover:bg-zinc-50 focus:outline-none cursor-pointer"
+             >
+               <option value="">All Status</option>
+               <option value="Active">Active</option>
+               <option value="Inactive">Inactive</option>
+             </select>
+             
+             <button 
+               onClick={() => { setSelectedClass(''); setSelectedStatus(''); setCurrentPage(0); }}
+               className="flex items-center gap-1.5 text-xs font-bold text-[#3b3dbf] hover:text-[#2c2eb5] ml-2"
+             >
                <Filter size={14} />
                Clear Filters
              </button>
@@ -219,7 +331,10 @@ export default function StudentsPage() {
                         <Link to={`/students/${student.id}`} className="w-full px-4 py-2 text-left hover:bg-zinc-50 flex items-center gap-2 text-zinc-700 font-semibold transition-colors">
                           <Eye size={16} /> View Profile
                         </Link>
-                        <button className="w-full px-4 py-2 text-left hover:bg-zinc-50 flex items-center gap-2 text-zinc-700 font-semibold transition-colors">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); openEditModal(student); }}
+                          className="w-full px-4 py-2 text-left hover:bg-zinc-50 flex items-center gap-2 text-zinc-700 font-semibold transition-colors"
+                        >
                           <Edit2 size={16} /> Edit Student
                         </button>
                         <div className="w-full h-px bg-zinc-100 my-1"></div>
@@ -290,66 +405,6 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {/* Bottom Metrics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-2">
-        {/* Total Students */}
-        <div className="bg-[#595cdb] p-6 rounded-2xl shadow-lg text-white flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-6">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <Users size={20} />
-            </div>
-            <div className="text-xs font-semibold text-indigo-100">+12% Monthly</div>
-          </div>
-          <div>
-            <p className="text-3xl font-bold mb-1">{totalStudents}</p>
-            <p className="text-sm font-semibold text-indigo-100">Total Students</p>
-          </div>
-        </div>
-
-        {/* Male Students */}
-        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#3b3dbf] flex items-center justify-center mb-6">
-            {/* Custom SVG for Male symbol */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="10" cy="14" r="5"></circle>
-              <line x1="13.5" y1="10.5" x2="21" y2="3"></line>
-              <polyline points="16 3 21 3 21 8"></polyline>
-            </svg>
-          </div>
-          <div>
-            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.male}</p>
-            <p className="text-sm font-semibold text-zinc-500">Male Students</p>
-          </div>
-        </div>
-
-        {/* Female Students */}
-        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
-          <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-6">
-            {/* Custom SVG for Female symbol */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="9" r="5"></circle>
-              <line x1="12" y1="14" x2="12" y2="22"></line>
-              <line x1="9" y1="19" x2="15" y2="19"></line>
-            </svg>
-          </div>
-          <div>
-            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.female}</p>
-            <p className="text-sm font-semibold text-zinc-500">Female Students</p>
-          </div>
-        </div>
-
-        {/* New Enrollments */}
-        <div className="bg-zinc-100/80 border border-zinc-200 p-6 rounded-2xl flex flex-col justify-between">
-          <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center mb-6">
-            <GraduationCap size={20} strokeWidth={2.5} />
-          </div>
-          <div>
-            <p className="text-3xl font-bold text-zinc-900 mb-1">{metrics.newEnrollments}</p>
-            <p className="text-sm font-semibold text-zinc-500">New Enrollments</p>
-          </div>
-        </div>
-      </div>
-
       {/* Global Footer */}
       <div className="mt-auto pt-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center text-xs font-semibold text-zinc-500 gap-4">
         <p>© 2024 EduCore ERP. All Rights Reserved.</p>
@@ -368,7 +423,9 @@ export default function StudentsPage() {
             >
               <X size={24} />
             </button>
-            <h2 className="text-2xl font-bold mb-6 text-zinc-900">Add New Student</h2>
+            <h2 className="text-2xl font-bold mb-6 text-zinc-900">
+              {editingStudentId ? 'Edit Student' : 'Add New Student'}
+            </h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="block text-sm font-semibold text-zinc-700 mb-1">Student Name *</label>
@@ -468,7 +525,7 @@ export default function StudentsPage() {
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[#3b3dbf] text-white rounded-lg font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm"
                 >
-                  Save Student
+                  {editingStudentId ? 'Update Student' : 'Save Student'}
                 </button>
               </div>
             </form>

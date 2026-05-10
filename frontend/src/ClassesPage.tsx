@@ -1,22 +1,127 @@
-import { Filter, ChevronDown, Plus, Edit2, TrendingUp, Lightbulb, ArrowRight, ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
+import { Filter, ChevronDown, Plus, Edit2, TrendingUp, Lightbulb, ArrowRight, ChevronLeft, ChevronRight, MoreVertical, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import api from './lib/api';
 
 export default function ClassesPage() {
-  const students = [
-    { id: '2024-001', initials: 'AB', name: 'Alexander Bennett', q1: 92, u2: 88, m: 95, l: 90, overall: 91.2, grade: 'A', bg: 'bg-indigo-50 text-[#3b3dbf]' },
-    { id: '2024-002', initials: 'CC', name: 'Chloe Chambers', q1: 78, u2: 82, m: 80, l: 65, overall: 76.3, grade: 'C', bg: 'bg-teal-50 text-teal-600' },
-    { id: '2024-003', initials: 'DL', name: 'David Lopez', q1: 100, u2: 96, m: 98, l: 99, overall: 98.2, grade: 'A+', bg: 'bg-orange-50 text-orange-600' },
-    { id: '2024-004', initials: 'EM', name: 'Elena Martinez', q1: 55, u2: 72, m: 68, l: 70, overall: 66.2, grade: 'D', bg: 'bg-red-50 text-red-700' },
-    { id: '2024-005', initials: 'JR', name: 'Julian Rivers', q1: 85, u2: 88, m: 82, l: 84, overall: 84.7, grade: 'B', bg: 'bg-cyan-50 text-cyan-600' },
-  ];
+  const [teacherClasses, setTeacherClasses] = useState<any[]>([]);
+  const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [students, setStudents] = useState<any[]>([]);
+  const [assessments, setAssessments] = useState<any[]>([]);
+  const [grades, setGrades] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingGrade, setEditingGrade] = useState<{ studentId: number; assessmentId: number } | null>(null);
+  const [tempScore, setTempScore] = useState<string>('');
 
-  const getScoreColor = (score: number) => {
-    return score < 70 ? 'text-red-500' : 'text-zinc-800';
+  useEffect(() => {
+    fetchClasses();
+  }, []);
+
+  const fetchClasses = async () => {
+    try {
+      const res = await api.get('/academic/teacher-classes');
+      setTeacherClasses(res.data);
+      if (res.data.length > 0) {
+        setSelectedClass(res.data[0]);
+        fetchGradebook(res.data[0].id);
+      } else {
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
+
+  const fetchGradebook = async (classId: number) => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/academic/classes/${classId}/gradebook`);
+      setStudents(res.data.students || []);
+      setAssessments(res.data.assessments || []);
+      setGrades(res.data.grades || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const cls = teacherClasses.find(c => c.id.toString() === e.target.value);
+    setSelectedClass(cls);
+    if (cls) fetchGradebook(cls.id);
+  };
+
+  const getStudentGrade = (studentId: number, assessmentId: number) => {
+    const grade = grades.find(g => g.student_id === studentId && g.assessment_id === assessmentId);
+    return grade ? grade.score : '-';
+  };
+
+  const saveGrade = async (studentId: number, assessmentId: number) => {
+    if (!tempScore || isNaN(Number(tempScore))) {
+      setEditingGrade(null);
+      return;
+    }
+    try {
+      await api.put('/academic/grades', {
+        assessment_id: assessmentId,
+        student_id: studentId,
+        score: Number(tempScore)
+      });
+      // Optimistic update
+      setGrades(prev => {
+        const existing = prev.find(g => g.student_id === studentId && g.assessment_id === assessmentId);
+        if (existing) {
+          return prev.map(g => g === existing ? { ...g, score: Number(tempScore) } : g);
+        }
+        return [...prev, { student_id: studentId, assessment_id: assessmentId, score: Number(tempScore) }];
+      });
+      setEditingGrade(null);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save score');
+    }
+  };
+
+  const calculateOverall = (studentId: number) => {
+    if (assessments.length === 0) return { percent: 0, grade: 'N/A' };
+    
+    let totalScore = 0;
+    let totalMax = 0;
+    
+    assessments.forEach(a => {
+      const g = grades.find(g => g.student_id === studentId && g.assessment_id === a.id);
+      if (g) {
+        totalScore += g.score;
+      }
+      totalMax += a.max_score || 100;
+    });
+
+    if (totalMax === 0) return { percent: 0, grade: 'N/A' };
+    
+    const percent = Math.round((totalScore / totalMax) * 1000) / 10;
+    let letter = 'F';
+    if (percent >= 90) letter = 'A';
+    else if (percent >= 80) letter = 'B';
+    else if (percent >= 70) letter = 'C';
+    else if (percent >= 60) letter = 'D';
+    
+    return { percent, grade: letter };
+  };
+
+  const getScoreColor = (score: string | number) => {
+    if (score === '-') return 'text-zinc-400';
+    return Number(score) < 70 ? 'text-red-500' : 'text-zinc-800';
   };
 
   const getOverallStyle = (score: number) => {
     if (score >= 90) return 'bg-indigo-50 text-[#3b3dbf] border-indigo-100';
     if (score >= 70) return 'bg-zinc-100 text-zinc-600 border-zinc-200';
     return 'bg-red-50 text-red-500 border-red-100';
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
   return (
@@ -26,19 +131,40 @@ export default function ClassesPage() {
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-[#3b3dbf] mb-1">Student Gradebook</h1>
-          <p className="text-zinc-500 font-semibold text-sm">AP Computer Science A - Grade 11</p>
+          <p className="text-zinc-500 font-semibold text-sm">
+            {selectedClass ? selectedClass.name : 'No Class Selected'}
+          </p>
         </div>
         <div className="flex items-center gap-3">
+          {teacherClasses.length > 0 && (
+            <select 
+              value={selectedClass?.id || ''} 
+              onChange={handleClassChange}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-700 shadow-sm hover:bg-zinc-50 transition-colors focus:outline-none pr-8"
+            >
+              {teacherClasses.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          )}
           <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-700 shadow-sm hover:bg-zinc-50 transition-colors">
             <Filter size={14} />
             Midterm Period 1
-            <ChevronDown size={14} />
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-700 shadow-sm hover:bg-zinc-50 transition-colors">
-            All Sections
-            <ChevronDown size={14} />
-          </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-lg text-sm font-bold shadow-sm hover:bg-[#2c2eb5] transition-colors ml-2">
+          <button 
+            onClick={async () => {
+              if (!selectedClass) return;
+              const name = prompt('Enter assessment name (e.g. Final Exam):');
+              if (!name) return;
+              try {
+                await api.post(`/academic/classes/${selectedClass.id}/assessments`, { name, max_score: 100 });
+                fetchGradebook(selectedClass.id);
+              } catch (e) {
+                alert('Failed to add assessment');
+              }
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-lg text-sm font-bold shadow-sm hover:bg-[#2c2eb5] transition-colors ml-2"
+          >
             <Plus size={16} />
             New Assessment
           </button>
@@ -89,56 +215,82 @@ export default function ClassesPage() {
             <thead className="bg-zinc-50/50 text-zinc-500 border-b border-zinc-100">
               <tr>
                 <th className="px-6 py-4 font-bold text-xs">Student Name</th>
-                <th className="px-4 py-4 text-center">
-                  <div className="font-bold text-xs">Quiz:<br/>Arrays</div>
-                  <div className="text-[10px] font-semibold text-zinc-400 mt-1">Sep 24</div>
-                </th>
-                <th className="px-4 py-4 text-center">
-                  <div className="font-bold text-xs">Unit 2<br/>Project</div>
-                  <div className="text-[10px] font-semibold text-zinc-400 mt-1">Oct 02</div>
-                </th>
-                <th className="px-4 py-4 text-center">
-                  <div className="font-bold text-xs text-[#3b3dbf]">Midterm<br/>Exam</div>
-                  <div className="text-[10px] font-semibold text-[#3b3dbf] mt-1">Oct 08</div>
-                </th>
-                <th className="px-4 py-4 text-center">
-                  <div className="font-bold text-xs">Lab:<br/>Recursion</div>
-                  <div className="text-[10px] font-semibold text-zinc-400 mt-1">Oct 10</div>
-                </th>
+                {assessments.map(a => (
+                  <th key={a.id} className="px-4 py-4 text-center">
+                    <div className="font-bold text-xs">{a.name}</div>
+                    <div className="text-[10px] font-semibold text-zinc-400 mt-1">{a.type} (/{a.max_score})</div>
+                  </th>
+                ))}
                 <th className="px-6 py-4 font-bold text-xs text-center">Overall</th>
-                <th className="px-6 py-4 font-bold text-xs text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 font-bold">
-              {students.map((student, index) => (
+              {loading ? (
+                <tr><td colSpan={assessments.length + 2} className="p-8 text-center text-zinc-500">Loading gradebook...</td></tr>
+              ) : students.length === 0 ? (
+                <tr><td colSpan={assessments.length + 2} className="p-8 text-center text-zinc-500">No students found in this class.</td></tr>
+              ) : students.map((student, index) => {
+                const overall = calculateOverall(student.id);
+                return (
                 <tr key={index} className="hover:bg-zinc-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${student.bg}`}>
-                        {student.initials}
-                      </div>
+                      {student.avatar ? (
+                        <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-indigo-50 text-[#3b3dbf]">
+                          {getInitials(student.name)}
+                        </div>
+                      )}
                       <div>
                         <div className="text-zinc-900">{student.name}</div>
-                        <div className="text-[10px] text-zinc-400 font-semibold">ID: {student.id}</div>
+                        <div className="text-[10px] text-zinc-400 font-semibold">ID: #{student.id}</div>
                       </div>
                     </div>
                   </td>
-                  <td className={`px-4 py-4 text-center ${getScoreColor(student.q1)}`}>{student.q1}</td>
-                  <td className={`px-4 py-4 text-center ${getScoreColor(student.u2)}`}>{student.u2}</td>
-                  <td className={`px-4 py-4 text-center text-[#3b3dbf] ${getScoreColor(student.m)}`}>{student.m}</td>
-                  <td className={`px-4 py-4 text-center ${getScoreColor(student.l)}`}>{student.l}</td>
+                  {assessments.map(a => {
+                    const score = getStudentGrade(student.id, a.id);
+                    const isEditing = editingGrade?.studentId === student.id && editingGrade?.assessmentId === a.id;
+                    return (
+                      <td key={a.id} className={`px-4 py-4 text-center group relative cursor-pointer ${getScoreColor(score)}`}
+                          onClick={() => {
+                            if (!isEditing) {
+                              setEditingGrade({ studentId: student.id, assessmentId: a.id });
+                              setTempScore(score === '-' ? '' : score.toString());
+                            }
+                          }}
+                      >
+                        {isEditing ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <input 
+                              type="text" 
+                              autoFocus
+                              value={tempScore}
+                              onChange={(e) => setTempScore(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveGrade(student.id, a.id);
+                                if (e.key === 'Escape') setEditingGrade(null);
+                              }}
+                              onBlur={() => saveGrade(student.id, a.id)}
+                              className="w-12 px-1 py-0.5 text-center text-sm font-bold border border-[#3b3dbf] rounded shadow-sm outline-none"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            {score}
+                            <Edit2 size={12} className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-[#3b3dbf] transition-opacity" />
+                          </div>
+                        )}
+                      </td>
+                    )
+                  })}
                   <td className="px-6 py-4 text-center">
-                    <span className={`inline-flex items-center justify-center px-3 py-1 text-[10px] rounded-full border ${getOverallStyle(student.overall)}`}>
-                      {student.overall}% ({student.grade})
+                    <span className={`inline-flex items-center justify-center px-3 py-1 text-[10px] rounded-full border ${getOverallStyle(overall.percent)}`}>
+                      {overall.percent}% ({overall.grade})
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <button className="text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 p-2 rounded-lg transition-colors inline-flex">
-                      <Edit2 size={16} />
-                    </button>
-                  </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>
