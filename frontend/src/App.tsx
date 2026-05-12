@@ -9,6 +9,8 @@ import WorkersPage from './WorkersPage';
 import ClassesPage from './ClassesPage';
 import MessagesPage from './MessagesPage';
 import FeesPage from './FeesPage';
+import ReportsPage from './ReportsPage';
+import SettingsPage from './SettingsPage';
 import './App.css';
 
 // Protected Route Component to require JWT Auth
@@ -45,8 +47,8 @@ function App() {
           <Route path="messages" element={<ProtectedRoute roles={['ADMIN', 'TEACHER', 'STAFF']}><MessagesPage /></ProtectedRoute>} />
           <Route path="fees" element={<ProtectedRoute roles={['ADMIN', 'STAFF']}><FeesPage /></ProtectedRoute>} />
           <Route path="exams" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Exams & Results</h1><p className="text-zinc-500">Coming soon.</p></div>} />
-          <Route path="reports" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Reports</h1><p className="text-zinc-500">Coming soon.</p></div>} />
-          <Route path="settings" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Settings</h1><p className="text-zinc-500">Coming soon.</p></div>} />
+          <Route path="reports" element={<ProtectedRoute roles={['ADMIN']}><ReportsPage /></ProtectedRoute>} />
+          <Route path="settings" element={<ProtectedRoute roles={['ADMIN']}><SettingsPage /></ProtectedRoute>} />
           <Route path="notices" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Notice Board</h1><p className="text-zinc-500">Coming soon.</p></div>} />
         </Route>
       </Routes>
