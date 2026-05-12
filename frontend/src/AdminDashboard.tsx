@@ -10,8 +10,10 @@ import {
   Megaphone,
   Eye
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-6 text-zinc-900 pb-10">
       
@@ -180,7 +182,7 @@ export default function AdminDashboard() {
             <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
             
             <div className="space-y-3">
-              <button className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
+              <button onClick={() => navigate('/students')} className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
                 <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
                   <UserPlus size={18} />
                 </div>
@@ -190,7 +192,7 @@ export default function AdminDashboard() {
                 </div>
               </button>
               
-              <button className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
+              <button onClick={() => navigate('/teachers')} className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
                 <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
                   <UserPlus size={18} />
                 </div>
@@ -200,7 +202,7 @@ export default function AdminDashboard() {
                 </div>
               </button>
               
-              <button className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
+              <button onClick={() => navigate('/messages')} className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
                 <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
                   <Megaphone size={18} />
                 </div>
