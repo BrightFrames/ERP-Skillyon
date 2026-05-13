@@ -51,10 +51,44 @@ export const login = async (req, res, next) => {
   }
 };
 
+// Parent login: returns a token with role PARENT and the list of children
+export const parentLogin = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    // Find students with this parent email
+    const { rows } = await pool.query('SELECT id, name, class_id FROM students WHERE parent_email = $1', [email]);
+
+    if (!rows || rows.length === 0) {
+      return res.status(401).json({ error: 'No children found for this parent email' });
+    }
+
+    const user = { id: email, name: email.split('@')[0], email, role: 'PARENT' };
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+
+    res.status(200).json({ message: 'Login successful', token, user: { ...user, children: rows } });
+  } catch (error) {
+    console.error('Parent Login Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 export const getProfile = async (req, res, next) => {
   const userId = req.user.id;
 
   try {
+    // If parent role, return parent profile with children
+    if (req.user && req.user.role === 'PARENT') {
+      const email = req.user.email || req.user.id;
+      const { rows } = await pool.query('SELECT id, name, class_id FROM students WHERE parent_email = $1', [email]);
+      const userObj = { id: email, name: (email || '').split('@')[0], role: 'PARENT', children: rows };
+      return res.status(200).json(userObj);
+    }
+
     // Check if it's a dummy user
     const dummyUser = Object.values(DUMMY_USERS).find(u => u.id === userId);
     if (dummyUser) {

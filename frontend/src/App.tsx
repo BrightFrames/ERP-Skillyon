@@ -46,6 +46,7 @@ function App() {
           <Route path="departments" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Departments Management</h1><p className="text-zinc-500">Coming soon.</p></div>} />
           <Route path="messages" element={<ProtectedRoute roles={['ADMIN', 'TEACHER', 'STAFF']}><MessagesPage /></ProtectedRoute>} />
           <Route path="fees" element={<ProtectedRoute roles={['ADMIN', 'STAFF']}><FeesPage /></ProtectedRoute>} />
+          {/* Parent panel moved to the separate parents app */}
           <Route path="exams" element={<div className="p-8"><h1 className="text-3xl font-bold tracking-tight mb-2">Exams & Results</h1><p className="text-zinc-500">Coming soon.</p></div>} />
           <Route path="reports" element={<ProtectedRoute roles={['ADMIN']}><ReportsPage /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute roles={['ADMIN']}><SettingsPage /></ProtectedRoute>} />
