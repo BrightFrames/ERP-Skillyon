@@ -1,15 +1,55 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from './lib/api';
-import { 
-  GraduationCap, 
-  ShieldCheck, 
-  Shield, 
-  User, 
-  Briefcase, 
-  AtSign, 
-  Lock 
+import {
+  GraduationCap,
+  ShieldCheck,
+  Shield,
+  User,
+  Briefcase,
+  AtSign,
+  Lock,
+  Eye,
+  EyeOff,
+  ChevronRight,
+  Zap
 } from 'lucide-react';
+
+const DEMO_ACCOUNTS = [
+  {
+    role: 'admin' as const,
+    label: 'Admin',
+    email: 'admin@educore.edu',
+    password: 'demo-password',
+    name: 'System Admin',
+    icon: Shield,
+    color: 'bg-violet-50 border-violet-200 text-violet-700',
+    activeColor: 'border-[#3b3dbf] bg-indigo-50 text-[#3b3dbf]',
+    desc: 'Full system access',
+  },
+  {
+    role: 'teacher' as const,
+    label: 'Teacher',
+    email: 'teacher@educore.edu',
+    password: 'demo-password',
+    name: 'Sarah Jenkins',
+    icon: User,
+    color: 'bg-teal-50 border-teal-200 text-teal-700',
+    activeColor: 'border-[#3b3dbf] bg-indigo-50 text-[#3b3dbf]',
+    desc: 'Gradebook & students',
+  },
+  {
+    role: 'staff' as const,
+    label: 'Staff',
+    email: 'staff@educore.edu',
+    password: 'demo-password',
+    name: 'Marcus Thompson',
+    icon: Briefcase,
+    color: 'bg-orange-50 border-orange-200 text-orange-700',
+    activeColor: 'border-[#3b3dbf] bg-indigo-50 text-[#3b3dbf]',
+    desc: 'Fees & records',
+  },
+];
 
 export default function LoginPage() {
   const [email, setEmail] = useState('admin@educore.edu');
@@ -17,195 +57,223 @@ export default function LoginPage() {
   const [role, setRole] = useState<'admin' | 'teacher' | 'staff'>('admin');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Auto-fill dummy credentials when role changes
+  // Auto-fill credentials when role changes
+  const selectRole = (r: 'admin' | 'teacher' | 'staff') => {
+    const acc = DEMO_ACCOUNTS.find(a => a.role === r)!;
+    setRole(r);
+    setEmail(acc.email);
+    setPassword(acc.password);
+    setError('');
+  };
+
   useEffect(() => {
-    if (role === 'admin') setEmail('admin@educore.edu');
-    if (role === 'teacher') setEmail('teacher@educore.edu');
-    if (role === 'staff') setEmail('staff@educore.edu');
-    setPassword('demo-password');
-  }, [role]);
+    const token = localStorage.getItem('token');
+    if (token) navigate('/');
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      const response = await api.post('/user/login', { email });
+      const response = await api.post('/user/login', { email, password });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to login');
+      setError(err.response?.data?.error || 'Failed to login. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const currentAcc = DEMO_ACCOUNTS.find(a => a.role === role)!;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col items-center justify-center p-4">
-      <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-zinc-100 min-h-[600px]">
-        
-        {/* Left Panel - Branding */}
-        <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-[#3b3dbf] to-[#2c2eb5] text-white p-12 flex-col justify-between relative overflow-hidden">
-          {/* Background decorative elements */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-black opacity-10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
-          
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/60 flex flex-col items-center justify-center p-4">
+      <div className="flex flex-col lg:flex-row w-full max-w-5xl bg-white rounded-3xl shadow-2xl shadow-indigo-100/50 overflow-hidden border border-zinc-100 min-h-[600px]">
+
+        {/* Left Panel — Branding */}
+        <div className="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-[#3b3dbf] via-[#3035b5] to-[#1e20a0] text-white p-12 flex-col justify-between relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-black opacity-10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
+
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-16">
-              <div className="bg-white p-2 rounded-lg text-[#3b3dbf]">
-                <GraduationCap size={28} strokeWidth={2.5} />
+            <div className="flex items-center gap-3 mb-12">
+              <div className="bg-white/20 p-2.5 rounded-xl">
+                <GraduationCap size={26} strokeWidth={2.5} />
               </div>
-              <h1 className="text-2xl font-bold tracking-tight">EduCore ERP</h1>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight">EduCore ERP</h1>
+                <p className="text-indigo-300 text-[10px] font-bold tracking-wider uppercase">Skillyon Platform</p>
+              </div>
             </div>
 
-            <h2 className="text-4xl font-bold leading-tight mb-6 mt-8">
-              Empowering the next<br/>generation of learners.
+            <h2 className="text-4xl font-bold leading-tight mb-4">
+              Manage your school<br />smarter, together.
             </h2>
-            <p className="text-blue-100 text-lg max-w-md leading-relaxed">
-              Manage academic records, administrative tasks, and communication in one unified corporate portal.
+            <p className="text-indigo-200 text-sm leading-relaxed max-w-xs">
+              Gradebooks, fees, attendance, staff management and analytics — all in one place.
             </p>
+
+            {/* Feature pills */}
+            <div className="flex flex-wrap gap-2 mt-8">
+              {['Gradebook', 'Fee Tracking', 'Staff Mgmt', 'Reports', 'Attendance'].map(f => (
+                <span key={f} className="px-3 py-1 bg-white/10 border border-white/10 rounded-full text-xs font-semibold text-indigo-100">
+                  {f}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div className="relative z-10 mt-16">
-            <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
-              <ShieldCheck className="text-blue-200" size={24} />
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4">
+              <ShieldCheck className="text-indigo-300 shrink-0" size={22} />
               <div>
-                <p className="text-sm font-semibold">Secure Access Portal</p>
-                <p className="text-xs text-blue-200">ISO 27001 Certified Academic Management</p>
+                <p className="text-sm font-bold">Secure Access Portal</p>
+                <p className="text-xs text-indigo-300">Role-based authentication · JWT secured</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Panel - Form */}
-        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-zinc-900 mb-2">Welcome Back</h2>
-            <p className="text-zinc-500">Please select your role and enter credentials</p>
+        {/* Right Panel — Form */}
+        <div className="w-full lg:w-7/12 p-8 md:p-12 flex flex-col justify-center">
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-1 lg:hidden">
+              <GraduationCap size={22} className="text-[#3b3dbf]" />
+              <span className="text-base font-bold text-[#3b3dbf]">EduCore ERP</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-1">Welcome back</h2>
+            <p className="text-zinc-400 text-sm">Select a demo role below to auto-fill credentials</p>
+          </div>
+
+          {/* Demo Role Cards */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            {DEMO_ACCOUNTS.map(acc => (
+              <button
+                key={acc.role}
+                type="button"
+                onClick={() => selectRole(acc.role)}
+                className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border-2 transition-all ${
+                  role === acc.role ? acc.activeColor + ' shadow-md shadow-indigo-100' : 'border-zinc-200 text-zinc-400 hover:border-zinc-300 hover:bg-zinc-50'
+                }`}
+              >
+                <acc.icon size={18} />
+                <span className="text-xs font-bold">{acc.label}</span>
+                <span className="text-[10px] font-medium opacity-60">{acc.desc}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Credential Hint */}
+          <div className="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 mb-5 flex items-center gap-3">
+            <Zap size={14} className="text-[#3b3dbf] shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-[#3b3dbf]">Demo credentials auto-filled</p>
+              <p className="text-[10px] text-indigo-400 font-medium truncate">{currentAcc.email} · password: demo-password</p>
+            </div>
+            <ChevronRight size={14} className="text-indigo-300 shrink-0" />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl mb-6 text-sm font-medium">
+            <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-5 text-sm font-medium">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            {/* Role Selection */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <button
-                type="button"
-                onClick={() => setRole('admin')}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
-                  role === 'admin' 
-                    ? 'border-[#3b3dbf] bg-blue-50 text-[#3b3dbf]' 
-                    : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50'
-                }`}
-              >
-                <Shield size={20} className="mb-2" />
-                <span className="text-sm font-semibold">Admin</span>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setRole('teacher')}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
-                  role === 'teacher' 
-                    ? 'border-[#3b3dbf] bg-blue-50 text-[#3b3dbf]' 
-                    : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50'
-                }`}
-              >
-                <User size={20} className="mb-2" />
-                <span className="text-sm font-semibold">Teacher</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole('staff')}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
-                  role === 'staff' 
-                    ? 'border-[#3b3dbf] bg-blue-50 text-[#3b3dbf]' 
-                    : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50'
-                }`}
-              >
-                <Briefcase size={20} className="mb-2" />
-                <span className="text-sm font-semibold">Staff</span>
-              </button>
-            </div>
-
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-zinc-700 mb-1.5">Username or Email</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <AtSign size={18} className="text-zinc-400" />
-                  </div>
-                  <input 
-                    type="email" 
-                    required
-                    placeholder={role === 'admin' ? "@admin.office@educore.edu" : "Enter your email"}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm font-semibold text-zinc-700">Password</label>
-                  <a href="#" className="text-sm font-semibold text-[#3b3dbf] hover:text-[#2c2eb5]">Forgot Password?</a>
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock size={18} className="text-zinc-400" />
-                  </div>
-                  <input 
-                    type="password" 
-                    required
-                    placeholder="••••••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all tracking-widest"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center mt-4">
-                <input 
-                  id="remember-me" 
-                  type="checkbox" 
-                  className="h-4 w-4 rounded border-zinc-300 text-[#3b3dbf] focus:ring-[#3b3dbf]"
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-zinc-600 mb-1.5">Email Address</label>
+              <div className="relative">
+                <AtSign size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all text-sm font-medium"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-zinc-600">
-                  Keep me logged in for 30 days
-                </label>
               </div>
             </div>
-            
-            <button 
-              type="submit" 
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-zinc-600">Password</label>
+                <a href="#" className="text-xs font-bold text-[#3b3dbf] hover:text-[#2c2eb5]">Forgot Password?</a>
+              </div>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-11 py-3 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all text-sm font-medium tracking-widest"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                id="remember"
+                type="checkbox"
+                className="w-4 h-4 rounded border-zinc-300 text-[#3b3dbf] accent-[#3b3dbf]"
+              />
+              <label htmlFor="remember" className="text-xs font-semibold text-zinc-500">
+                Keep me logged in for 30 days
+              </label>
+            </div>
+
+            <button
+              type="submit"
               disabled={loading}
-              className="w-full bg-[#3b3dbf] hover:bg-[#2c2eb5] text-white font-semibold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+              className="w-full bg-[#3b3dbf] hover:bg-[#2c2eb5] active:scale-[0.99] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200/50 hover:shadow-indigo-300/60 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
             >
-              {loading ? 'Signing in...' : 'Sign In to Portal'}
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>Sign In as {currentAcc.label} <ChevronRight size={16} /></>
+              )}
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-zinc-500">
-            Problems logging in? <a href="#" className="text-[#3b3dbf] hover:underline">Contact Support Center</a>
+          {/* All accounts reference */}
+          <div className="mt-6 pt-5 border-t border-zinc-100">
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-3">All Demo Accounts</p>
+            <div className="grid grid-cols-3 gap-2">
+              {DEMO_ACCOUNTS.map(acc => (
+                <button
+                  key={acc.role}
+                  onClick={() => selectRole(acc.role)}
+                  className="text-left p-2.5 rounded-xl bg-zinc-50 hover:bg-indigo-50 border border-zinc-100 hover:border-indigo-100 transition-colors"
+                >
+                  <p className="text-[10px] font-bold text-zinc-500">{acc.name}</p>
+                  <p className="text-[10px] text-zinc-400 font-medium truncate">{acc.email}</p>
+                  <span className="inline-block mt-1 text-[9px] font-bold uppercase tracking-wider text-[#3b3dbf] bg-indigo-50 px-1.5 py-0.5 rounded-full">{acc.role}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-      
-      {/* Global Footer */}
-      <div className="mt-12 text-xs text-zinc-400 text-center pb-4">
-        © 2024 EduCore ERP Solutions. All Rights Reserved. Authorized personnel only.
-      </div>
+
+      <p className="mt-8 text-xs text-zinc-400">
+        © 2024 EduCore ERP · Skillyon Platform · Authorized access only
+      </p>
     </div>
   );
 }
- 

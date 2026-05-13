@@ -1,69 +1,323 @@
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react';
+import {
+  User, Lock, Bell, Shield, Globe, Palette,
+  Save, Eye, EyeOff, ChevronRight, CheckCircle
+} from 'lucide-react';
+
+const SECTIONS = [
+  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'security', label: 'Security', icon: Lock },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'appearance', label: 'Appearance', icon: Palette },
+  { id: 'system', label: 'System', icon: Globe },
+];
 
 export default function SettingsPage() {
-  const [schoolName, setSchoolName] = useState('EduCore High School')
-  const [adminEmail, setAdminEmail] = useState('admin@educore.local')
-  const [termStart, setTermStart] = useState('2026-01-01')
-  const [termEnd, setTermEnd] = useState('2026-06-30')
-  const [saved, setSaved] = useState(false)
+  const [active, setActive] = useState('profile');
+  const [saved, setSaved] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
-  useEffect(() => {
-    const s = localStorage.getItem('siteSettings')
-    if (s) {
-      try {
-        const parsed = JSON.parse(s)
-        setSchoolName(parsed.schoolName || schoolName)
-        setAdminEmail(parsed.adminEmail || adminEmail)
-        setTermStart(parsed.termStart || termStart)
-        setTermEnd(parsed.termEnd || termEnd)
-      } catch (e) {}
-    }
-  }, [])
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : {};
 
-  const save = () => {
-    const payload = { schoolName, adminEmail, termStart, termEnd }
-    localStorage.setItem('siteSettings', JSON.stringify(payload))
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
+  const [profile, setProfile] = useState({
+    name: user.name || '',
+    email: user.email || '',
+    role: user.role || '',
+    phone: '',
+    address: '',
+  });
+
+  const [notifications, setNotifications] = useState({
+    emailGrades: true,
+    emailFees: true,
+    emailAnnouncements: false,
+    browserAlerts: true,
+    weeklyDigest: true,
+  });
+
+  const [appearance, setAppearance] = useState({
+    theme: 'light',
+    density: 'comfortable',
+    language: 'English',
+  });
+
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
+    <button
+      onClick={() => onChange(!value)}
+      className={`relative w-11 h-6 rounded-full transition-colors ${value ? 'bg-[#3b3dbf]' : 'bg-zinc-200'}`}
+    >
+      <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${value ? 'left-6' : 'left-1'}`} />
+    </button>
+  );
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Settings</h1>
-          <p className="text-sm text-zinc-500">Configure portal and academic settings</p>
-        </div>
-        <div>
-          <button onClick={save} className="px-4 py-2 bg-[#3b3dbf] text-white rounded-lg font-semibold">Save Settings</button>
-        </div>
+    <div className="flex flex-col gap-6 pb-10">
+
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#3b3dbf]">Settings</h1>
+        <p className="text-zinc-400 text-sm mt-0.5">Manage your account, preferences, and system configuration.</p>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-semibold text-zinc-500">School Name</label>
-            <input value={schoolName} onChange={e => setSchoolName(e.target.value)} className="mt-2 w-full rounded-lg border px-3 py-2 text-sm" />
-          </div>
+      <div className="flex flex-col lg:flex-row gap-6">
 
-          <div>
-            <label className="text-xs font-semibold text-zinc-500">Admin Email</label>
-            <input value={adminEmail} onChange={e => setAdminEmail(e.target.value)} className="mt-2 w-full rounded-lg border px-3 py-2 text-sm" />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-zinc-500">Term Start</label>
-            <input type="date" value={termStart} onChange={e => setTermStart(e.target.value)} className="mt-2 w-full rounded-lg border px-3 py-2 text-sm" />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-zinc-500">Term End</label>
-            <input type="date" value={termEnd} onChange={e => setTermEnd(e.target.value)} className="mt-2 w-full rounded-lg border px-3 py-2 text-sm" />
+        {/* Sidebar */}
+        <div className="w-full lg:w-56 shrink-0">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+            {SECTIONS.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setActive(s.id)}
+                className={`w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold transition-colors border-b border-zinc-100 last:border-0 ${
+                  active === s.id
+                    ? 'bg-indigo-50 text-[#3b3dbf]'
+                    : 'text-zinc-600 hover:bg-zinc-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <s.icon size={16} />
+                  {s.label}
+                </div>
+                {active === s.id && <ChevronRight size={14} />}
+              </button>
+            ))}
           </div>
         </div>
 
-        {saved && <div className="mt-4 text-sm text-emerald-600 font-semibold">Settings saved</div>}
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
+
+            {/* Profile */}
+            {active === 'profile' && (
+              <div>
+                <h2 className="text-base font-bold text-zinc-900 mb-5">Profile Information</h2>
+                <div className="flex items-center gap-5 mb-6 pb-6 border-b border-zinc-100">
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-100 text-[#3b3dbf] flex items-center justify-center text-xl font-bold shrink-0">
+                    {profile.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U'}
+                  </div>
+                  <div>
+                    <p className="font-bold text-zinc-800">{profile.name || 'User'}</p>
+                    <p className="text-xs font-bold text-zinc-400 mt-0.5">{profile.role}</p>
+                    <button className="text-xs font-bold text-[#3b3dbf] hover:underline mt-1.5">Change Avatar</button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Your full name' },
+                    { label: 'Email Address', key: 'email', type: 'email', placeholder: 'your@email.com' },
+                    { label: 'Phone Number', key: 'phone', type: 'tel', placeholder: '+91 00000 00000' },
+                    { label: 'Address', key: 'address', type: 'text', placeholder: 'City, Country' },
+                  ].map(field => (
+                    <div key={field.key}>
+                      <label className="block text-xs font-bold text-zinc-500 mb-1.5">{field.label}</label>
+                      <input
+                        type={field.type}
+                        value={(profile as any)[field.key]}
+                        onChange={e => setProfile({ ...profile, [field.key]: e.target.value })}
+                        placeholder={field.placeholder}
+                        className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                      />
+                    </div>
+                  ))}
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5">Role</label>
+                    <input
+                      type="text"
+                      value={profile.role}
+                      disabled
+                      className="w-full px-3 py-2.5 text-sm border border-zinc-100 rounded-xl bg-zinc-50 text-zinc-400 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Security */}
+            {active === 'security' && (
+              <div>
+                <h2 className="text-base font-bold text-zinc-900 mb-5">Security Settings</h2>
+                <div className="flex flex-col gap-4 max-w-md">
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5">Current Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPass ? 'text' : 'password'}
+                        placeholder="Enter current password"
+                        className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none pr-10 transition-colors"
+                      />
+                      <button onClick={() => setShowPass(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400">
+                        {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5">New Password</label>
+                    <input
+                      type="password"
+                      placeholder="Enter new password"
+                      className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5">Confirm New Password</label>
+                    <input
+                      type="password"
+                      placeholder="Confirm new password"
+                      className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+                <div className="mt-6 pt-5 border-t border-zinc-100">
+                  <h3 className="text-sm font-bold text-zinc-700 mb-3">Active Sessions</h3>
+                  <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+                    <div>
+                      <p className="text-xs font-bold text-zinc-700">Current Browser Session</p>
+                      <p className="text-[10px] text-zinc-400 font-medium mt-0.5">Active right now · {new Date().toLocaleDateString()}</p>
+                    </div>
+                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full">Active</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Notifications */}
+            {active === 'notifications' && (
+              <div>
+                <h2 className="text-base font-bold text-zinc-900 mb-5">Notification Preferences</h2>
+                <div className="flex flex-col divide-y divide-zinc-100">
+                  {[
+                    { key: 'emailGrades', label: 'Grade Updates', desc: 'When new marks are added or updated' },
+                    { key: 'emailFees', label: 'Fee Reminders', desc: 'Payment due dates and overdue notices' },
+                    { key: 'emailAnnouncements', label: 'Announcements', desc: 'School-wide notices and events' },
+                    { key: 'browserAlerts', label: 'Browser Alerts', desc: 'Real-time notifications in the browser' },
+                    { key: 'weeklyDigest', label: 'Weekly Digest', desc: 'A summary of the week every Monday' },
+                  ].map(item => (
+                    <div key={item.key} className="flex items-center justify-between py-4">
+                      <div>
+                        <p className="text-sm font-bold text-zinc-700">{item.label}</p>
+                        <p className="text-xs font-medium text-zinc-400 mt-0.5">{item.desc}</p>
+                      </div>
+                      <Toggle
+                        value={(notifications as any)[item.key]}
+                        onChange={v => setNotifications({ ...notifications, [item.key]: v })}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Appearance */}
+            {active === 'appearance' && (
+              <div>
+                <h2 className="text-base font-bold text-zinc-900 mb-5">Appearance</h2>
+                <div className="flex flex-col gap-6">
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-3">Theme</label>
+                    <div className="flex gap-3">
+                      {['light', 'dark', 'system'].map(t => (
+                        <button
+                          key={t}
+                          onClick={() => setAppearance({ ...appearance, theme: t })}
+                          className={`flex-1 py-3 rounded-xl border text-sm font-bold capitalize transition-all ${
+                            appearance.theme === t ? 'bg-[#3b3dbf] text-white border-[#3b3dbf] shadow-md' : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-3">Display Density</label>
+                    <div className="flex gap-3">
+                      {['compact', 'comfortable', 'spacious'].map(d => (
+                        <button
+                          key={d}
+                          onClick={() => setAppearance({ ...appearance, density: d })}
+                          className={`flex-1 py-3 rounded-xl border text-sm font-bold capitalize transition-all ${
+                            appearance.density === d ? 'bg-[#3b3dbf] text-white border-[#3b3dbf] shadow-md' : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                          }`}
+                        >
+                          {d}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5">Language</label>
+                    <select
+                      value={appearance.language}
+                      onChange={e => setAppearance({ ...appearance, language: e.target.value })}
+                      className="w-full max-w-xs px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                    >
+                      {['English', 'Hindi', 'Marathi', 'Tamil', 'Telugu', 'Gujarati'].map(l => (
+                        <option key={l}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* System */}
+            {active === 'system' && (
+              <div>
+                <h2 className="text-base font-bold text-zinc-900 mb-5">System Information</h2>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  {[
+                    { label: 'System Version', value: 'EduCore ERP v2.0' },
+                    { label: 'Environment', value: 'Development' },
+                    { label: 'Database', value: 'PostgreSQL' },
+                    { label: 'Backend', value: 'Express.js' },
+                    { label: 'Frontend', value: 'React + Vite' },
+                    { label: 'Auth', value: 'JWT' },
+                  ].map(item => (
+                    <div key={item.label} className="bg-zinc-50 rounded-xl p-4 border border-zinc-100">
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{item.label}</p>
+                      <p className="text-sm font-bold text-zinc-700 mt-1">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  <button className="px-4 py-2.5 text-xs font-bold text-red-500 border border-red-200 bg-red-50 rounded-xl hover:bg-red-100 transition-colors">
+                    Clear Cache
+                  </button>
+                  <button className="px-4 py-2.5 text-xs font-bold text-zinc-600 border border-zinc-200 bg-zinc-50 rounded-xl hover:bg-zinc-100 transition-colors">
+                    Export Logs
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Save Button */}
+            {active !== 'system' && (
+              <div className="flex items-center gap-3 mt-7 pt-5 border-t border-zinc-100">
+                <button
+                  onClick={handleSave}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-xl text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm"
+                >
+                  <Save size={15} />
+                  Save Changes
+                </button>
+                {saved && (
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-500">
+                    <CheckCircle size={14} />
+                    Saved successfully!
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,293 +1,289 @@
-import { 
-  User, 
-  UserCheck, 
-  Banknote, 
+import {
+  User,
+  UserCheck,
+  Banknote,
   Calendar,
-  Filter,
   Download,
-  ChevronDown,
   UserPlus,
   Megaphone,
-  Eye
+  Eye,
+  GraduationCap,
+  BookOpen,
+  TrendingUp,
+  Users
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import api from './lib/api';
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState({ total: 0, male: 0, female: 0, newEnrollments: 0 });
+  const [recentStudents, setRecentStudents] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const userName = user?.name || (user?.role === 'ADMIN' ? 'Admin' : user?.role === 'TEACHER' ? 'Dr. Sarah Wilson' : 'Staff');
+  const userRole = user?.role || 'ADMIN';
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const [studentsRes, classesRes] = await Promise.all([
+        api.get('/students?page=0&limit=5'),
+        api.get('/classes'),
+      ]);
+      const data = studentsRes.data;
+      setStats({
+        total: data.total || 0,
+        male: data.metrics?.male || 0,
+        female: data.metrics?.female || 0,
+        newEnrollments: data.metrics?.newEnrollments || 0,
+      });
+      setRecentStudents(data.data || []);
+      setClasses(classesRes.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getInitials = (name: string) =>
+    name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '?';
+
+  const greetingTime = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good Morning';
+    if (h < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
   return (
     <div className="flex flex-col gap-6 text-zinc-900 pb-10">
-      
-      {/* Header Section */}
+
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
+          <p className="text-sm font-semibold text-zinc-400 mb-1">{greetingTime()}, {userName} 👋</p>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1">Overview Dashboard</h1>
-          <p className="text-zinc-500 text-sm md:text-base">Welcome back, Admin. Here is what's happening at EduCore today.</p>
+          <p className="text-zinc-400 text-sm">Here's what's happening at EduCore today.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-lg text-sm font-semibold hover:bg-zinc-50 transition-colors shadow-sm text-zinc-700">
-            <Filter size={16} />
-            Filters
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#3b3dbf] text-white rounded-lg text-sm font-semibold hover:bg-[#2c2eb5] transition-colors shadow-sm">
-            <Download size={16} />
-            Export Report
-          </button>
+          {userRole === 'ADMIN' && (
+            <button className="flex items-center gap-2 px-4 py-2 bg-[#3b3dbf] text-white rounded-lg text-sm font-semibold hover:bg-[#2c2eb5] transition-colors shadow-sm">
+              <Download size={16} />
+              Export Report
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <div className="bg-white p-5 md:p-6 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-36">
+      {/* Live Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-32">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-semibold text-zinc-500 mb-1">Total Students</p>
-              <p className="text-3xl font-bold text-zinc-900">1,250</p>
+              <p className="text-xs font-semibold text-zinc-400 mb-1">Total Students</p>
+              <p className="text-3xl font-bold text-zinc-900">{loading ? '...' : stats.total}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#3b3dbf] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#3b3dbf] flex items-center justify-center shrink-0">
+              <Users size={20} />
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-xs font-semibold text-emerald-500">
+            <TrendingUp size={12} /> +{stats.newEnrollments} this month
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-32">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-semibold text-zinc-400 mb-1">Total Classes</p>
+              <p className="text-3xl font-bold text-zinc-900">{loading ? '...' : classes.length}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <BookOpen size={20} />
+            </div>
+          </div>
+          <p className="text-xs font-semibold text-zinc-400">Active this semester</p>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-32">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-semibold text-zinc-400 mb-1">Male Students</p>
+              <p className="text-3xl font-bold text-zinc-900">{loading ? '...' : stats.male}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
               <User size={20} />
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-            +12% from last term
-          </div>
+          <p className="text-xs font-semibold text-zinc-400">Enrolled</p>
         </div>
 
-        <div className="bg-white p-5 md:p-6 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-36">
+        <div className="bg-white p-5 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-32">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-semibold text-zinc-500 mb-1">Total Teachers</p>
-              <p className="text-3xl font-bold text-zinc-900">85</p>
+              <p className="text-xs font-semibold text-zinc-400 mb-1">Female Students</p>
+              <p className="text-3xl font-bold text-zinc-900">{loading ? '...' : stats.female}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-pink-50 text-pink-500 flex items-center justify-center shrink-0">
               <UserCheck size={20} />
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs font-medium text-zinc-500">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-            Active & Fully Staffed
-          </div>
-        </div>
-
-        <div className="bg-white p-5 md:p-6 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-36">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-semibold text-zinc-500 mb-1">Monthly Revenue</p>
-              <p className="text-3xl font-bold text-zinc-900">$45k</p>
-            </div>
-            <div className="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
-              <Banknote size={20} />
-            </div>
-          </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-            8% above target
-          </div>
-        </div>
-
-        <div className="bg-white p-5 md:p-6 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-36">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-semibold text-zinc-500 mb-1">Attendance</p>
-              <p className="text-3xl font-bold text-zinc-900">94%</p>
-            </div>
-            <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
-              <Calendar size={20} />
-            </div>
-          </div>
-          <div className="flex items-center gap-1 text-xs font-medium text-zinc-500">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            Today's average
-          </div>
+          <p className="text-xs font-semibold text-zinc-400">Enrolled</p>
         </div>
       </div>
 
-      {/* Middle Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        
-        {/* Chart Card */}
+      {/* Middle Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* Classes Overview */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 flex flex-col">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="font-bold text-lg">Monthly Admission Trends</h3>
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-semibold text-zinc-600">
-              Academic Year 2023-24
-              <ChevronDown size={14} />
-            </button>
+          <div className="flex justify-between items-center mb-5">
+            <h3 className="font-bold text-base text-zinc-900">Active Classes</h3>
+            <Link to="/classes" className="text-xs font-bold text-[#3b3dbf] hover:underline">View Gradebooks →</Link>
           </div>
-          
-          {/* Mock Bar Chart */}
-          <div className="flex-1 flex items-end justify-between gap-2 md:gap-6 pt-4 pb-2 border-b border-zinc-100">
-            <div className="w-full bg-indigo-100 rounded-t-sm" style={{ height: '40%' }}></div>
-            <div className="w-full bg-indigo-200 rounded-t-sm" style={{ height: '65%' }}></div>
-            <div className="w-full bg-indigo-200 rounded-t-sm" style={{ height: '80%' }}></div>
-            <div className="w-full bg-indigo-200 rounded-t-sm" style={{ height: '45%' }}></div>
-            <div className="w-full bg-indigo-200 rounded-t-sm" style={{ height: '90%' }}></div>
-            <div className="w-full bg-indigo-200 rounded-t-sm" style={{ height: '55%' }}></div>
-          </div>
-          
-          <div className="flex justify-between text-xs font-semibold text-zinc-400 pt-3 px-2">
-            <span>Jan</span>
-            <span>Feb</span>
-            <span>Mar</span>
-            <span>Apr</span>
-            <span>May</span>
-            <span>Jun</span>
-          </div>
-          
-          <div className="flex items-center gap-6 mt-6">
-            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#3b3dbf]"></div>
-              New Admissions
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center text-zinc-300 text-sm">Loading...</div>
+          ) : classes.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center text-zinc-300 text-sm">No classes found.</div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {classes.map((cls, i) => {
+                const colors = [
+                  'bg-indigo-50 text-[#3b3dbf] border-indigo-100',
+                  'bg-emerald-50 text-emerald-700 border-emerald-100',
+                  'bg-orange-50 text-orange-600 border-orange-100',
+                  'bg-pink-50 text-pink-600 border-pink-100',
+                  'bg-violet-50 text-violet-700 border-violet-100',
+                ];
+                const color = colors[i % colors.length];
+                return (
+                  <button
+                    key={cls.id}
+                    onClick={() => navigate('/classes')}
+                    className={`flex items-center gap-3 p-4 rounded-xl border text-left hover:shadow-md transition-all ${color}`}
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-white/60 flex items-center justify-center text-xs font-bold shrink-0">
+                      {getInitials(cls.name)}
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm leading-tight">{cls.name}</div>
+                      <div className="text-[10px] opacity-60 font-medium mt-0.5">Click to open gradebook</div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500">
-              <div className="w-2.5 h-2.5 rounded-full bg-cyan-400"></div>
-              Enquiries
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Right Column Cards */}
-        <div className="flex flex-col gap-4 md:gap-6">
-          {/* Fee Collection Card */}
-          <div className="bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm">
-            <h3 className="font-bold text-lg mb-6">Fee Collection</h3>
-            
-            <div className="mb-5">
-              <div className="flex justify-between text-xs font-bold text-zinc-800 mb-2">
-                <span>Tuition Fees</span>
-                <span>85%</span>
-              </div>
-              <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
-                <div className="h-full bg-[#3b3dbf] rounded-full" style={{ width: '85%' }}></div>
-              </div>
-            </div>
-            
-            <div className="mb-8">
-              <div className="flex justify-between text-xs font-bold text-zinc-800 mb-2">
-                <span>Transportation</span>
-                <span>62%</span>
-              </div>
-              <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
-                <div className="h-full bg-teal-600 rounded-full" style={{ width: '62%' }}></div>
-              </div>
-            </div>
-
-            <button className="w-full py-2.5 bg-white border border-zinc-200 rounded-xl text-sm font-semibold text-[#3b3dbf] hover:bg-zinc-50 transition-colors">
-              View Full Ledger
-            </button>
-          </div>
-
-          {/* Quick Actions Card */}
-          <div className="bg-[#595cdb] p-6 rounded-2xl shadow-lg text-white flex-1">
-            <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
-            
-            <div className="space-y-3">
-              <button onClick={() => navigate('/students')} className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
-                <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
-                  <UserPlus size={18} />
+        {/* Quick Actions */}
+        <div className="flex flex-col gap-4">
+          <div className="bg-[#3b3dbf] p-6 rounded-2xl shadow-lg text-white flex-1 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full translate-x-8 -translate-y-8"></div>
+            <h3 className="font-bold text-base mb-5 relative z-10">Quick Actions</h3>
+            <div className="space-y-2.5 relative z-10">
+              <Link to="/students" className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
+                <div className="p-1.5 bg-white/10 rounded-lg">
+                  <UserPlus size={16} />
                 </div>
                 <div>
-                  <div className="text-sm font-bold">Add Student</div>
-                  <div className="text-xs text-indigo-100">Register new enrollment</div>
+                  <div className="text-sm font-bold">Manage Students</div>
+                  <div className="text-[10px] text-indigo-200">View & edit student records</div>
                 </div>
-              </button>
-              
-              <button onClick={() => navigate('/teachers')} className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
-                <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
-                  <UserPlus size={18} />
-                </div>
-                <div>
-                  <div className="text-sm font-bold">Add Teacher</div>
-                  <div className="text-xs text-indigo-100">Onboard new faculty member</div>
-                </div>
-              </button>
-              
-              <button onClick={() => navigate('/messages')} className="w-full flex items-center gap-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
-                <div className="p-2 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
-                  <Megaphone size={18} />
+              </Link>
+              <Link to="/classes" className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
+                <div className="p-1.5 bg-white/10 rounded-lg">
+                  <GraduationCap size={16} />
                 </div>
                 <div>
-                  <div className="text-sm font-bold">Send Notice</div>
-                  <div className="text-xs text-indigo-100">Broadcast to all parents</div>
+                  <div className="text-sm font-bold">Open Gradebook</div>
+                  <div className="text-[10px] text-indigo-200">Add & update marks</div>
                 </div>
-              </button>
+              </Link>
+              <Link to="/messages" className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
+                <div className="p-1.5 bg-white/10 rounded-lg">
+                  <Megaphone size={16} />
+                </div>
+                <div>
+                  <div className="text-sm font-bold">Messages</div>
+                  <div className="text-[10px] text-indigo-200">Broadcast to parents</div>
+                </div>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Table Section */}
+      {/* Recent Enrollments Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-zinc-100 flex flex-col overflow-hidden">
-        <div className="p-6 border-b border-zinc-100 flex justify-between items-center">
-           <h3 className="font-bold text-lg">Recent Student Enrollments</h3>
-           <a href="#" className="text-sm font-semibold text-[#3b3dbf] hover:underline">View All</a>
+        <div className="px-6 py-4 border-b border-zinc-100 flex justify-between items-center">
+          <h3 className="font-bold text-base text-zinc-900">Recent Student Enrollments</h3>
+          <Link to="/students" className="text-xs font-bold text-[#3b3dbf] hover:underline">View All →</Link>
         </div>
         <div className="w-full overflow-x-auto">
           <table className="w-full text-left text-sm text-zinc-600">
-            <thead className="bg-white text-zinc-500 font-semibold border-b border-zinc-100">
+            <thead className="bg-zinc-50/60 text-zinc-400 font-semibold border-b border-zinc-100">
               <tr>
-                <th className="px-6 py-4 font-semibold">Student Name</th>
-                <th className="px-6 py-4 font-semibold">ID Number</th>
-                <th className="px-6 py-4 font-semibold">Class/Grade</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold text-right">Action</th>
+                <th className="px-6 py-3.5 font-bold text-xs">Student Name</th>
+                <th className="px-6 py-3.5 font-bold text-xs">ID</th>
+                <th className="px-6 py-3.5 font-bold text-xs">Class</th>
+                <th className="px-6 py-3.5 font-bold text-xs">Gender</th>
+                <th className="px-6 py-3.5 font-bold text-xs">Status</th>
+                <th className="px-6 py-3.5 font-bold text-xs text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 font-medium">
-              <tr className="hover:bg-zinc-50/50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" className="w-8 h-8 rounded-full bg-zinc-200" />
-                    <span className="text-zinc-900 font-bold">Sarah Jenkins</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">#STU-9821</td>
-                <td className="px-6 py-4">Grade 8-B</td>
-                <td className="px-6 py-4">
-                  <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold">ACTIVE</span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <button className="text-[#3b3dbf] hover:bg-blue-50 p-2 rounded-lg transition-colors inline-flex">
-                    <Eye size={18} />
-                  </button>
-                </td>
-              </tr>
-              <tr className="hover:bg-zinc-50/50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" className="w-8 h-8 rounded-full bg-zinc-200" />
-                    <span className="text-zinc-900 font-bold">Marcus Thompson</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">#STU-9744</td>
-                <td className="px-6 py-4">Grade 10-A</td>
-                <td className="px-6 py-4">
-                  <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold">ACTIVE</span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <button className="text-[#3b3dbf] hover:bg-blue-50 p-2 rounded-lg transition-colors inline-flex">
-                    <Eye size={18} />
-                  </button>
-                </td>
-              </tr>
-              <tr className="hover:bg-zinc-50/50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" className="w-8 h-8 rounded-full bg-zinc-200" />
-                    <span className="text-zinc-900 font-bold">Chloe Williams</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">#STU-9610</td>
-                <td className="px-6 py-4">Grade 7-C</td>
-                <td className="px-6 py-4">
-                  <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold">PENDING</span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <button className="text-[#3b3dbf] hover:bg-blue-50 p-2 rounded-lg transition-colors inline-flex">
-                    <Eye size={18} />
-                  </button>
-                </td>
-              </tr>
+            <tbody className="divide-y divide-zinc-50 font-medium">
+              {loading ? (
+                <tr><td colSpan={6} className="px-6 py-8 text-center text-zinc-300 text-sm">Loading...</td></tr>
+              ) : recentStudents.length === 0 ? (
+                <tr><td colSpan={6} className="px-6 py-8 text-center text-zinc-300 text-sm">No students found.</td></tr>
+              ) : recentStudents.map((s) => (
+                <tr key={s.id} className="hover:bg-zinc-50/50 transition-colors">
+                  <td className="px-6 py-3.5">
+                    <div className="flex items-center gap-3">
+                      {s.avatar ? (
+                        <img src={s.avatar} alt={s.name} className="w-8 h-8 rounded-full object-cover border border-zinc-100" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-indigo-100 text-[#3b3dbf] flex items-center justify-center text-xs font-bold shrink-0">
+                          {getInitials(s.name)}
+                        </div>
+                      )}
+                      <span className="text-zinc-900 font-bold">{s.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-3.5 text-zinc-400 text-xs font-semibold">#{s.id.toString().padStart(4, '0')}</td>
+                  <td className="px-6 py-3.5">
+                    {s.class_name ? (
+                      <span className="px-2 py-1 bg-indigo-50 text-[#3b3dbf] rounded-lg text-xs font-bold">{s.class_name}</span>
+                    ) : (
+                      <span className="text-zinc-300 text-xs">—</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-3.5 text-xs text-zinc-500 font-semibold">{s.gender || '—'}</td>
+                  <td className="px-6 py-3.5">
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                      s.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'
+                    }`}>
+                      {s.status || 'Active'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-3.5 text-right">
+                    <Link to={`/students/${s.id}`} className="text-[#3b3dbf] hover:bg-indigo-50 p-2 rounded-lg transition-colors inline-flex">
+                      <Eye size={16} />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

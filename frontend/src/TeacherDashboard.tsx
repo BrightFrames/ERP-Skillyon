@@ -1,228 +1,273 @@
-import { 
-  Clock, 
-  MapPin, 
-  Send, 
-  BookOpen, 
-  CheckCircle2, 
-  Circle, 
-  Info, 
-  Megaphone, 
-  MoreVertical,
-  Filter
+import {
+  BookOpen, Users, GraduationCap, TrendingUp,
+  Clock, ChevronRight, Send, CheckCircle2, Circle,
+  Megaphone, AlertTriangle
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import api from './lib/api';
 
 export default function TeacherDashboard() {
-  const roster = [
-    {
-      id: '2024-0012',
-      name: 'Alexander Bennett',
-      subtitle: 'Top Ranker • 98% Attendance',
-      status: 'Present',
-      note: '',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-    },
-    {
-      id: '2024-0045',
-      name: 'Catherine Pierce',
-      subtitle: 'Medical Leave History',
-      status: 'Late',
-      note: 'Bus delayed 10 mins',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-    },
-    {
-      id: '2024-0089',
-      name: 'Daniel Marcus',
-      subtitle: 'Average Grade: B+',
-      status: 'Absent',
-      note: '',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-    },
-    {
-      id: '2024-0102',
-      name: 'Elena Rodriguez',
-      subtitle: 'Sports Team Captain',
-      status: 'Present',
-      note: '',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-    }
+  const [classes, setClasses] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [gradebooks, setGradebooks] = useState<Record<number, any>>({});
+  const [loading, setLoading] = useState(true);
+
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : {};
+  const name = user.name || 'Teacher';
+  const subject = user.subject || 'Your Subject';
+
+  const greetingTime = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good Morning';
+    if (h < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const [classRes, studentRes] = await Promise.all([
+          api.get('/academic/teacher-classes'),
+          api.get('/students?page=0&limit=200'),
+        ]);
+
+        const cls = classRes.data || [];
+        const stu = studentRes.data.data || [];
+        setClasses(cls);
+        setStudents(stu);
+
+        // Fetch gradebook for each class
+        const books: Record<number, any> = {};
+        await Promise.all(cls.map(async (c: any) => {
+          try {
+            const r = await api.get(`/academic/classes/${c.id}/gradebook`);
+            books[c.id] = r.data;
+          } catch { books[c.id] = { students: [], assessments: [], grades: [] }; }
+        }));
+        setGradebooks(books);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, []);
+
+  const getInitials = (name: string) =>
+    name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || '?';
+
+  // Aggregate stats
+  const totalStudents = students.length;
+  const totalAssessments = Object.values(gradebooks).reduce((sum, gb) => sum + (gb.assessments?.length || 0), 0);
+  const totalGrades = Object.values(gradebooks).reduce((sum, gb) => sum + (gb.grades?.length || 0), 0);
+  const ungradedSlots = Object.values(gradebooks).reduce((sum, gb) => {
+    return sum + (gb.students?.length || 0) * (gb.assessments?.length || 0) - (gb.grades?.length || 0);
+  }, 0);
+
+  const bgColors = [
+    'bg-[#3b3dbf]/10 text-[#3b3dbf]',
+    'bg-emerald-100 text-emerald-700',
+    'bg-violet-100 text-violet-700',
+    'bg-orange-100 text-orange-600',
+    'bg-rose-100 text-rose-700',
   ];
 
+  // Students at risk across all classes
+  const atRiskStudents: any[] = [];
+  Object.entries(gradebooks).forEach(([classId, gb]) => {
+    const cls = classes.find(c => c.id.toString() === classId);
+    gb.students?.forEach((s: any) => {
+      const graded = gb.grades?.filter((g: any) => g.student_id === s.id) || [];
+      if (graded.length === 0) return;
+      const avgScore = graded.reduce((a: number, g: any) => a + g.score, 0) / graded.length;
+      const maxScore = gb.assessments?.reduce((a: number, a2: any) => a + (a2.max_score || 100), 0) / (gb.assessments?.length || 1) || 100;
+      if ((avgScore / maxScore) * 100 < 60) {
+        atRiskStudents.push({ ...s, className: cls?.name, avgScore: Math.round((avgScore / maxScore) * 100) });
+      }
+    });
+  });
+
   return (
-    <div className="flex flex-col gap-6 text-zinc-900 pb-10 min-h-full">
-      
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+    <div className="flex flex-col gap-6 text-zinc-900 pb-10">
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold mb-2">
-            <span className="text-red-700">Classes</span>
-            <span className="text-zinc-400">&gt;</span>
-            <span className="text-[#3b3dbf]">Grade 11-B</span>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-3">Advanced Mathematics - Grade 11-B</h1>
-          <div className="flex items-center gap-6 text-sm font-bold">
-            <div className="flex items-center gap-1.5 text-teal-600">
-              <Clock size={16} />
-              08:00 AM - 09:30 AM
-            </div>
-            <div className="flex items-center gap-1.5 text-orange-600">
-              <MapPin size={16} />
-              Room 402 - Science Wing
-            </div>
-          </div>
+          <p className="text-sm font-semibold text-zinc-400 mb-1">{greetingTime()}, {name} 👋</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Teacher Dashboard</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">Subject: <span className="text-[#3b3dbf] font-bold">{subject}</span></p>
         </div>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-lg text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm">
-          <Send size={16} />
-          Submit Attendance
-        </button>
+        <Link
+          to="/classes"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-xl text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm shrink-0"
+        >
+          <GraduationCap size={16} />
+          Open Gradebook
+        </Link>
       </div>
 
-      {/* Middle Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Today's Lesson */}
-        <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2 font-bold text-lg">
-              <BookOpen className="text-[#3b3dbf]" size={20} />
-              Today's Lesson
-            </div>
-            <button className="text-[#3b3dbf] text-xs font-bold hover:underline">
-              Edit Plan
-            </button>
-          </div>
-          
-          <div className="bg-indigo-50/50 border-l-4 border-[#3b3dbf] p-4 rounded-r-xl mb-6">
-            <div className="text-xs font-bold text-[#3b3dbf] mb-1">Module 4: Differential Calculus</div>
-            <div className="font-bold text-zinc-900">Introduction to Derivatives and Chain Rule</div>
-          </div>
-          
-          <div className="space-y-4 mb-6">
-            <div className="flex gap-3 items-start">
-              <CheckCircle2 className="text-[#3b3dbf] mt-0.5 shrink-0" size={18} />
-              <span className="text-sm font-semibold text-zinc-600">Review of limits and continuity (15 min)</span>
-            </div>
-            <div className="flex gap-3 items-start">
-              <Circle className="text-zinc-300 mt-0.5 shrink-0" size={18} />
-              <span className="text-sm font-semibold text-zinc-600">Derivative from first principles (25 min)</span>
-            </div>
-            <div className="flex gap-3 items-start">
-              <Circle className="text-zinc-300 mt-0.5 shrink-0" size={18} />
-              <span className="text-sm font-semibold text-zinc-600">Group exercise: Power rule applications (30 min)</span>
-            </div>
-          </div>
-          
-          <div className="bg-cyan-50/50 border border-cyan-100 p-4 rounded-xl">
-            <div className="text-[10px] font-bold text-cyan-700 tracking-wider mb-1 uppercase">Required Materials</div>
-            <div className="text-xs font-semibold text-cyan-900">Scientific calculators, Graphing paper, Module 4 Handouts.</div>
-          </div>
-        </div>
-
-        {/* Class Announcements */}
-        <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-6">
-          <div className="flex items-center gap-2 font-bold text-lg mb-6">
-            <Megaphone className="text-[#3b3dbf]" size={20} />
-            Class Announcements
-          </div>
-          
-          <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4 mb-8">
-            <textarea 
-              placeholder="Write a quick announcement to the class..." 
-              className="w-full bg-transparent border-none resize-none focus:outline-none text-sm text-zinc-700 placeholder:text-zinc-400 font-medium"
-              rows={3}
-            ></textarea>
-          </div>
-          
-          <div className="text-[10px] font-bold text-zinc-500 tracking-wider mb-3 uppercase">Recent Updates</div>
-          
-          <div className="bg-indigo-50/50 p-4 rounded-xl flex gap-3">
-            <div className="shrink-0 mt-0.5">
-              <div className="w-6 h-6 rounded-full border border-[#3b3dbf] flex items-center justify-center text-[#3b3dbf]">
-                <Info size={14} />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'My Classes', value: classes.length, icon: BookOpen, color: 'bg-indigo-50 text-[#3b3dbf]', sub: 'assigned to you' },
+          { label: 'Total Students', value: totalStudents, icon: Users, color: 'bg-teal-50 text-teal-600', sub: 'across all classes' },
+          { label: 'Assessments', value: totalAssessments, icon: GraduationCap, color: 'bg-violet-50 text-violet-600', sub: 'created by you' },
+          { label: 'Ungraded Slots', value: ungradedSlots, icon: AlertTriangle, color: ungradedSlots > 0 ? 'bg-orange-50 text-orange-500' : 'bg-emerald-50 text-emerald-500', sub: ungradedSlots > 0 ? 'need grading' : 'all caught up!' },
+        ].map((item, i) => (
+          <div key={i} className="bg-white p-5 rounded-2xl border border-zinc-100 shadow-sm flex flex-col justify-between h-32">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs font-bold text-zinc-400 mb-1">{item.label}</p>
+                <p className="text-3xl font-bold text-zinc-900">{loading ? '...' : item.value}</p>
+              </div>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}>
+                <item.icon size={20} />
               </div>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-zinc-700 mb-2">Mid-term project guidelines have been uploaded to the student portal. Deadline: Oct 24th.</p>
-              <p className="text-xs text-zinc-400 font-medium">Posted 2 hours ago</p>
-            </div>
+            <p className="text-xs font-semibold text-zinc-400">{item.sub}</p>
           </div>
+        ))}
+      </div>
+
+      {/* Middle section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* My Classes Grid */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-100 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-base text-zinc-900">My Classes</h3>
+            <Link to="/classes" className="text-xs font-bold text-[#3b3dbf] hover:underline flex items-center gap-1">
+              View Gradebooks <ChevronRight size={12} />
+            </Link>
+          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-4 border-[#3b3dbf]/30 border-t-[#3b3dbf] rounded-full animate-spin" />
+            </div>
+          ) : classes.length === 0 ? (
+            <div className="text-center text-zinc-300 py-8 text-sm">No classes assigned to you yet.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {classes.map((cls, i) => {
+                const gb = gradebooks[cls.id] || {};
+                const stuCount = gb.students?.length || 0;
+                const assmCount = gb.assessments?.length || 0;
+                const gradeCount = gb.grades?.length || 0;
+                const ungraded = stuCount * assmCount - gradeCount;
+                return (
+                  <Link
+                    key={cls.id}
+                    to="/classes"
+                    className="group flex items-start gap-3 p-4 rounded-xl border border-zinc-100 hover:border-[#3b3dbf]/40 hover:bg-indigo-50/30 transition-all"
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${bgColors[i % bgColors.length]}`}>
+                      {getInitials(cls.name)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-zinc-800 text-sm truncate">{cls.name}</div>
+                      <div className="text-[10px] text-zinc-400 font-semibold mt-0.5">{stuCount} students · {assmCount} assessments</div>
+                      {ungraded > 0 && (
+                        <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-orange-50 text-orange-500 rounded-full text-[10px] font-bold">
+                          <AlertTriangle size={10} />
+                          {ungraded} ungraded
+                        </div>
+                      )}
+                    </div>
+                    <ChevronRight size={14} className="text-zinc-300 group-hover:text-[#3b3dbf] transition-colors shrink-0 mt-1" />
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* At Risk Students */}
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-base text-zinc-900">At Risk Students</h3>
+            <span className="text-xs font-bold text-red-400">{atRiskStudents.length} students</span>
+          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-6">
+              <div className="w-6 h-6 border-4 border-[#3b3dbf]/30 border-t-[#3b3dbf] rounded-full animate-spin" />
+            </div>
+          ) : atRiskStudents.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                <CheckCircle2 size={24} className="text-emerald-500" />
+              </div>
+              <p className="text-xs font-bold text-zinc-400">All students are performing well!</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
+              {atRiskStudents.slice(0, 6).map((s, i) => (
+                <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-red-50/50 border border-red-100">
+                  <div className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold shrink-0">
+                    {getInitials(s.name)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold text-zinc-800 truncate">{s.name}</div>
+                    <div className="text-[10px] text-zinc-400 font-semibold">{s.className}</div>
+                  </div>
+                  <span className="text-xs font-bold text-red-500 shrink-0">{s.avgScore}%</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>
 
-      {/* Digital Attendance Roster */}
-      <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 flex flex-col overflow-hidden mt-2">
-        <div className="p-6 border-b border-zinc-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-           <div>
-             <h3 className="font-bold text-xl mb-1">Digital Attendance Roster</h3>
-             <p className="text-xs font-semibold text-zinc-500">24 Students Enrolled • Oct 16, 2023</p>
-           </div>
-           <div className="flex items-center gap-3">
-             <div className="flex bg-white border border-zinc-200 rounded-lg p-1">
-               <button className="px-4 py-1.5 bg-indigo-50 text-[#3b3dbf] rounded-md text-xs font-bold">All</button>
-               <button className="px-4 py-1.5 text-zinc-500 hover:bg-zinc-50 rounded-md text-xs font-bold transition-colors">Absent</button>
-               <button className="px-4 py-1.5 text-zinc-500 hover:bg-zinc-50 rounded-md text-xs font-bold transition-colors">Late</button>
-             </div>
-             <button className="flex items-center gap-1.5 px-4 py-2 bg-white border border-zinc-200 rounded-lg text-xs font-bold text-zinc-700 hover:bg-zinc-50 shadow-sm transition-colors">
-               <Filter size={14} />
-               Sort
-             </button>
-           </div>
-        </div>
-        
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-600">
-            <thead className="bg-zinc-50/50 text-zinc-500 text-xs font-bold border-b border-zinc-100">
-              <tr>
-                <th className="px-6 py-4">Student Name</th>
-                <th className="px-6 py-4">Student ID</th>
-                <th className="px-6 py-4">Attendance Status</th>
-                <th className="px-6 py-4">Notes</th>
-                <th className="px-6 py-4 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100 font-semibold">
-              {roster.map((student, index) => (
-                <tr key={index} className="hover:bg-zinc-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full bg-zinc-200 object-cover" />
-                      <div>
-                        <div className="text-zinc-900 font-bold">{student.name}</div>
-                        <div className="text-xs text-zinc-500">{student.subtitle}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-zinc-500">ID: {student.id}</td>
-                  <td className="px-6 py-4">
-                    <div className="inline-flex bg-zinc-100 rounded-full p-1 border border-zinc-200/50">
-                      <button className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${student.status === 'Present' ? 'bg-[#3b3dbf] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-800'}`}>Present</button>
-                      <button className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${student.status === 'Late' ? 'bg-[#8c4616] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-800'}`}>Late</button>
-                      <button className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${student.status === 'Absent' ? 'bg-red-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-800'}`}>Absent</button>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {student.note ? (
-                      <span className="text-xs font-bold text-[#8c4616] italic">{student.note}</span>
-                    ) : (
-                      <span className="text-xs font-medium text-zinc-400 italic">Add remark...</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <button className="text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 p-2 rounded-lg transition-colors inline-flex">
-                      <MoreVertical size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Today's Plan (static but polished) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <BookOpen size={18} className="text-[#3b3dbf]" />
+            <h3 className="font-bold text-base text-zinc-900">Today's Teaching Plan</h3>
+          </div>
+          <div className="bg-indigo-50/60 border-l-4 border-[#3b3dbf] p-4 rounded-r-xl mb-4">
+            <p className="text-xs font-bold text-[#3b3dbf] mb-0.5">{subject} — Today</p>
+            <p className="font-bold text-zinc-800 text-sm">Review & Assessment Prep</p>
+          </div>
+          <div className="space-y-3">
+            {['Review previous assessments with class', 'Cover any at-risk student topics', 'Distribute marks & feedback'].map((item, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                {i === 0 ? (
+                  <CheckCircle2 size={16} className="text-[#3b3dbf] shrink-0 mt-0.5" />
+                ) : (
+                  <Circle size={16} className="text-zinc-300 shrink-0 mt-0.5" />
+                )}
+                <span className="text-sm font-semibold text-zinc-600">{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="p-4 md:px-6 border-t border-zinc-100 flex justify-between items-center text-xs font-bold text-zinc-500">
-          <div>Showing 4 of 24 students</div>
-          <div className="flex gap-2">
-            <button className="px-4 py-2 border border-zinc-200 bg-white rounded-lg hover:bg-zinc-50 transition-colors shadow-sm">Previous</button>
-            <button className="px-4 py-2 border border-zinc-200 bg-white rounded-lg hover:bg-zinc-50 transition-colors shadow-sm text-zinc-800">Next</button>
+        <div className="bg-[#3b3dbf] rounded-2xl p-6 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-28 h-28 bg-white/5 rounded-bl-full translate-x-8 -translate-y-8" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-4">
+              <Megaphone size={18} />
+              <h3 className="font-bold text-base">Quick Announcement</h3>
+            </div>
+            <div className="bg-white/10 border border-white/20 rounded-xl p-3 mb-4">
+              <textarea
+                placeholder="Write a message to your classes..."
+                className="w-full bg-transparent text-sm font-medium placeholder:text-indigo-200 focus:outline-none resize-none"
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-2">
+              {classes.slice(0, 3).map(cls => (
+                <span key={cls.id} className="px-2.5 py-1 bg-white/20 text-white text-[10px] font-bold rounded-full">{cls.name}</span>
+              ))}
+            </div>
+            <button className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-white text-[#3b3dbf] rounded-xl text-sm font-bold hover:bg-zinc-100 transition-colors">
+              <Send size={14} /> Send to All My Classes
+            </button>
           </div>
         </div>
       </div>

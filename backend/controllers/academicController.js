@@ -3,12 +3,7 @@ import pool from '../db/index.js';
 // GET /api/academic/teacher-classes
 export const getTeacherClasses = async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT id, name FROM classes WHERE teacher_id = $1', [req.user.id]);
-    // Fallback: If teacher has no assigned classes, just return all classes for demonstration
-    if (rows.length === 0) {
-      const all = await pool.query('SELECT id, name FROM classes');
-      return res.status(200).json(all.rows);
-    }
+    const { rows } = await pool.query('SELECT id, name FROM classes ORDER BY id ASC');
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
@@ -21,13 +16,13 @@ export const getGradebook = async (req, res) => {
   const { classId } = req.params;
   try {
     const { rows: students } = await pool.query('SELECT id, name, avatar FROM students WHERE class_id = $1 ORDER BY name ASC', [classId]);
-    const { rows: assessments } = await pool.query('SELECT id, name, type, max_score FROM assessments WHERE class_id = $1 ORDER BY id ASC', [classId]);
+    const { rows: assessments } = await pool.query('SELECT id, name, type, max_score FROM assessments WHERE class_id = $1 AND teacher_id = $2 ORDER BY id ASC', [classId, req.user.id]);
     const { rows: grades } = await pool.query(`
       SELECT g.student_id, g.assessment_id, g.score 
       FROM grades g 
       JOIN assessments a ON g.assessment_id = a.id 
-      WHERE a.class_id = $1
-    `, [classId]);
+      WHERE a.class_id = $1 AND a.teacher_id = $2
+    `, [classId, req.user.id]);
     
     res.status(200).json({ students, assessments, grades });
   } catch (error) {

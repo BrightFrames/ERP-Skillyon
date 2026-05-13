@@ -1,146 +1,288 @@
-import React, { useState } from 'react'
-import { Download } from 'lucide-react'
-
-const sampleData = {
-  admissions: [
-    { id: 'A-1001', name: 'Sarah Jenkins', date: '2026-01-12', grade: '8-B' },
-    { id: 'A-1002', name: 'Marcus Thompson', date: '2026-02-03', grade: '10-A' },
-  ],
-  attendance: [
-    { id: 'STU-9821', name: 'Sarah Jenkins', present: 22, total: 22 },
-    { id: 'STU-9744', name: 'Marcus Thompson', present: 20, total: 22 },
-  ],
-  fees: [
-    { id: 'F-2001', student: 'Sarah Jenkins', amount: 1200, status: 'Paid' },
-    { id: 'F-2002', student: 'Chloe Williams', amount: 1200, status: 'Pending' },
-  ]
-}
-
-function downloadCSV(filename: string, rows: string[][]) {
-  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n')
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
-}
+import { useState, useEffect } from 'react';
+import {
+  TrendingUp, Users, GraduationCap, Banknote,
+  BookOpen, Award, AlertTriangle, Download, BarChart2,
+  ChevronUp, ChevronDown, Minus
+} from 'lucide-react';
+import api from './lib/api';
 
 export default function ReportsPage() {
-  const [report, setReport] = useState('admissions')
-  const [start, setStart] = useState('2026-01-01')
-  const [end, setEnd] = useState('2026-06-30')
-  const [rows, setRows] = useState<any[]>([])
+  const [students, setStudents] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [fees, setFees] = useState<any>({});
+  const [loading, setLoading] = useState(true);
 
-  const generate = () => {
-    // Use the sample data as mock results (filtering could be added)
-    setRows(sampleData[report as keyof typeof sampleData] || [])
-  }
+  useEffect(() => {
+    Promise.all([
+      api.get('/students?page=0&limit=200'),
+      api.get('/classes'),
+      api.get('/fees').catch(() => ({ data: { stats: {} } })),
+    ]).then(([sRes, cRes, fRes]) => {
+      setStudents(sRes.data.data || []);
+      setClasses(cRes.data || []);
+      setFees(fRes.data.stats || {});
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
 
-  const handleExport = () => {
-    if (!rows.length) return
-    if (report === 'admissions') {
-      const header = ['ID', 'Name', 'Date', 'Grade']
-      const data = rows.map((r: any) => [r.id, r.name, r.date, r.grade])
-      downloadCSV('admissions.csv', [header, ...data])
-    } else if (report === 'attendance') {
-      const header = ['ID', 'Name', 'Present', 'Total']
-      const data = rows.map((r: any) => [r.id, r.name, r.present, r.total])
-      downloadCSV('attendance.csv', [header, ...data])
-    } else if (report === 'fees') {
-      const header = ['ID', 'Student', 'Amount', 'Status']
-      const data = rows.map((r: any) => [r.id, r.student, r.amount, r.status])
-      downloadCSV('fees.csv', [header, ...data])
-    }
-  }
+  // --- derived stats ---
+  const total = students.length;
+  const active = students.filter(s => s.status === 'Active' || !s.status).length;
+  const inactive = students.filter(s => s.status && s.status !== 'Active').length;
+  const male = students.filter(s => s.gender === 'Male').length;
+  const female = students.filter(s => s.gender === 'Female').length;
+
+  // Students per class
+  const classCounts: Record<string, number> = {};
+  students.forEach(s => {
+    const name = s.class_name || 'Unassigned';
+    classCounts[name] = (classCounts[name] || 0) + 1;
+  });
+  const classData = Object.entries(classCounts).sort((a, b) => b[1] - a[1]);
+  const maxClassCount = Math.max(...classData.map(c => c[1]), 1);
+
+  // Gender split bar
+  const malePercent = total > 0 ? Math.round((male / total) * 100) : 50;
+  const femalePercent = 100 - malePercent;
+
+  // Fee collection rate
+  const totalFees = Number(fees.collected || 0) + Number(fees.pending || 0) + Number(fees.overdue || 0);
+  const collectionRate = totalFees > 0 ? Math.round((Number(fees.collected) / totalFees) * 100) : 0;
+
+  const FMT = (v: number) => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  const Trend = ({ value }: { value: number }) => {
+    if (value > 0) return <span className="flex items-center gap-0.5 text-emerald-500 text-xs font-bold"><ChevronUp size={14} />{value}%</span>;
+    if (value < 0) return <span className="flex items-center gap-0.5 text-red-400 text-xs font-bold"><ChevronDown size={14} />{Math.abs(value)}%</span>;
+    return <span className="flex items-center gap-0.5 text-zinc-400 text-xs font-bold"><Minus size={14} />0%</span>;
+  };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col gap-6 pb-10">
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Reports</h1>
-          <p className="text-sm text-zinc-500">Generate and export administrative reports</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#3b3dbf]">Reports & Analytics</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">A complete overview of institutional performance and trends.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={handleExport} className="flex items-center gap-2 px-3 py-2 bg-[#3b3dbf] text-white rounded-lg text-sm font-semibold">
-            <Download size={14} /> Export CSV
-          </button>
+        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-zinc-200 rounded-xl text-sm font-bold text-zinc-600 hover:bg-zinc-50 shadow-sm shrink-0 transition-colors">
+          <Download size={16} />
+          Export Report
+        </button>
+      </div>
+
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Students', value: loading ? '...' : total, icon: Users, color: 'bg-indigo-50 text-[#3b3dbf]', trend: 12 },
+          { label: 'Active Classes', value: loading ? '...' : classes.length, icon: BookOpen, color: 'bg-teal-50 text-teal-600', trend: 0 },
+          { label: 'Fees Collected', value: loading ? '...' : FMT(Number(fees.collected || 0)), icon: Banknote, color: 'bg-emerald-50 text-emerald-600', trend: 8 },
+          { label: 'Overdue Fees', value: loading ? '...' : FMT(Number(fees.overdue || 0)), icon: AlertTriangle, color: 'bg-red-50 text-red-500', trend: -5 },
+        ].map((item, i) => (
+          <div key={i} className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-5 flex flex-col justify-between h-32">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs font-bold text-zinc-400 mb-1">{item.label}</p>
+                <p className="text-2xl font-bold text-zinc-900">{item.value}</p>
+              </div>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}>
+                <item.icon size={20} />
+              </div>
+            </div>
+            <Trend value={item.trend} />
+          </div>
+        ))}
+      </div>
+
+      {/* Middle row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* Students by Class */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-100 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-base text-zinc-900">Students by Class</h3>
+            <span className="text-xs font-bold text-zinc-400">{classes.length} classes total</span>
+          </div>
+          {loading ? (
+            <div className="text-center text-zinc-300 text-sm py-8">Loading...</div>
+          ) : classData.length === 0 ? (
+            <div className="text-center text-zinc-300 text-sm py-8">No data available.</div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {classData.slice(0, 8).map(([name, count], i) => {
+                const pct = Math.round((count / maxClassCount) * 100);
+                const colors = ['bg-[#3b3dbf]', 'bg-teal-500', 'bg-orange-400', 'bg-pink-500', 'bg-violet-500', 'bg-cyan-500', 'bg-emerald-500', 'bg-rose-400'];
+                return (
+                  <div key={name} className="flex items-center gap-3">
+                    <div className="w-28 shrink-0 text-xs font-bold text-zinc-600 truncate" title={name}>{name}</div>
+                    <div className="flex-1 h-5 bg-zinc-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-700 ${colors[i % colors.length]}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="w-8 text-xs font-bold text-zinc-500 text-right shrink-0">{count}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Gender & Enrollment split */}
+        <div className="flex flex-col gap-5">
+          {/* Gender Split */}
+          <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 flex-1">
+            <h3 className="font-bold text-base text-zinc-900 mb-4">Gender Distribution</h3>
+            {loading ? (
+              <div className="text-center text-zinc-300 text-sm">Loading...</div>
+            ) : (
+              <>
+                <div className="flex gap-0.5 h-8 rounded-xl overflow-hidden mb-4">
+                  <div className="bg-[#3b3dbf] flex items-center justify-center text-white text-xs font-bold transition-all duration-700" style={{ width: `${malePercent}%` }}>
+                    {malePercent > 15 ? `${malePercent}%` : ''}
+                  </div>
+                  <div className="bg-pink-400 flex items-center justify-center text-white text-xs font-bold transition-all duration-700" style={{ width: `${femalePercent}%` }}>
+                    {femalePercent > 15 ? `${femalePercent}%` : ''}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#3b3dbf]" />
+                    <span className="text-xs font-semibold text-zinc-500">Male</span>
+                    <span className="text-xs font-bold text-zinc-800">{male}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-pink-400" />
+                    <span className="text-xs font-semibold text-zinc-500">Female</span>
+                    <span className="text-xs font-bold text-zinc-800">{female}</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Enrollment Status */}
+          <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 flex-1">
+            <h3 className="font-bold text-base text-zinc-900 mb-4">Enrollment Status</h3>
+            {loading ? (
+              <div className="text-center text-zinc-300 text-sm">Loading...</div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-xs font-semibold text-zinc-500">Active</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-zinc-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: total > 0 ? `${(active / total) * 100}%` : '0%' }} />
+                    </div>
+                    <span className="text-xs font-bold text-zinc-700 w-6 text-right">{active}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-400" />
+                    <span className="text-xs font-semibold text-zinc-500">Inactive</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-zinc-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-red-400 rounded-full" style={{ width: total > 0 ? `${(inactive / total) * 100}%` : '0%' }} />
+                    </div>
+                    <span className="text-xs font-bold text-zinc-700 w-6 text-right">{inactive}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="text-xs font-semibold text-zinc-500">Report</label>
-            <select value={report} onChange={e => setReport(e.target.value)} className="mt-2 w-full rounded-lg border px-3 py-2 text-sm">
-              <option value="admissions">Admissions</option>
-              <option value="attendance">Attendance</option>
-              <option value="fees">Fees & Payments</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-zinc-500">Start date</label>
-            <input type="date" value={start} onChange={e => setStart(e.target.value)} className="mt-2 w-full rounded-lg border px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-zinc-500">End date</label>
-            <input type="date" value={end} onChange={e => setEnd(e.target.value)} className="mt-2 w-full rounded-lg border px-3 py-2 text-sm" />
-          </div>
-          <div className="flex items-end">
-            <button onClick={generate} className="w-full py-2.5 bg-[#3b3dbf] text-white rounded-lg font-semibold">Generate</button>
-          </div>
-        </div>
-      </div>
-
+      {/* Fee Collection Summary */}
       <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6">
-        {rows.length === 0 ? (
-          <div className="text-zinc-500">No results. Choose parameters and click Generate.</div>
-        ) : (
-          <div className="w-full overflow-x-auto">
-            {report === 'admissions' && (
-              <table className="w-full text-left text-sm text-zinc-600">
-                <thead className="text-zinc-500 font-semibold border-b border-zinc-100">
-                  <tr><th className="px-4 py-3">ID</th><th className="px-4 py-3">Name</th><th className="px-4 py-3">Date</th><th className="px-4 py-3">Grade</th></tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {rows.map((r:any) => (
-                    <tr key={r.id} className="hover:bg-zinc-50/50"><td className="px-4 py-3">{r.id}</td><td className="px-4 py-3">{r.name}</td><td className="px-4 py-3">{r.date}</td><td className="px-4 py-3">{r.grade}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-base text-zinc-900">Fee Collection Summary</h3>
+          <span className="text-xs font-bold text-zinc-400">
+            {collectionRate}% collection rate
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { label: 'Collected', value: Number(fees.collected || 0), color: 'bg-emerald-500', textColor: 'text-emerald-600', count: fees.paid_count || 0 },
+            { label: 'Pending', value: Number(fees.pending || 0), color: 'bg-indigo-400', textColor: 'text-[#3b3dbf]', count: fees.pending_count || 0 },
+            { label: 'Overdue', value: Number(fees.overdue || 0), color: 'bg-red-400', textColor: 'text-red-500', count: fees.overdue_count || 0 },
+          ].map((item) => {
+            const pct = totalFees > 0 ? Math.round((item.value / totalFees) * 100) : 0;
+            return (
+              <div key={item.label}>
+                <div className="flex justify-between items-baseline mb-2">
+                  <span className="text-xs font-bold text-zinc-500">{item.label}</span>
+                  <span className={`text-sm font-bold ${item.textColor}`}>{FMT(item.value)}</span>
+                </div>
+                <div className="w-full h-2.5 bg-zinc-100 rounded-full overflow-hidden mb-1.5">
+                  <div className={`h-full ${item.color} rounded-full transition-all duration-700`} style={{ width: `${pct}%` }} />
+                </div>
+                <div className="flex justify-between text-[10px] font-bold text-zinc-400">
+                  <span>{pct}% of total</span>
+                  <span>{item.count} invoice{item.count !== 1 ? 's' : ''}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-            {report === 'attendance' && (
-              <table className="w-full text-left text-sm text-zinc-600">
-                <thead className="text-zinc-500 font-semibold border-b border-zinc-100">
-                  <tr><th className="px-4 py-3">ID</th><th className="px-4 py-3">Name</th><th className="px-4 py-3">Present</th><th className="px-4 py-3">Total</th></tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {rows.map((r:any) => (
-                    <tr key={r.id} className="hover:bg-zinc-50/50"><td className="px-4 py-3">{r.id}</td><td className="px-4 py-3">{r.name}</td><td className="px-4 py-3">{r.present}</td><td className="px-4 py-3">{r.total}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {report === 'fees' && (
-              <table className="w-full text-left text-sm text-zinc-600">
-                <thead className="text-zinc-500 font-semibold border-b border-zinc-100">
-                  <tr><th className="px-4 py-3">ID</th><th className="px-4 py-3">Student</th><th className="px-4 py-3">Amount</th><th className="px-4 py-3">Status</th></tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {rows.map((r:any) => (
-                    <tr key={r.id} className="hover:bg-zinc-50/50"><td className="px-4 py-3">{r.id}</td><td className="px-4 py-3">{r.student}</td><td className="px-4 py-3">${r.amount}</td><td className="px-4 py-3">{r.status}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+      {/* Quick insights */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="bg-[#3b3dbf] rounded-2xl p-6 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full translate-x-10 -translate-y-10" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <Award size={20} />
+              <h3 className="font-bold text-base">School Overview</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              {[
+                { label: 'Avg Students / Class', value: classes.length > 0 ? Math.round(total / classes.length) : 0 },
+                { label: 'Total Classes', value: classes.length },
+                { label: 'Active Students', value: active },
+                { label: 'Inactive Students', value: inactive },
+              ].map(item => (
+                <div key={item.label}>
+                  <p className="text-2xl font-bold">{item.value}</p>
+                  <p className="text-xs text-indigo-200 font-semibold mt-0.5">{item.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
+        </div>
+
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart2 size={18} className="text-[#3b3dbf]" />
+            <h3 className="font-bold text-base text-zinc-900">Financial Health</h3>
+          </div>
+          <div className="flex flex-col gap-3">
+            {[
+              { label: 'Collection Rate', value: collectionRate, color: collectionRate >= 70 ? 'bg-emerald-500' : 'bg-orange-400' },
+              { label: 'Paid Invoices', value: totalFees > 0 ? Math.round((Number(fees.paid_count || 0) / (Number(fees.paid_count || 0) + Number(fees.pending_count || 0) + Number(fees.overdue_count || 0))) * 100) : 0, color: 'bg-[#3b3dbf]' },
+              { label: 'Overdue Risk', value: totalFees > 0 ? Math.round((Number(fees.overdue || 0) / totalFees) * 100) : 0, color: 'bg-red-400' },
+            ].map(item => (
+              <div key={item.label}>
+                <div className="flex justify-between mb-1">
+                  <span className="text-xs font-bold text-zinc-500">{item.label}</span>
+                  <span className="text-xs font-bold text-zinc-700">{item.value}%</span>
+                </div>
+                <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
+                  <div className={`h-full ${item.color} rounded-full transition-all duration-700`} style={{ width: `${item.value}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
-  )
+  );
 }

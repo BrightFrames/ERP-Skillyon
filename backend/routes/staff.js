@@ -50,4 +50,19 @@ router.post('/', async (req, res) => {
   }
 });
 
+// DELETE a staff member by ID (Admin only)
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('DELETE FROM staff WHERE id = $1 RETURNING id', [id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, error: 'Staff member not found' });
+    }
+    res.json({ success: true, message: 'Staff member deleted' });
+  } catch (error) {
+    console.error('Error deleting staff:', error);
+    res.status(500).json({ success: false, error: 'Database error' });
+  }
+});
+
 export default router;

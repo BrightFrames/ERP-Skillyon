@@ -11,25 +11,33 @@ const DUMMY_USERS = {
 };
 
 export const login = async (req, res, next) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
+  const DEMO_PASSWORD = 'demo-password';
   try {
     let user;
 
-    // Check for dummy login
+    // Check for dummy/demo login
     if (DUMMY_USERS[email]) {
+      if (password && password !== DEMO_PASSWORD) {
+        return res.status(401).json({ error: 'Invalid credentials. Use password: demo-password' });
+      }
       user = DUMMY_USERS[email];
     } else {
-      // In a real app, verify passwords here (bcrypt.compare)
+      // Real staff from DB — password check (accept demo-password for all in dev)
       const { rows } = await pool.query('SELECT id, name, email, role, subject FROM staff WHERE email = $1', [email]);
       if (rows.length === 0) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      // In production, compare bcrypt hash. For dev, accept demo-password.
+      if (password && password !== DEMO_PASSWORD) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
       user = rows[0];
     }
     
-    // Generate JWT Token
+    // Generate JWT Token — include name so frontend always has it
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id, role: user.role, name: user.name },
       JWT_SECRET,
       { expiresIn: '8h' }
     );
@@ -41,7 +49,8 @@ export const login = async (req, res, next) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        subject: user.subject || null,
       }
     });
 

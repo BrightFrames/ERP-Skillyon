@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './Layout';
 import LoginPage from './LoginPage';
-import AccountPage from './AccountPage';
+import AdminDashboard from './AdminDashboard';
+import TeacherDashboard from './TeacherDashboard';
 import StudentsPage from './StudentsPage';
 import StudentProfilePage from './StudentProfilePage';
 import TeachersPage from './TeachersPage';
@@ -12,6 +13,13 @@ import FeesPage from './FeesPage';
 import ReportsPage from './ReportsPage';
 import SettingsPage from './SettingsPage';
 import './App.css';
+
+function RoleDashboard() {
+  const userStr = localStorage.getItem('user');
+  const role = userStr ? JSON.parse(userStr)?.role : 'ADMIN';
+  if (role === 'TEACHER') return <TeacherDashboard />;
+  return <AdminDashboard />;
+}
 
 // Protected Route Component to require JWT Auth
 function ProtectedRoute({ children, roles }: { children: React.ReactNode, roles?: string[] }) {
@@ -37,7 +45,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route index element={<AccountPage />} />
+          <Route index element={<RoleDashboard />} />
           <Route path="students" element={<ProtectedRoute roles={['ADMIN', 'TEACHER']}><StudentsPage /></ProtectedRoute>} />
           <Route path="students/:id" element={<ProtectedRoute roles={['ADMIN', 'TEACHER']}><StudentProfilePage /></ProtectedRoute>} />
           <Route path="teachers" element={<ProtectedRoute roles={['ADMIN']}><TeachersPage /></ProtectedRoute>} />
