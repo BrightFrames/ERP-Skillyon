@@ -1,5 +1,6 @@
 import { Plus, Edit2, TrendingUp, Users, BookOpen, AlertTriangle, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from './lib/api';
 
 export default function ClassesPage() {
@@ -15,6 +16,9 @@ export default function ClassesPage() {
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [newAssessment, setNewAssessment] = useState({ name: '', type: 'Quiz', max_score: '100' });
   const inputRef = useRef<HTMLInputElement>(null);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     fetchClasses();
@@ -139,6 +143,11 @@ export default function ClassesPage() {
 
   const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+  const filteredStudents = students.filter(s =>
+    s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    s.id.toString().includes(searchQuery)
+  );
 
   // KPI calculations
   const gradedCount = grades.length;
@@ -270,25 +279,21 @@ export default function ClassesPage() {
             </div>
           ) : (
             <div className="overflow-x-auto flex-1">
-              {assessments.length === 0 && (
-                <div className="p-6 text-center">
-                  <div className="inline-flex flex-col items-center gap-3 text-zinc-400">
-                    <Plus size={32} strokeWidth={1.5} />
-                    <p className="text-sm font-semibold">No assessments yet for this class.</p>
-                    <button onClick={() => setShowAssessmentModal(true)} className="text-xs font-bold text-[#3b3dbf] hover:underline">
-                      + Add your first assessment
-                    </button>
-                  </div>
-                </div>
-              )}
-              {students.length === 0 && assessments.length > 0 && (
+              {students.length === 0 && (
                 <div className="p-6 text-center text-sm text-zinc-400 font-medium">No students enrolled in this class yet.</div>
               )}
-              {students.length > 0 && assessments.length > 0 && (
+              {students.length > 0 && (
                 <table className="w-full text-left text-sm min-w-max">
                   <thead className="bg-zinc-50 border-b border-zinc-100 sticky top-0">
                     <tr>
                       <th className="px-5 py-3.5 font-bold text-xs text-zinc-500 sticky left-0 bg-zinc-50 z-10 min-w-[200px]">Student</th>
+                      {assessments.length === 0 && (
+                        <th className="px-4 py-3.5 text-center min-w-[200px]">
+                          <button onClick={() => setShowAssessmentModal(true)} className="text-xs font-bold text-[#3b3dbf] hover:underline flex items-center justify-center gap-1 mx-auto">
+                            <Plus size={14} /> Add your first assessment
+                          </button>
+                        </th>
+                      )}
                       {assessments.map(a => (
                         <th key={a.id} className="px-4 py-3.5 text-center min-w-[110px]">
                           <div className="font-bold text-xs text-zinc-700">{a.name}</div>
@@ -299,7 +304,7 @@ export default function ClassesPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
-                    {students.map((student) => {
+                    {filteredStudents.map((student) => {
                       const overall = calculateOverall(student.id);
                       return (
                         <tr key={student.id} className="hover:bg-indigo-50/30 transition-colors group">
@@ -318,6 +323,11 @@ export default function ClassesPage() {
                               </div>
                             </div>
                           </td>
+                          {assessments.length === 0 && (
+                            <td className="px-4 py-3.5 text-center cursor-not-allowed">
+                              <span className="text-zinc-300">—</span>
+                            </td>
+                          )}
                           {assessments.map(a => {
                             const score = getStudentGrade(student.id, a.id);
                             const isEditing = editingGrade?.studentId === student.id && editingGrade?.assessmentId === a.id;

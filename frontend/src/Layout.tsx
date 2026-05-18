@@ -48,16 +48,14 @@ export default function Layout() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(true); }
-      if (e.key === 'Escape') setSearchOpen(false);
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { 
+        e.preventDefault(); 
+        searchInputRef.current?.focus(); 
+      }
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, []);
-
-  useEffect(() => {
-    if (searchOpen) setTimeout(() => searchInputRef.current?.focus(), 50);
-  }, [searchOpen]);
 
   const QUICK_LINKS = [
     { label: 'Dashboard', path: '/', icon: LayoutDashboard },
@@ -178,16 +176,18 @@ export default function Layout() {
               <Menu size={20} />
             </button>
             
-            {/* Global Search trigger */}
-            <div className="hidden sm:flex items-center relative w-full max-w-md">
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="w-full flex items-center gap-3 pl-4 pr-3 py-2.5 bg-zinc-100/80 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 rounded-xl text-sm text-zinc-400 font-medium transition-all"
-              >
-                <Search size={16} className="text-zinc-400" />
-                <span>Search pages, students...</span>
-                <kbd className="ml-auto text-[10px] font-bold bg-white border border-zinc-200 text-zinc-400 px-1.5 py-0.5 rounded shadow-sm">⌘K</kbd>
-              </button>
+            {/* Search Input */}
+            <div className="hidden sm:flex items-center relative w-full max-w-md bg-zinc-100/80 hover:bg-zinc-100 border border-transparent focus-within:border-zinc-300 focus-within:bg-white rounded-xl transition-all">
+              <Search size={16} className="text-zinc-400 absolute left-4" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search..."
+                value={currentSearch}
+                onChange={handleSearchChange}
+                className="w-full bg-transparent border-none outline-none py-2.5 pl-11 pr-12 text-sm text-zinc-800 placeholder:text-zinc-400 font-medium"
+              />
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold bg-white border border-zinc-200 text-zinc-400 px-1.5 py-0.5 rounded shadow-sm">⌘K</kbd>
             </div>
           </div>
           
@@ -231,55 +231,6 @@ export default function Layout() {
         </div>
       </main>
 
-      {/* Global Search Spotlight */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/40 backdrop-blur-sm" onClick={() => setSearchOpen(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-100">
-              <Search size={18} className="text-zinc-400 shrink-0" />
-              <input
-                ref={searchInputRef}
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && filteredLinks.length > 0) handleGlobalSearch(filteredLinks[0].path);
-                }}
-                placeholder="Search pages, students, staff..."
-                className="flex-1 text-sm font-medium text-zinc-800 bg-transparent focus:outline-none placeholder:text-zinc-400"
-              />
-              <button onClick={() => setSearchOpen(false)} className="p-1 text-zinc-400 hover:text-zinc-600">
-                <X size={16} />
-              </button>
-            </div>
-            <div className="py-2">
-              {filteredLinks.length === 0 ? (
-                <div className="px-4 py-6 text-center text-sm text-zinc-400">No results found</div>
-              ) : (
-                filteredLinks.map(link => (
-                  <button
-                    key={link.path}
-                    onClick={() => handleGlobalSearch(link.path)}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors text-left"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-[#3b3dbf] flex items-center justify-center shrink-0">
-                      <link.icon size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-zinc-800">{link.label}</p>
-                      <p className="text-[10px] text-zinc-400 font-medium">{link.path}</p>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-            <div className="px-4 py-2.5 border-t border-zinc-100 bg-zinc-50 flex items-center gap-3 text-[10px] font-bold text-zinc-400">
-              <span>↵ to open</span>
-              <span>esc to close</span>
-              <span className="ml-auto">⌘K to open anywhere</span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

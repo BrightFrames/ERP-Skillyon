@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Plus, Search, UserCheck, BookOpen, Trash2, MoreVertical, X, GraduationCap, Users, Briefcase } from 'lucide-react';
 import api from './lib/api';
 
@@ -13,6 +14,9 @@ const SUBJECTS = [
 export default function TeachersPage() {
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const globalSearch = searchParams.get('search') || '';
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -66,8 +70,9 @@ export default function TeachersPage() {
   };
 
   const filtered = staff.filter(s => {
-    const matchSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.email.toLowerCase().includes(search.toLowerCase());
+    const effectiveSearch = search || globalSearch;
+    const matchSearch = s.name.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
+      s.email.toLowerCase().includes(effectiveSearch.toLowerCase());
     const matchRole = roleFilter ? s.role === roleFilter : true;
     return matchSearch && matchRole;
   });
