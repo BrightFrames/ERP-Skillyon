@@ -94,7 +94,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-zinc-50 font-sans text-zinc-900 overflow-hidden">
+    <div className="flex h-screen bg-[#f8fafc] font-sans text-slate-900 overflow-hidden selection:bg-indigo-500/30">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
@@ -103,18 +103,18 @@ export default function Layout() {
         />
       )}
 
-      {/* Sidebar - Dark Theme */}
-      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#1a1c2c] border-r border-[#26283b] flex flex-col transform transition-transform duration-200 ease-in-out md:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      {/* Sidebar - Premium Theme */}
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-[#0f172a] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] shadow-[4px_0_24px_rgba(0,0,0,0.1)] border-r border-slate-800/50 flex flex-col transform transition-transform duration-300 ease-in-out md:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="p-6 flex flex-col gap-1">
-          <div className="flex items-center justify-between md:justify-start gap-3">
-            <div className="bg-[#3b3dbf] p-1.5 rounded-lg text-white">
+          <div className="flex items-center justify-between md:justify-start gap-3 mb-2">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30">
               <GraduationCap size={24} strokeWidth={2.5} />
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white leading-tight">
-                EduCore ERP
+              <h2 className="text-2xl font-black tracking-tight text-white leading-tight">
+                Edu<span className="text-indigo-400">Core</span>
               </h2>
-              <p className="text-[10px] font-bold text-zinc-400 tracking-wider">{roleDisplay}</p>
+              <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">{roleDisplay}</p>
             </div>
             <button 
               className="md:hidden text-zinc-400 hover:text-white ml-auto"
@@ -132,21 +132,26 @@ export default function Layout() {
               to={item.path}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${
+                `flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group ${
                   isActive
-                    ? 'bg-[#3b3dbf] text-white shadow-lg shadow-[#3b3dbf]/20'
-                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'
+                    ? 'text-white bg-white/10 shadow-[inset_1px_1px_0_rgba(255,255,255,0.1)] border border-white/10'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
                 }`
               }
             >
-              <item.icon size={20} strokeWidth={2.5} />
-              {item.name}
+              {({ isActive }) => (
+                <>
+                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500 rounded-r-full" />}
+                  <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-indigo-400' : 'group-hover:text-indigo-400 transition-colors'} />
+                  {item.name}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
-        <div className="p-4 space-y-2 mb-2">
-          <button className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-white/5 hover:bg-white/10 transition-colors border border-white/5">
+        <div className="p-4 space-y-3 mb-4">
+          <button className="flex w-full items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 transition-all border border-slate-700 shadow-sm hover:shadow-md">
             <Headset size={18} />
             Support Center
           </button>
@@ -156,18 +161,19 @@ export default function Layout() {
               localStorage.removeItem('user');
               window.location.href = '/login';
             }}
-            className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-400/10 transition-colors"
+            className="flex w-full items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-semibold text-red-400 bg-red-400/10 hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
           >
             <LogOut size={18} />
-            Logout
+            Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col w-full md:w-auto h-full overflow-hidden bg-zinc-50/50">
+      <main className="flex-1 flex flex-col w-full md:w-auto h-full overflow-hidden bg-[#f8fafc] relative">
+        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-indigo-50/50 to-transparent pointer-events-none"></div>
         {/* Top Header */}
-        <header className="h-20 shrink-0 bg-white border-b border-zinc-200 flex items-center justify-between px-6 lg:px-10 z-10">
+        <header className="h-20 shrink-0 glass border-b border-slate-200/60 flex items-center justify-between px-6 lg:px-10 z-10 sticky top-0">
           <div className="flex items-center flex-1 gap-4">
             <button 
               className="md:hidden p-2 -ml-2 text-zinc-600 hover:text-zinc-900 bg-zinc-100 rounded-lg"
@@ -177,46 +183,46 @@ export default function Layout() {
             </button>
             
             {/* Search Input */}
-            <div className="hidden sm:flex items-center relative w-full max-w-md bg-zinc-100/80 hover:bg-zinc-100 border border-transparent focus-within:border-zinc-300 focus-within:bg-white rounded-xl transition-all">
-              <Search size={16} className="text-zinc-400 absolute left-4" />
+            <div className="hidden sm:flex items-center relative w-full max-w-md bg-white border border-slate-200 shadow-sm focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 rounded-2xl transition-all group">
+              <Search size={18} className="text-slate-400 absolute left-4 group-focus-within:text-indigo-500 transition-colors" />
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search..."
+                placeholder="Search students, classes, or reports..."
                 value={currentSearch}
                 onChange={handleSearchChange}
-                className="w-full bg-transparent border-none outline-none py-2.5 pl-11 pr-12 text-sm text-zinc-800 placeholder:text-zinc-400 font-medium"
+                className="w-full bg-transparent border-none outline-none py-3 pl-12 pr-12 text-sm text-slate-800 placeholder:text-slate-400 font-medium"
               />
-              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold bg-white border border-zinc-200 text-zinc-400 px-1.5 py-0.5 rounded shadow-sm">⌘K</kbd>
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold bg-slate-50 border border-slate-200 text-slate-400 px-2 py-1 rounded-md shadow-sm">⌘K</kbd>
             </div>
           </div>
           
           <div className="flex items-center gap-4 lg:gap-6 ml-4">
-            <div className="hidden sm:flex items-center gap-3 text-zinc-500">
-              <button className="p-2 hover:bg-zinc-100 rounded-full transition-colors relative">
+            <div className="hidden sm:flex items-center gap-2 text-slate-500">
+              <button className="p-2.5 hover:bg-slate-100 hover:text-indigo-600 rounded-full transition-all relative">
                 <Bell size={20} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white animate-pulse"></span>
               </button>
-              <button className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
+              <button className="p-2.5 hover:bg-slate-100 hover:text-indigo-600 rounded-full transition-all">
                 <CircleHelp size={20} />
               </button>
-              <button className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
+              <button className="p-2.5 hover:bg-slate-100 hover:text-indigo-600 rounded-full transition-all">
                 <Grid size={20} />
               </button>
             </div>
             
-            <div className="h-8 w-px bg-zinc-200 hidden sm:block"></div>
+            <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
 
-            <button className="hidden sm:flex bg-[#3b3dbf] hover:bg-[#2c2eb5] text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shadow-sm">
+            <button className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 border border-indigo-500/50">
               Check In
             </button>
             
-            <button className="flex items-center gap-3 pl-2">
+            <button className="flex items-center gap-3 pl-2 group">
               <div className="hidden sm:block text-right">
-                <div className="text-sm font-bold text-zinc-900 leading-tight">{displayName}</div>
-                <div className="text-xs font-semibold text-zinc-500">{displayRole}</div>
+                <div className="text-sm font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">{displayName}</div>
+                <div className="text-xs font-semibold text-slate-500">{displayRole}</div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-indigo-100 text-[#3b3dbf] flex items-center justify-center text-sm font-bold border border-zinc-200 shadow-sm shrink-0">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center text-sm font-bold border-2 border-white shadow-md shrink-0 group-hover:scale-105 transition-transform">
                 {displayName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
               </div>
             </button>
