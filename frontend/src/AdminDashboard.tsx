@@ -10,7 +10,9 @@ import {
   GraduationCap,
   BookOpen,
   TrendingUp,
-  Users
+  Users,
+  Plus,
+  X
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -21,6 +23,13 @@ export default function AdminDashboard() {
   const [recentStudents, setRecentStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Add Class Modal State
+  const [showAddClassModal, setShowAddClassModal] = useState(false);
+  const [newGrade, setNewGrade] = useState('');
+  const [newSection, setNewSection] = useState('');
+  const [isSubmittingClass, setIsSubmittingClass] = useState(false);
+
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem('user');
@@ -65,6 +74,26 @@ export default function AdminDashboard() {
     return 'Good Evening';
   };
 
+  const handleAddClass = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGrade.trim() || !newSection.trim()) return;
+    
+    setIsSubmittingClass(true);
+    try {
+      const className = `Grade ${newGrade.trim()} - ${newSection.trim().toUpperCase()}`;
+      await api.post('/classes', { name: className });
+      await fetchDashboardData(); // Refresh the classes list
+      setShowAddClassModal(false);
+      setNewGrade('');
+      setNewSection('');
+    } catch (err) {
+      console.error('Failed to add class', err);
+      alert('Failed to create class. Please try again.');
+    } finally {
+      setIsSubmittingClass(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 text-zinc-900 pb-10">
 
@@ -74,14 +103,6 @@ export default function AdminDashboard() {
           <p className="text-sm font-semibold text-zinc-400 mb-1">{greetingTime()}, {userName} 👋</p>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1">Overview Dashboard</h1>
           <p className="text-zinc-400 text-sm">Here's what's happening at EduCore today.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {userRole === 'ADMIN' && (
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#3b3dbf] text-white rounded-lg text-sm font-semibold hover:bg-[#2c2eb5] transition-colors shadow-sm">
-              <Download size={16} />
-              Export Report
-            </button>
-          )}
         </div>
       </div>
 
@@ -143,13 +164,23 @@ export default function AdminDashboard() {
       </div>
 
       {/* Middle Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="flex flex-col gap-5">
 
         {/* Classes Overview */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 flex flex-col">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 flex flex-col">
           <div className="flex justify-between items-center mb-5">
             <h3 className="font-bold text-base text-zinc-900">Active Classes</h3>
-            <Link to="/classes" className="text-xs font-bold text-[#3b3dbf] hover:underline">View Gradebooks →</Link>
+            <div className="flex items-center gap-3">
+              {userRole === 'ADMIN' && (
+                <button 
+                  onClick={() => setShowAddClassModal(true)} 
+                  className="flex items-center gap-1 text-xs font-bold text-white bg-[#3b3dbf] px-2.5 py-1.5 rounded-lg hover:bg-[#2c2eb5] transition-colors"
+                >
+                  <Plus size={14} /> Add Class
+                </button>
+              )}
+              <Link to="/classes" className="text-xs font-bold text-zinc-500 hover:text-zinc-800">View Gradebooks →</Link>
+            </div>
           </div>
           {loading ? (
             <div className="flex-1 flex items-center justify-center text-zinc-300 text-sm">Loading...</div>
@@ -184,43 +215,6 @@ export default function AdminDashboard() {
               })}
             </div>
           )}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="flex flex-col gap-4">
-          <div className="bg-[#3b3dbf] p-6 rounded-2xl shadow-lg text-white flex-1 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full translate-x-8 -translate-y-8"></div>
-            <h3 className="font-bold text-base mb-5 relative z-10">Quick Actions</h3>
-            <div className="space-y-2.5 relative z-10">
-              <Link to="/students" className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
-                <div className="p-1.5 bg-white/10 rounded-lg">
-                  <UserPlus size={16} />
-                </div>
-                <div>
-                  <div className="text-sm font-bold">Manage Students</div>
-                  <div className="text-[10px] text-indigo-200">View & edit student records</div>
-                </div>
-              </Link>
-              <Link to="/classes" className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
-                <div className="p-1.5 bg-white/10 rounded-lg">
-                  <GraduationCap size={16} />
-                </div>
-                <div>
-                  <div className="text-sm font-bold">Open Gradebook</div>
-                  <div className="text-[10px] text-indigo-200">Add & update marks</div>
-                </div>
-              </Link>
-              <Link to="/messages" className="w-full flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
-                <div className="p-1.5 bg-white/10 rounded-lg">
-                  <Megaphone size={16} />
-                </div>
-                <div>
-                  <div className="text-sm font-bold">Messages</div>
-                  <div className="text-[10px] text-indigo-200">Broadcast to parents</div>
-                </div>
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -288,6 +282,81 @@ export default function AdminDashboard() {
           </table>
         </div>
       </div>
+
+      {/* Add Class Modal */}
+      {showAddClassModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
+              <h3 className="font-bold text-lg text-zinc-900">Add New Class</h3>
+              <button 
+                onClick={() => setShowAddClassModal(false)}
+                className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddClass} className="p-6 flex flex-col gap-4">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1.5">Grade (e.g. 10)</label>
+                  <input
+                    type="text"
+                    required
+                    value={newGrade}
+                    onChange={(e) => setNewGrade(e.target.value)}
+                    placeholder="10"
+                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-zinc-700 mb-1.5">Section (e.g. A)</label>
+                  <input
+                    type="text"
+                    required
+                    value={newSection}
+                    onChange={(e) => setNewSection(e.target.value)}
+                    placeholder="A"
+                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 bg-indigo-50 rounded-xl mt-2">
+                <p className="text-xs font-semibold text-indigo-800">Preview</p>
+                <p className="text-sm font-bold text-indigo-900 mt-0.5">
+                  {newGrade || newSection 
+                    ? `Grade ${newGrade.trim()} - ${newSection.trim().toUpperCase()}`
+                    : 'Grade ... - ...'}
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddClassModal(false)}
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 hover:bg-zinc-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingClass || !newGrade.trim() || !newSection.trim()}
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#3b3dbf] hover:bg-[#2c2eb5] disabled:opacity-50 transition-colors flex items-center gap-2"
+                >
+                  {isSubmittingClass ? 'Creating...' : (
+                    <>
+                      <Plus size={16} /> Create Class
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
