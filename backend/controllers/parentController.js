@@ -96,3 +96,46 @@ export const getReceipt = async (req, res, next) => {
     res.status(500).json({ error: 'Failed to fetch receipt' });
   }
 };
+
+export const getAcademics = async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const { rows } = await pool.query(
+      `SELECT id, subject, exam_name, score, max_score FROM marks WHERE student_id = $1 ORDER BY exam_name DESC, subject ASC`,
+      [studentId]
+    );
+    res.json({ data: rows });
+  } catch (err) {
+    console.error('getAcademics error', err);
+    res.status(500).json({ error: 'Failed to fetch academics' });
+  }
+};
+
+export const getMessages = async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const { rows } = await pool.query(
+      `SELECT id, sender, content, timestamp FROM parent_messages WHERE student_id = $1 ORDER BY timestamp ASC`,
+      [studentId]
+    );
+    res.json({ data: rows });
+  } catch (err) {
+    console.error('getMessages error', err);
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+};
+
+export const sendMessage = async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const { content } = req.body;
+    const { rows } = await pool.query(
+      `INSERT INTO parent_messages (student_id, sender, content) VALUES ($1, 'PARENT', $2) RETURNING id, sender, content, timestamp`,
+      [studentId, content]
+    );
+    res.json({ data: rows[0] });
+  } catch (err) {
+    console.error('sendMessage error', err);
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+};

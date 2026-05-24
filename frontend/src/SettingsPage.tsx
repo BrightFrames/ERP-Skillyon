@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   User, Lock, Bell, Shield, Globe, Palette,
   Save, Eye, EyeOff, ChevronRight, CheckCircle
 } from 'lucide-react';
+import api from './lib/api';
 
 const SECTIONS = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -16,6 +17,7 @@ export default function SettingsPage() {
   const [active, setActive] = useState('profile');
   const [saved, setSaved] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
@@ -42,9 +44,28 @@ export default function SettingsPage() {
     language: 'English',
   });
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  useEffect(() => {
+    api.get('/user/settings').then(res => {
+      if (res.data) {
+        if (res.data.profile && Object.keys(res.data.profile).length > 0) setProfile(prev => ({...prev, ...res.data.profile}));
+        if (res.data.notifications && Object.keys(res.data.notifications).length > 0) setNotifications(res.data.notifications);
+        if (res.data.appearance && Object.keys(res.data.appearance).length > 0) setAppearance(res.data.appearance);
+      }
+      setLoading(false);
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      await api.put('/user/settings', { profile, notifications, appearance });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (error) {
+      console.error('Failed to save settings', error);
+    }
   };
 
   const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (

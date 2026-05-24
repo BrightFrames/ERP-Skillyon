@@ -14,56 +14,29 @@ import {
   Megaphone,
   MoreHorizontal
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import api from './lib/api';
 
 export default function MessagesPage() {
-  const chats = [
-    {
-      id: 1,
-      name: 'Sarah Mitchell',
-      role: 'Mother of Leo (Grade 4-B)',
-      message: 'Thank you for the progress report. Ca...',
-      time: '2m ago',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      active: true,
-      selected: true,
-      type: 'user'
-    },
-    {
-      id: 2,
-      name: 'Mathematics Class 10-A',
-      role: '32 Students',
-      message: 'David: I\'ve uploaded the new assignment...',
-      time: '1h ago',
-      icon: <Users size={16} className="text-teal-600" />,
-      bg: 'bg-teal-50',
-      active: false,
-      selected: false,
-      type: 'group'
-    },
-    {
-      id: 3,
-      name: 'James Wilson',
-      role: 'Grade 11-C',
-      message: 'Hi Mr. Adams, I had a question about the...',
-      time: '4h ago',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      active: false,
-      selected: false,
-      type: 'user'
-    },
-    {
-      id: 4,
-      name: 'Faculty Announcements',
-      role: 'Staff Only',
-      message: 'Principal: Meeting at 9 AM in the...',
-      time: 'Yesterday',
-      icon: <Megaphone size={16} className="text-orange-600" />,
-      bg: 'bg-orange-50',
-      active: false,
-      selected: false,
-      type: 'group'
-    }
-  ];
+  const [chats, setChats] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/messages').then(res => {
+      // transform real messages into chat format for UI
+      const dbChats = (res.data.data || []).map((m: any) => ({
+        id: m.id,
+        name: `Parent of ${m.student_name} (${m.class_name})`,
+        role: m.sender,
+        message: m.content,
+        time: new Date(m.timestamp).toLocaleTimeString(),
+        avatar: m.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.student_name)}&background=random`,
+        active: true,
+        selected: false,
+        type: 'user'
+      }));
+      setChats(dbChats);
+    }).catch(err => console.error(err));
+  }, []);
 
   return (
     <div className="flex h-[calc(100vh-140px)] bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden text-zinc-900">
