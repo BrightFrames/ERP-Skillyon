@@ -42,7 +42,7 @@ export default function ParentFees({ childId }){
         a.download = `receipt_${json.paymentId}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        const r = await fetch(`/api/parent/${childId}/fees`, { credentials: 'include' });
+        const r = await fetch(`/api/parent/${childId}/fees`, { headers: { ...authHeader }, credentials: 'include' });
         const j = await r.json();
         setFees(j.data || []);
       }

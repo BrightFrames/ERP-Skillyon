@@ -44,6 +44,32 @@ export default function ParentLogin({ onSuccess }) {
     }
   }
 
+  const demoLogin = async () => {
+    const demoEmail = 'parent@example.com'
+    setError(null)
+    setLoading(true)
+    try {
+      const res = await fetch('/api/user/parent-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: demoEmail })
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setError(json.error || 'Login failed')
+        setLoading(false)
+        return
+      }
+      localStorage.setItem('token', json.token)
+      localStorage.setItem('user', JSON.stringify(json.user))
+      if (onSuccess) onSuccess(json.user)
+    } catch (err) {
+      setError('Network error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50">
       <form onSubmit={submit} className="w-full max-w-md bg-white p-6 rounded shadow">
@@ -63,6 +89,9 @@ export default function ParentLogin({ onSuccess }) {
         )}
         {error && <div className="text-sm text-red-500 mb-2">{error}</div>}
         <div className="flex items-center justify-end gap-2">
+          <button type="button" onClick={demoLogin} className="px-4 py-2 border rounded bg-white" disabled={loading}>
+            {loading ? 'Signing in...' : 'Use demo parent'}
+          </button>
           <button type="submit" className="px-4 py-2 bg-[#3b3dbf] text-white rounded" disabled={loading || !validEmail(email)}>
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
