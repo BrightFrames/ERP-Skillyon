@@ -1,38 +1,30 @@
 import pool from '../db/index.js';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 // Use a fallback secret for development if not in .env
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
 
-const DUMMY_USERS = {
-  'admin@educore.edu': { id: 9991, name: 'System Admin', email: 'admin@educore.edu', role: 'ADMIN', subject: null, join_date: new Date().toISOString() },
-  'teacher@educore.edu': { id: 9992, name: 'Sarah Jenkins', email: 'teacher@educore.edu', role: 'TEACHER', subject: 'Mathematics', join_date: new Date().toISOString() },
-  'staff@educore.edu': { id: 9993, name: 'Marcus Thompson', email: 'staff@educore.edu', role: 'STAFF', subject: null, join_date: new Date().toISOString() },
-};
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
-  const DEMO_PASSWORD = 'demo-password';
   try {
     let user;
 
-    // Check for dummy/demo login
-    if (DUMMY_USERS[email]) {
-      if (password && password !== DEMO_PASSWORD) {
-        return res.status(401).json({ error: 'Invalid credentials. Use password: demo-password' });
-      }
-      user = DUMMY_USERS[email];
-    } else {
-      // Real staff from DB — password check (accept demo-password for all in dev)
-      const { rows } = await pool.query('SELECT id, name, email, role, subject FROM staff WHERE email = $1', [email]);
-      if (rows.length === 0) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-      // In production, compare bcrypt hash. For dev, accept demo-password.
-      if (password && password !== DEMO_PASSWORD) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-      user = rows[0];
+    // Real staff from DB — password check
+    const { rows } = await pool.query('SELECT id, name, email, role, subject, password FROM staff WHERE email = $1', [email]);
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    user = rows[0];
+
+    if (!user.password || !password) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
     
     // Generate JWT Token — include name so frontend always has it
@@ -141,12 +133,6 @@ export const getProfile = async (req, res, next) => {
       const { rows } = await pool.query('SELECT id, name, class_id FROM students WHERE parent_email = $1', [email]);
       const userObj = { id: email, name: (email || '').split('@')[0], role: 'PARENT', children: rows };
       return res.status(200).json(userObj);
-    }
-
-    // Check if it's a dummy user
-    const dummyUser = Object.values(DUMMY_USERS).find(u => u.id === userId);
-    if (dummyUser) {
-      return res.status(200).json(dummyUser);
     }
 
     // Secure Parameterized Query

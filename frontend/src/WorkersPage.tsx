@@ -11,7 +11,7 @@ export default function WorkersPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
-  const [form, setForm] = useState({ name: '', email: '', role: 'STAFF' });
+  const [form, setForm] = useState({ name: '', email: '', role: 'STAFF', password: '' });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function WorkersPage() {
     try {
       await api.post('/staff', form);
       setShowModal(false);
-      setForm({ name: '', email: '', role: 'STAFF' });
+      setForm({ name: '', email: '', role: 'STAFF', password: '' });
       fetchWorkers();
     } catch (err: any) {
       alert(err?.response?.data?.error || 'Failed to add member');
@@ -273,6 +273,16 @@ export default function WorkersPage() {
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
                   placeholder="ravi@school.edu"
+                  className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-zinc-600 mb-1.5">Password *</label>
+                <input
+                  required type="password"
+                  value={form.password}
+                  onChange={e => setForm({ ...form, password: e.target.value })}
+                  placeholder="Set an initial password"
                   className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
                 />
               </div>

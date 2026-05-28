@@ -21,7 +21,7 @@ export default function TeachersPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'TEACHER', subject: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', role: 'TEACHER', subject: '', password: '' });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function TeachersPage() {
     try {
       await api.post('/staff', formData);
       setShowModal(false);
-      setFormData({ name: '', email: '', role: 'TEACHER', subject: '' });
+      setFormData({ name: '', email: '', role: 'TEACHER', subject: '', password: '' });
       fetchStaff();
     } catch (err: any) {
       alert(err?.response?.data?.error || 'Failed to add staff member');
@@ -282,6 +282,16 @@ export default function TeachersPage() {
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
                   placeholder="e.g. sarah@school.edu"
+                  className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-zinc-600 mb-1.5">Password *</label>
+                <input
+                  required type="password"
+                  value={formData.password}
+                  onChange={e => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Set an initial password"
                   className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
                 />
               </div>

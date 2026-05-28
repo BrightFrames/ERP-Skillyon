@@ -19,7 +19,7 @@ const DEMO_ACCOUNTS = [
   {
     role: 'admin' as const,
     label: 'Admin',
-    email: 'admin@educore.edu',
+    email: 'admin@school.erp',
     password: 'demo-password',
     name: 'System Admin',
     icon: Shield,
@@ -30,7 +30,7 @@ const DEMO_ACCOUNTS = [
   {
     role: 'teacher' as const,
     label: 'Teacher',
-    email: 'teacher@educore.edu',
+    email: 'sarah.j@school.edu',
     password: 'demo-password',
     name: 'Sarah Jenkins',
     icon: User,
@@ -41,9 +41,9 @@ const DEMO_ACCOUNTS = [
   {
     role: 'staff' as const,
     label: 'Staff',
-    email: 'staff@educore.edu',
+    email: 'janice.d@school.edu',
     password: 'demo-password',
-    name: 'Marcus Thompson',
+    name: 'Janice Doe',
     icon: Briefcase,
     color: 'bg-orange-50 border-orange-200 text-orange-700',
     activeColor: 'border-[#3b3dbf] bg-indigo-50 text-[#3b3dbf]',
@@ -52,7 +52,7 @@ const DEMO_ACCOUNTS = [
 ];
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@educore.edu');
+  const [email, setEmail] = useState('admin@school.erp');
   const [password, setPassword] = useState('demo-password');
   const [role, setRole] = useState<'admin' | 'teacher' | 'staff'>('admin');
   const [error, setError] = useState('');
@@ -72,7 +72,7 @@ export default function LoginPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) navigate('/');
-  }, []);
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -237,7 +237,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !email || !password}
               className="w-full bg-[#3b3dbf] hover:bg-[#2c2eb5] active:scale-[0.99] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200/50 hover:shadow-indigo-300/60 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
@@ -246,7 +246,7 @@ export default function LoginPage() {
                   Signing in...
                 </>
               ) : (
-                <>Sign In as {currentAcc.label} <ChevronRight size={16} /></>
+                <>Sign In <ChevronRight size={16} /></>
               )}
             </button>
           </form>

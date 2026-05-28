@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../db/index.js';
+import bcrypt from 'bcrypt';
 
 const router = express.Router();
 
@@ -8,10 +9,10 @@ router.get('/', async (req, res) => {
   const { role } = req.query;
   try {
     let queryArgs = [];
-    let queryText = 'SELECT * FROM staff ORDER BY join_date DESC';
+    let queryText = 'SELECT id, name, email, role, subject, join_date FROM staff ORDER BY join_date DESC';
     
     if (role) {
-      queryText = 'SELECT * FROM staff WHERE role = $1 ORDER BY join_date DESC';
+      queryText = 'SELECT id, name, email, role, subject, join_date FROM staff WHERE role = $1 ORDER BY join_date DESC';
       queryArgs.push(role);
     } 
     
@@ -25,9 +26,9 @@ router.get('/', async (req, res) => {
 
 // POST to create a new staff member (Teacher or Worker)
 router.post('/', async (req, res) => {
-  const { name, email, role, subject } = req.body;
-  if (!name || !email || !role) {
-    return res.status(400).json({ success: false, error: 'Missing required fields: name, email, role.' });
+  const { name, email, role, subject, password } = req.body;
+  if (!name || !email || !role || !password) {
+    return res.status(400).json({ success: false, error: 'Missing required fields: name, email, role, password.' });
   }
 
   try {
@@ -36,11 +37,14 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ success: false, error: 'User with this email already exists.' });
     }
 
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
     const result = await pool.query(
-      `INSERT INTO staff (name, email, role, subject, join_date)
-       VALUES ($1, $2, $3, $4, CURRENT_DATE)
-       RETURNING *`,
-      [name, email, role, subject || null]
+      `INSERT INTO staff (name, email, role, subject, password, join_date)
+       VALUES ($1, $2, $3, $4, $5, CURRENT_DATE)
+       RETURNING id, name, email, role, subject, join_date`,
+      [name, email, role, subject || null, passwordHash]
     );
 
     res.status(201).json({ success: true, data: result.rows[0] });
