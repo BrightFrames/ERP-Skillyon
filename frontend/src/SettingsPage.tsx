@@ -121,7 +121,7 @@ export default function SettingsPage() {
                 <h2 className="text-base font-bold text-zinc-900 mb-5">Profile Information</h2>
                 <div className="flex items-center gap-5 mb-6 pb-6 border-b border-zinc-100">
                   <div className="w-16 h-16 rounded-2xl bg-indigo-100 text-[#3b3dbf] flex items-center justify-center text-xl font-bold shrink-0">
-                    {profile.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U'}
+                    {profile.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'U'}
                   </div>
                   <div>
                     <p className="font-bold text-zinc-800">{profile.name || 'User'}</p>

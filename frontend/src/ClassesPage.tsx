@@ -160,7 +160,8 @@ export default function ClassesPage() {
     if (students.length === 0 || assessments.length === 0) return '-';
     const totals = students.map(s => calculateOverall(s.id).percent).filter(p => p !== '-');
     if (totals.length === 0) return '-';
-    return (totals.reduce((a, b) => Number(a) + Number(b), 0) / totals.length).toFixed(1);
+    const sum = totals.reduce((a, b) => Number(a) + Number(b), 0);
+    return (Number(sum) / totals.length).toFixed(1);
   })();
 
   const bgColors = [
