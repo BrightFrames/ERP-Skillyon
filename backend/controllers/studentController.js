@@ -1,5 +1,6 @@
 import pool from '../db/index.js';
 import { z } from 'zod';
+import bcrypt from 'bcrypt';
 
 // Zod schemas for validation
 const studentSchema = z.object({
@@ -9,7 +10,9 @@ const studentSchema = z.object({
   class_id: z.number().int().positive().optional().nullable(),
   gender: z.string().optional().nullable(),
   status: z.string().optional().nullable(),
-  avatar: z.string().optional().nullable()
+  avatar: z.string().optional().nullable(),
+  password: z.string().min(6).optional().nullable(),
+  parent_password: z.string().min(6).optional().nullable()
 });
 
 // Admin ONLY: Create Student
@@ -17,9 +20,19 @@ export const createStudent = async (req, res, next) => {
   try {
     const validatedData = studentSchema.parse(req.body);
     
+    let hashedPassword = null;
+    let hashedParentPassword = null;
+    
+    if (validatedData.password) {
+      hashedPassword = await bcrypt.hash(validatedData.password, 10);
+    }
+    if (validatedData.parent_password) {
+      hashedParentPassword = await bcrypt.hash(validatedData.parent_password, 10);
+    }
+    
     const { rows } = await pool.query(
-      `INSERT INTO students (name, email, parent_email, class_id, gender, status, avatar) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      `INSERT INTO students (name, email, parent_email, class_id, gender, status, avatar, password, parent_password) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
       [
         validatedData.name, 
         validatedData.email, 
@@ -27,7 +40,9 @@ export const createStudent = async (req, res, next) => {
         validatedData.class_id,
         validatedData.gender || 'Unknown',
         validatedData.status || 'Active',
-        validatedData.avatar || null
+        validatedData.avatar || null,
+        hashedPassword,
+        hashedParentPassword
       ]
     );
 
@@ -142,20 +157,42 @@ export const updateStudent = async (req, res, next) => {
     const { id } = req.params;
     const validatedData = studentSchema.parse(req.body);
     
+    let passwordQuery = "";
+    let params = [
+      validatedData.name, 
+      validatedData.email, 
+      validatedData.parent_email, 
+      validatedData.class_id,
+      validatedData.gender || 'Unknown',
+      validatedData.status || 'Active',
+      validatedData.avatar || null,
+      id
+    ];
+    let paramIndex = 9;
+
+    if (validatedData.password) {
+      const hash = await bcrypt.hash(validatedData.password, 10);
+      passwordQuery += `, password = $${paramIndex}`;
+      params.push(hash);
+      paramIndex++;
+    }
+
+    if (validatedData.parent_password) {
+      const hash = await bcrypt.hash(validatedData.parent_password, 10);
+      passwordQuery += `, parent_password = $${paramIndex}`;
+      params.push(hash);
+      
+      // If updating parent password, ideally update it for all siblings with the same parent email
+      if (validatedData.parent_email) {
+        await pool.query('UPDATE students SET parent_password = $1 WHERE parent_email = $2', [hash, validatedData.parent_email]);
+      }
+    }
+    
     const { rows } = await pool.query(
       `UPDATE students 
-       SET name = $1, email = $2, parent_email = $3, class_id = $4, gender = $5, status = $6, avatar = $7
+       SET name = $1, email = $2, parent_email = $3, class_id = $4, gender = $5, status = $6, avatar = $7 ${passwordQuery}
        WHERE id = $8 RETURNING *`,
-      [
-        validatedData.name, 
-        validatedData.email, 
-        validatedData.parent_email, 
-        validatedData.class_id,
-        validatedData.gender || 'Unknown',
-        validatedData.status || 'Active',
-        validatedData.avatar || null,
-        id
-      ]
+      params
     );
 
     if (rows.length === 0) {

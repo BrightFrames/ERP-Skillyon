@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import StudentLogin from './StudentLogin';
+import { LayoutDashboard, Calendar, GraduationCap, CreditCard, LogOut, CheckCircle2, Clock, FileText, ChevronRight } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState(null)
   const [tab, setTab] = useState('dashboard')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -25,40 +27,137 @@ export default function App() {
     setUser(null)
   }
 
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'attendance', label: 'Attendance', icon: Calendar },
+    { id: 'academics', label: 'Academics', icon: GraduationCap },
+    { id: 'fees', label: 'Fees', icon: CreditCard },
+  ]
+
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <header className="p-4 sm:p-6 flex items-center justify-between border-b bg-white">
-        <div>
-          <h1 className="text-lg sm:text-2xl font-bold">Student Portal</h1>
-          <p className="text-sm text-zinc-500">Welcome back, {user.name}</p>
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-sky-500/30">
+      {/* Top Navigation */}
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center">
+              <GraduationCap size={18} strokeWidth={2.5} />
+            </div>
+            <span className="font-bold text-lg text-slate-900 tracking-tight">EduCore</span>
+            <span className="hidden sm:inline-block ml-1 px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[10px] font-bold uppercase tracking-wider">Student</span>
+          </div>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setTab(item.id)}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
+                  tab === item.id 
+                    ? 'bg-sky-50 text-sky-600' 
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                }`}
+              >
+                <item.icon size={16} strokeWidth={tab === item.id ? 2.5 : 2} />
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
+              <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                {user.name?.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-sm font-semibold text-slate-700">{user.name?.split(' ')[0]}</span>
+            </div>
+            <button 
+              onClick={logout} 
+              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
+              title="Logout"
+            >
+              <LogOut size={18} />
+            </button>
+          </div>
         </div>
-        <button onClick={logout} className="px-4 py-2 text-sm rounded border bg-white text-zinc-700 font-medium hover:bg-zinc-50">Logout</button>
+
+        {/* Mobile Nav Scrollable */}
+        <div className="md:hidden border-t border-slate-100 bg-white/80 backdrop-blur-md">
+          <div className="flex overflow-x-auto px-4 py-2 gap-2 scrollbar-hide">
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setTab(item.id)}
+                className={`whitespace-nowrap px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
+                  tab === item.id 
+                    ? 'bg-sky-50 text-sky-600 border border-sky-100' 
+                    : 'text-slate-500 border border-transparent'
+                }`}
+              >
+                <item.icon size={16} strokeWidth={tab === item.id ? 2.5 : 2} />
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </header>
 
-      <nav className="bg-white p-3 sm:p-4 border-b flex gap-2 sm:gap-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
-        <button onClick={() => setTab('dashboard')} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${tab === 'dashboard' ? 'bg-[#3b3dbf] text-white' : 'bg-transparent text-zinc-600 hover:bg-zinc-100'}`}>Dashboard</button>
-        <button onClick={() => setTab('attendance')} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${tab === 'attendance' ? 'bg-[#3b3dbf] text-white' : 'bg-transparent text-zinc-600 hover:bg-zinc-100'}`}>Attendance</button>
-        <button onClick={() => setTab('academics')} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${tab === 'academics' ? 'bg-[#3b3dbf] text-white' : 'bg-transparent text-zinc-600 hover:bg-zinc-100'}`}>Academics</button>
-        <button onClick={() => setTab('fees')} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${tab === 'fees' ? 'bg-[#3b3dbf] text-white' : 'bg-transparent text-zinc-600 hover:bg-zinc-100'}`}>Fees</button>
-      </nav>
-
-      <main className="p-4 sm:p-6 lg:max-w-6xl mx-auto">
-        {tab === 'dashboard' && <Dashboard />}
-        {tab === 'attendance' && <Attendance />}
-        {tab === 'academics' && <Academics />}
-        {tab === 'fees' && <Fees />}
+      {/* Main Content */}
+      <main className="flex-1 w-full max-w-5xl mx-auto p-4 sm:p-6 lg:py-8">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+          {tab === 'dashboard' && <Dashboard user={user} setTab={setTab} />}
+          {tab === 'attendance' && <Attendance />}
+          {tab === 'academics' && <Academics />}
+          {tab === 'fees' && <Fees />}
+        </div>
       </main>
     </div>
   )
 }
 
-function Dashboard() {
+function Dashboard({ user, setTab }) {
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">My Dashboard</h2>
-      <div className="bg-white p-6 rounded-xl shadow-sm">
-        <p className="text-zinc-600 mb-2"><strong>Tip:</strong> Always check your academics to see if any new exams are added.</p>
-        <p className="text-zinc-600">Your recent updates will appear here.</p>
+    <div className="space-y-6">
+      <div className="bg-gradient-to-br from-sky-500 to-blue-600 rounded-[24px] p-6 sm:p-8 text-white relative overflow-hidden shadow-lg shadow-sky-500/20">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+        <div className="relative z-10">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-1">Hello, {user.name}! 👋</h2>
+          <p className="text-sky-100 max-w-md">Welcome back to your portal. Have a great day of learning ahead.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Quick Link Cards */}
+        <button onClick={() => setTab('attendance')} className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4 hover:border-sky-200 hover:shadow-md transition-all group text-left">
+          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Calendar size={24} />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800">Attendance</h3>
+            <p className="text-sm text-slate-500 mt-0.5">Check your daily presence.</p>
+          </div>
+        </button>
+
+        <button onClick={() => setTab('academics')} className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4 hover:border-sky-200 hover:shadow-md transition-all group text-left">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <FileText size={24} />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800">Academics</h3>
+            <p className="text-sm text-slate-500 mt-0.5">View your exam results.</p>
+          </div>
+        </button>
+
+        <div className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center">
+            <Clock size={24} />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800">Today's Tip</h3>
+            <p className="text-sm text-slate-500 mt-0.5">Stay consistent with your homework to keep stress away!</p>
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -74,23 +173,52 @@ function Attendance() {
   }, [])
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Attendance</h2>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Attendance</h2>
+        <p className="text-sm text-slate-500">Your presence record for the year.</p>
+      </div>
+
       {data.summary ? (
-        <div className="bg-white p-4 rounded-xl shadow-sm mb-4 inline-block">
-          <div className="text-sm text-zinc-500">Attendance Percentage</div>
-          <div className="text-2xl font-bold">{data.summary.percent}%</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col">
+            <span className="text-sm font-semibold text-slate-500 mb-1">Percentage</span>
+            <span className={`text-3xl font-bold ${data.summary.percent >= 75 ? 'text-teal-500' : 'text-rose-500'}`}>{data.summary.percent}%</span>
+          </div>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col">
+            <span className="text-sm font-semibold text-slate-500 mb-1">Total Days</span>
+            <span className="text-3xl font-bold text-slate-800">{data.summary.total}</span>
+          </div>
+          <div className="hidden sm:flex bg-white p-5 rounded-[20px] border border-slate-100 flex-col">
+            <span className="text-sm font-semibold text-slate-500 mb-1">Present</span>
+            <span className="text-3xl font-bold text-teal-500">{data.summary.present}</span>
+          </div>
         </div>
-      ) : <p className="text-zinc-500">Loading...</p>}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
-        <ul className="divide-y text-sm">
+      ) : (
+        <div className="h-24 bg-slate-100 rounded-[20px] animate-pulse"></div>
+      )}
+
+      <div className="bg-white rounded-[20px] border border-slate-100 overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100">
+          <h3 className="font-bold text-slate-800">Recent Records</h3>
+        </div>
+        <div className="divide-y divide-slate-50">
           {data.active.map((r, i) => (
-            <li key={i} className="p-4 flex justify-between">
-              <span className="font-medium text-zinc-700">{new Date(r.date).toDateString()}</span>
-              <span className={`font-semibold ${r.status === 'PRESENT' ? 'text-green-600' : 'text-red-500'}`}>{r.status}</span>
-            </li>
+            <div key={i} className="px-5 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
+              <div>
+                <div className="font-semibold text-slate-800">{new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                <div className="text-xs text-slate-400">{new Date(r.date).toLocaleDateString('en-US', { weekday: 'long' })}</div>
+              </div>
+              <div className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                r.status === 'PRESENT' ? 'bg-teal-50 text-teal-600' : 'bg-rose-50 text-rose-600'
+              }`}>
+                {r.status === 'PRESENT' ? <CheckCircle2 size={14} /> : <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>}
+                {r.status}
+              </div>
+            </div>
           ))}
-        </ul>
+          {data.active.length === 0 && <div className="p-8 text-center text-slate-400 text-sm font-medium">No recent records.</div>}
+        </div>
       </div>
     </div>
   )
@@ -103,25 +231,54 @@ function Academics() {
       headers: { Authorization: `Bearer ${localStorage.getItem('student_token')}` }
     }).then(r => r.json()).then(res => setMarks(res.data || []))
   }, [])
+  
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Academics</h2>
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden overflow-x-auto border">
-        <table className="w-full text-sm">
-          <thead className="bg-[#f0f0f5] text-left text-zinc-700 border-b">
-            <tr><th className="p-4 font-semibold">Exam</th><th className="p-4 font-semibold">Subject</th><th className="p-4 font-semibold">Score</th></tr>
-          </thead>
-          <tbody className="divide-y">
-            {marks.map((m, i) => (
-              <tr key={i} className="hover:bg-zinc-50">
-                <td className="p-4 text-zinc-700">{m.exam_name}</td>
-                <td className="p-4 text-zinc-800 font-medium">{m.subject}</td>
-                <td className="p-4 text-zinc-600">{m.score} / {m.max_score}</td>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Academics</h2>
+        <p className="text-sm text-slate-500">Exam scores and performance.</p>
+      </div>
+
+      <div className="bg-white rounded-[20px] border border-slate-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50/50 text-slate-500 font-semibold border-b border-slate-100">
+              <tr>
+                <th className="px-5 py-4">Exam</th>
+                <th className="px-5 py-4">Subject</th>
+                <th className="px-5 py-4">Score</th>
+                <th className="px-5 py-4">Progress</th>
               </tr>
-            ))}
-            {marks.length === 0 && <tr><td colSpan="3" className="p-4 text-center text-zinc-500">No academics data found.</td></tr>}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {marks.map((m, i) => {
+                const pct = Math.round((m.score / m.max_score) * 100);
+                return (
+                  <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-5 py-4 font-semibold text-slate-800">{m.exam_name}</td>
+                    <td className="px-5 py-4 text-slate-600">{m.subject}</td>
+                    <td className="px-5 py-4">
+                      <span className="font-bold text-slate-900">{m.score}</span>
+                      <span className="text-slate-400">/{m.max_score}</span>
+                    </td>
+                    <td className="px-5 py-4 min-w-[150px]">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full ${pct >= 75 ? 'bg-sky-500' : pct >= 50 ? 'bg-amber-400' : 'bg-rose-400'}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className={`text-xs font-bold ${pct >= 75 ? 'text-sky-600' : pct >= 50 ? 'text-amber-600' : 'text-rose-600'}`}>{pct}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+              {marks.length === 0 && <tr><td colSpan="4" className="p-8 text-center text-slate-400 text-sm font-medium">No academics data found.</td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
@@ -134,27 +291,36 @@ function Fees() {
       headers: { Authorization: `Bearer ${localStorage.getItem('student_token')}` }
     }).then(r => r.json()).then(res => setFees(res.data || []))
   }, [])
+
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Fees</h2>
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
-        <ul className="divide-y text-sm">
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Fees</h2>
+        <p className="text-sm text-slate-500">Your fee payment history.</p>
+      </div>
+
+      <div className="bg-white rounded-[20px] border border-slate-100 overflow-hidden">
+        <div className="divide-y divide-slate-50">
           {fees.map((f, i) => (
-            <li key={i} className="p-4 flex justify-between items-center text-sm hover:bg-zinc-50">
+            <div key={i} className="px-5 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors">
               <div>
-                <div className="font-medium text-zinc-800">{f.term}</div>
-                <div className="text-xs text-zinc-500 mt-1">Due: {new Date(f.due_date).toDateString()}</div>
+                <div className="font-bold text-slate-800 text-lg mb-0.5">{f.term}</div>
+                <div className="text-sm text-slate-500 flex items-center gap-1.5">
+                  <Calendar size={14} /> Due: {new Date(f.due_date).toLocaleDateString()}
+                </div>
               </div>
-              <div className="flex gap-4 items-center">
-                <span className="font-semibold text-lg text-zinc-700">₹{f.amount}</span>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${f.status === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                <span className="font-bold text-xl text-slate-900">₹{f.amount}</span>
+                <span className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                  f.status === 'PAID' ? 'bg-teal-50 text-teal-600' : 'bg-rose-50 text-rose-600'
+                }`}>
                   {f.status}
                 </span>
               </div>
-            </li>
+            </div>
           ))}
-          {fees.length === 0 && <li className="p-4 text-center text-zinc-500">No fees records found.</li>}
-        </ul>
+          {fees.length === 0 && <div className="p-8 text-center text-slate-400 text-sm font-medium">No fee records found.</div>}
+        </div>
       </div>
     </div>
   )

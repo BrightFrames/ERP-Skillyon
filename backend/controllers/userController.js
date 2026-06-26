@@ -54,16 +54,33 @@ export const login = async (req, res, next) => {
 
 // Parent login: returns a token with role PARENT and the list of children
 export const parentLogin = async (req, res, next) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
   try {
-    // Find students with this parent email
-    const { rows } = await pool.query('SELECT id, name, class_id FROM students WHERE parent_email = $1', [email]);
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Find students with this parent email and check the password of the first match
+    const { rows } = await pool.query('SELECT id, name, class_id, parent_password FROM students WHERE parent_email = $1', [email]);
 
     if (!rows || rows.length === 0) {
       return res.status(401).json({ error: 'No children found for this parent email' });
     }
 
+    const parentPasswordHash = rows[0].parent_password;
+    if (!parentPasswordHash) {
+      return res.status(401).json({ error: 'Invalid credentials or password not set' });
+    }
+
+    const isMatch = await bcrypt.compare(password, parentPasswordHash);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
     const user = { id: email, name: email.split('@')[0], email, role: 'PARENT' };
+    
+    // Remove password from children array before sending to frontend
+    const children = rows.map(r => ({ id: r.id, name: r.name, class_id: r.class_id }));
 
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email },
@@ -71,7 +88,7 @@ export const parentLogin = async (req, res, next) => {
       { expiresIn: '8h' }
     );
 
-    res.status(200).json({ message: 'Login successful', token, user: { ...user, children: rows } });
+    res.status(200).json({ message: 'Login successful', token, user: { ...user, children } });
   } catch (error) {
     console.error('Parent Login Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -104,13 +121,35 @@ export const parentSignup = async (req, res, next) => {
 };
 
 export const studentLogin = async (req, res, next) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
   try {
-    const { rows } = await pool.query('SELECT id, name, email, class_id FROM students WHERE email = $1', [email]);
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const { rows } = await pool.query('SELECT id, name, email, class_id, password FROM students WHERE email = $1', [email]);
     if (!rows || rows.length === 0) {
       return res.status(401).json({ error: 'Student not found with this email' });
     }
-    const user = { ...rows[0], role: 'STUDENT' };
+
+    const student = rows[0];
+    if (!student.password) {
+      return res.status(401).json({ error: 'Invalid credentials or password not set' });
+    }
+
+    const isMatch = await bcrypt.compare(password, student.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const user = { 
+      id: student.id, 
+      name: student.name, 
+      email: student.email, 
+      class_id: student.class_id, 
+      role: 'STUDENT' 
+    };
+
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email },
       JWT_SECRET,

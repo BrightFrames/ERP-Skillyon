@@ -28,7 +28,9 @@ export default function StudentsPage() {
     class_id: '',
     gender: 'Male',
     status: 'Active',
-    avatar: ''
+    avatar: '',
+    password: '',
+    parent_password: ''
   });
   const [totalStudents, setTotalStudents] = useState(0);
   const [metrics, setMetrics] = useState({ male: 0, female: 0, newEnrollments: 0 });
@@ -77,7 +79,7 @@ export default function StudentsPage() {
 
   const openAddModal = () => {
     setEditingStudentId(null);
-    setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '' });
+    setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '', password: '', parent_password: '' });
     setIsModalOpen(true);
   };
 
@@ -90,7 +92,9 @@ export default function StudentsPage() {
       class_id: student.class_id || '',
       gender: student.gender || 'Unknown',
       status: student.status || 'Active',
-      avatar: student.avatar || ''
+      avatar: student.avatar || '',
+      password: '', // Don't prefill passwords
+      parent_password: ''
     });
     setActiveMenuId(null);
     setIsModalOpen(true);
@@ -99,10 +103,14 @@ export default function StudentsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = {
+      // Remove empty passwords from payload so we don't accidentally blank them out if not updated
+      const payload: any = {
         ...formData,
         class_id: formData.class_id ? parseInt(formData.class_id) : undefined
       };
+      
+      if (!payload.password) delete payload.password;
+      if (!payload.parent_password) delete payload.parent_password;
       
       if (editingStudentId) {
         await api.put(`/students/${editingStudentId}`, payload);
@@ -112,7 +120,7 @@ export default function StudentsPage() {
       
       setIsModalOpen(false);
       setEditingStudentId(null);
-      setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '' });
+      setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '', password: '', parent_password: '' });
       fetchStudents();
     } catch (error) {
       console.error('Failed to save student', error);
@@ -451,6 +459,18 @@ export default function StudentsPage() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Student Login Password {editingStudentId && <span className="text-zinc-400 font-normal">(Leave blank to keep unchanged)</span>}</label>
+                <input 
+                  type="password" 
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                  placeholder={editingStudentId ? '••••••••' : 'Enter password'}
+                  required={!editingStudentId}
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-semibold text-zinc-700 mb-1">Parent Email</label>
                 <input 
                   type="email" 
@@ -459,6 +479,18 @@ export default function StudentsPage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
                   placeholder="e.g. parent@email.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Parent Login Password {editingStudentId && <span className="text-zinc-400 font-normal">(Leave blank to keep unchanged)</span>}</label>
+                <input 
+                  type="password" 
+                  name="parent_password"
+                  value={formData.parent_password}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                  placeholder={editingStudentId ? '••••••••' : 'Enter parent password'}
+                  required={!editingStudentId}
                 />
               </div>
               <div>

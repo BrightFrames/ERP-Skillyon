@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, FileText } from 'lucide-react';
+import { Clock, Calendar, FileText, CreditCard, Bus, MessageCircle, ChevronRight, ArrowUpRight } from 'lucide-react';
 
 export default function ParentDashboard({ selectedChild, onChildChange }) {
   const [children, setChildren] = useState([]);
@@ -24,10 +24,13 @@ export default function ParentDashboard({ selectedChild, onChildChange }) {
           if (res.ok) {
             userObj = await res.json();
             localStorage.setItem('user', JSON.stringify(userObj));
+          } else if (res.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.reload();
           }
         }
       }
-
       setChildren(userObj?.children || []);
     };
     init();
@@ -49,7 +52,7 @@ export default function ParentDashboard({ selectedChild, onChildChange }) {
           const fJson = await fRes.json();
           const unpaid = (fJson.data || []).filter(f => f.status !== 'PAID');
           const totalDue = unpaid.reduce((s, f) => s + Number(f.amount || 0), 0);
-          setFeeDue(totalDue ? `₹${totalDue.toFixed(2)}` : '₹0.00');
+          setFeeDue(totalDue ? `₹${totalDue.toFixed(0)}` : '₹0');
         }
       } catch (err) {
         console.error(err);
@@ -57,92 +60,170 @@ export default function ParentDashboard({ selectedChild, onChildChange }) {
     })();
   }, [selectedChild]);
 
+  const greetingTime = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? (() => { try { return JSON.parse(userStr) } catch { return {} } })() : {};
+  const parentName = user.name || user.email?.split('@')[0] || 'there';
+
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-bold">Student Dashboard</h1>
-          <p className="text-sm text-zinc-500">Quick summary</p>
+    <div className="space-y-6">
+
+      {/* Greeting */}
+      <div>
+        <h2 className="text-xl font-bold text-gray-900">{greetingTime()}, {parentName}</h2>
+        <p className="text-sm text-gray-400 mt-0.5">Here's your child's overview</p>
+      </div>
+
+      {/* Quick stats row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-white rounded-xl p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Attendance</span>
+            <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+              <Clock size={14} />
+            </div>
+          </div>
+          <div className={`text-2xl font-bold ${attendancePct !== null ? (attendancePct >= 75 ? 'text-teal-600' : 'text-amber-600') : 'text-gray-300'}`}>
+            {attendancePct !== null ? `${attendancePct}%` : '—'}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {children.length > 1 && (
-            <select value={selectedChild || ''} onChange={(e) => onChildChange(e.target.value)} className="px-3 py-1 border rounded-md text-sm mr-2">
-              {children.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          )}
-          <button className="px-3 py-1 bg-white border rounded-md">Last 30 days</button>
+
+        <div className="bg-white rounded-xl p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Exams</span>
+            <div className="w-7 h-7 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center">
+              <Calendar size={14} />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-gray-900">{upcomingExams.length}</div>
+          <span className="text-[11px] text-gray-400">upcoming</span>
+        </div>
+
+        <div className="bg-white rounded-xl p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Homework</span>
+            <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center">
+              <FileText size={14} />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-gray-900">{homeworkPending}</div>
+          <span className="text-[11px] text-rose-500 font-medium">pending</span>
+        </div>
+
+        <div className="bg-white rounded-xl p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Fee Due</span>
+            <div className="w-7 h-7 rounded-lg bg-violet-50 text-violet-500 flex items-center justify-center">
+              <CreditCard size={14} />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-gray-900">{feeDue || '—'}</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-        <div className="bg-white p-3 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs text-zinc-500">Attendance</div>
-              <div className="text-xl font-bold">{attendancePct ?? '--'}%</div>
-            </div>
-            <Clock size={32} className="text-zinc-400" />
-          </div>
-        </div>
+      {/* Two column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-        <div className="bg-white p-3 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs text-zinc-500">Upcoming Exams</div>
-              <div className="text-sm font-medium">{upcomingExams.length} scheduled</div>
-            </div>
-            <Calendar size={32} className="text-zinc-400" />
-          </div>
-        </div>
+        {/* Left — wider */}
+        <div className="lg:col-span-3 space-y-4">
 
-        <div className="bg-white p-3 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs text-zinc-500">Homework Pending</div>
-              <div className="text-xl font-bold">{homeworkPending}</div>
+          {/* Latest Marks */}
+          <div className="bg-white rounded-xl border border-gray-100 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">Latest Marks</h3>
+              <span className="text-[11px] text-gray-400 font-medium">Current Term</span>
             </div>
-            <FileText size={32} className="text-zinc-400" />
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="col-span-2 bg-white p-3 rounded-xl shadow-sm">
-          <h3 className="font-semibold text-lg mb-3">Recent Notices</h3>
-          <ul className="text-sm text-zinc-600 space-y-2">
-            {recentNotices.map(n => (
-              <li key={n.id} className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{n.title}</div>
-                  <div className="text-xs text-zinc-400">{n.date}</div>
-                </div>
-                <button className="text-sm text-zinc-500">View</button>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-6">
-            <h4 className="font-semibold mb-2">Latest Marks</h4>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-3">
               {latestMarks.map(m => (
-                <div key={m.subject} className="p-3 bg-zinc-50 rounded-md">
-                  <div className="text-sm text-zinc-500">{m.subject}</div>
-                  <div className="font-bold text-lg">{m.marks}</div>
+                <div key={m.subject} className="flex items-center gap-4">
+                  <span className="text-sm text-gray-600 w-16 shrink-0">{m.subject}</span>
+                  <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${m.marks >= 85 ? 'bg-teal-500' : m.marks >= 60 ? 'bg-amber-400' : 'bg-rose-400'}`}
+                      style={{ width: `${m.marks}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 w-8 text-right">{m.marks}</span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Notices */}
+          <div className="bg-white rounded-xl border border-gray-100 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">Notices</h3>
+              <button className="text-xs text-teal-600 font-medium hover:text-teal-700 flex items-center gap-0.5">
+                View all <ChevronRight size={12} />
+              </button>
+            </div>
+            {recentNotices.length === 0 ? (
+              <p className="text-sm text-gray-400">No notices</p>
+            ) : (
+              <div className="space-y-2">
+                {recentNotices.map(n => (
+                  <div key={n.id} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors -mx-1">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-teal-400 shrink-0"></div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-800">{n.title}</div>
+                        <div className="text-xs text-gray-400">{n.date}</div>
+                      </div>
+                    </div>
+                    <ArrowUpRight size={14} className="text-gray-300" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="bg-white p-3 rounded-xl shadow-sm">
-          <h3 className="font-semibold text-lg mb-3">Fees & Transport</h3>
-          <div className="text-sm text-zinc-500">Due: <span className="font-bold text-zinc-900">{feeDue || '—'}</span></div>
-          <div className="mt-4">
-            <div className="text-sm text-zinc-500">Bus Status</div>
-            <div className="mt-2 font-medium">On route • ETA 12 mins</div>
+        {/* Right — narrower */}
+        <div className="lg:col-span-2 space-y-4">
+
+          {/* Upcoming Exams */}
+          <div className="bg-white rounded-xl border border-gray-100 p-5">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Upcoming Exams</h3>
+            <div className="space-y-2.5">
+              {upcomingExams.map(exam => (
+                <div key={exam.id} className="flex items-center gap-3 p-2.5 bg-orange-50/60 rounded-lg">
+                  <div className="w-8 h-8 rounded-lg bg-white text-orange-500 flex items-center justify-center border border-orange-100">
+                    <Calendar size={14} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-800">{exam.title}</div>
+                    <div className="text-xs text-gray-400">{exam.date}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="mt-4">
-            <h4 className="text-sm text-zinc-500">Teacher Remarks</h4>
-            <div className="mt-2 text-sm text-zinc-700">Excellent participation in class discussions.</div>
+
+          {/* Quick info */}
+          <div className="bg-teal-600 rounded-xl p-5 text-white">
+            <h3 className="text-sm font-semibold mb-4 text-teal-50">Quick Info</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Bus size={16} className="text-teal-200 shrink-0" />
+                <div>
+                  <div className="text-xs text-teal-200">Bus Status</div>
+                  <div className="text-sm font-medium">On route • ETA 12 min</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <MessageCircle size={16} className="text-teal-200 shrink-0" />
+                <div>
+                  <div className="text-xs text-teal-200">Teacher Remarks</div>
+                  <div className="text-sm font-medium">Excellent participation</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

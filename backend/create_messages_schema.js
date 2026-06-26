@@ -6,8 +6,8 @@ async function schema() {
     console.log('parent_messages table created');
     const { rows } = await pool.query('SELECT id FROM students LIMIT 1');
     if (rows.length > 0) {
-      await pool.query('INSERT INTO parent_messages (student_id, sender, content) VALUES (, , )', [rows[0].id, 'PARENT', 'Hi, I would like an update on my childs progress.']);
-      await pool.query('INSERT INTO parent_messages (student_id, sender, content) VALUES (, , )', [rows[0].id, 'TEACHER', 'They are doing great! See the recent marks.']);
+      await pool.query('INSERT INTO parent_messages (student_id, sender, content) VALUES ($1, $2, $3)', [rows[0].id, 'PARENT', 'Hi, I would like an update on my childs progress.']);
+      await pool.query('INSERT INTO parent_messages (student_id, sender, content) VALUES ($1, $2, $3)', [rows[0].id, 'TEACHER', 'They are doing great! See the recent marks.']);
     }
   } catch(e) { console.error(e); } finally { process.exit(); }
 }
