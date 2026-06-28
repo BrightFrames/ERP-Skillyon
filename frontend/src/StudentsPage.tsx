@@ -109,8 +109,11 @@ export default function StudentsPage() {
         class_id: formData.class_id ? parseInt(formData.class_id) : undefined
       };
       
+      // Remove empty strings so they don't fail Zod validation
       if (!payload.password) delete payload.password;
       if (!payload.parent_password) delete payload.parent_password;
+      if (!payload.email) delete payload.email;
+      if (!payload.parent_email) delete payload.parent_email;
       
       if (editingStudentId) {
         await api.put(`/students/${editingStudentId}`, payload);
