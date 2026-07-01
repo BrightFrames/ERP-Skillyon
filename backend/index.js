@@ -10,6 +10,7 @@ import parentRoutes from './routes/parent.js';
 import feesRoutes from './routes/fees.js';
 import studentPortalRoutes from './routes/studentPortal.js';
 import messagesRoutes from './routes/messages.js';
+import superadminRoutes from './routes/superadmin/index.js';
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 
 // Security and Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'], // Allow multiple Vite ports
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177'], // Allow multiple Vite ports
   credentials: true
 }));
 app.use(express.json());
@@ -33,6 +34,7 @@ app.use('/api/parent', parentRoutes);
 app.use('/api/fees', feesRoutes);
 app.use('/api/student-portal', studentPortalRoutes);
 app.use('/api/messages', messagesRoutes);
+app.use('/api/superadmin', superadminRoutes);
 
 // Global Error Handler (secure-fullstack-dev requirement: No sensitive DB fields are leaked)
 app.use((err, req, res, next) => {

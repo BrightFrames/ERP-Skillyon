@@ -11,8 +11,11 @@ export const login = async (req, res, next) => {
   try {
     let user;
 
-    // Real staff from DB — password check
-    const { rows } = await pool.query('SELECT id, name, email, role, subject, password FROM staff WHERE email = $1', [email]);
+    // Real staff from DB — password check (join with schools for tenant info)
+    const { rows } = await pool.query(
+      'SELECT s.id, s.name, s.email, s.role, s.subject, s.password, s.school_id, sc.name as school_name, sc.subscription_status FROM staff s LEFT JOIN schools sc ON s.school_id = sc.id WHERE s.email = $1',
+      [email]
+    );
     if (rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -26,10 +29,15 @@ export const login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    // Block login for non-SUPER_ADMIN users whose school is suspended
+    if (user.role !== 'SUPER_ADMIN' && user.subscription_status === 'SUSPENDED') {
+      return res.status(403).json({ error: 'Your school subscription has been suspended. Please contact the platform administrator.' });
+    }
     
-    // Generate JWT Token — include name so frontend always has it
+    // Generate JWT Token — include school context for tenant isolation
     const token = jwt.sign(
-      { id: user.id, role: user.role, name: user.name, email: user.email },
+      { id: user.id, role: user.role, name: user.name, email: user.email, school_id: user.school_id || null, school_name: user.school_name || null },
       JWT_SECRET,
       { expiresIn: '8h' }
     );
@@ -43,6 +51,8 @@ export const login = async (req, res, next) => {
         email: user.email,
         role: user.role,
         subject: user.subject || null,
+        school_id: user.school_id || null,
+        school_name: user.school_name || null,
       }
     });
 
