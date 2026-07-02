@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Loader2, Eye, EyeOff, School, CheckCircle, AlertCircle, Shield, Mail, User, Lock, Building2 } from 'lucide-react'
+import { X, Loader2, Eye, EyeOff, School, CheckCircle, AlertCircle, Shield, Mail, User, Lock, Building2, Plus } from 'lucide-react'
 import api from '../lib/api'
 
 interface Props {

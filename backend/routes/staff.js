@@ -1,20 +1,34 @@
 import express from 'express';
 import pool from '../db/index.js';
 import bcrypt from 'bcrypt';
+import { authenticate, requireSchool } from '../middleware/auth.js';
 
 const router = express.Router();
+
+router.use(authenticate, requireSchool);
 
 // GET all staff (filtered by role if provided query param)
 router.get('/', async (req, res) => {
   const { role } = req.query;
   try {
     let queryArgs = [];
-    let queryText = 'SELECT id, name, email, role, subject, join_date FROM staff ORDER BY join_date DESC';
+    let queryText = 'SELECT id, name, email, role, subject, join_date FROM staff';
+    let whereClauses = [];
     
+    if (req.school_id) {
+      whereClauses.push(`school_id = $${queryArgs.length + 1}`);
+      queryArgs.push(req.school_id);
+    }
+
     if (role) {
-      queryText = 'SELECT id, name, email, role, subject, join_date FROM staff WHERE role = $1 ORDER BY join_date DESC';
+      whereClauses.push(`role = $${queryArgs.length + 1}`);
       queryArgs.push(role);
     } 
+
+    if (whereClauses.length > 0) {
+      queryText += ' WHERE ' + whereClauses.join(' AND ');
+    }
+    queryText += ' ORDER BY join_date DESC';
     
     const result = await pool.query(queryText, queryArgs);
     res.json({ success: true, data: result.rows, total: result.rowCount });
@@ -41,10 +55,10 @@ router.post('/', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     const result = await pool.query(
-      `INSERT INTO staff (name, email, role, subject, password, join_date)
-       VALUES ($1, $2, $3, $4, $5, CURRENT_DATE)
+      `INSERT INTO staff (name, email, role, subject, password, join_date, school_id)
+       VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, $6)
        RETURNING id, name, email, role, subject, join_date`,
-      [name, email, role, subject || null, passwordHash]
+      [name, email, role, subject || null, passwordHash, req.school_id || null]
     );
 
     res.status(201).json({ success: true, data: result.rows[0] });
@@ -58,7 +72,15 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query('DELETE FROM staff WHERE id = $1 RETURNING id', [id]);
+    let queryText = 'DELETE FROM staff WHERE id = $1';
+    let queryArgs = [id];
+    if (req.school_id) {
+      queryText += ' AND school_id = $2';
+      queryArgs.push(req.school_id);
+    }
+    queryText += ' RETURNING id';
+    
+    const result = await pool.query(queryText, queryArgs);
     if (result.rowCount === 0) {
       return res.status(404).json({ success: false, error: 'Staff member not found' });
     }

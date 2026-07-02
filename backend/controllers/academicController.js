@@ -3,7 +3,14 @@ import pool from '../db/index.js';
 // GET /api/academic/teacher-classes
 export const getTeacherClasses = async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT id, name FROM classes ORDER BY id ASC');
+    let query = 'SELECT id, name FROM classes';
+    let params = [];
+    if (req.school_id) {
+      query += ' WHERE school_id = $1';
+      params.push(req.school_id);
+    }
+    query += ' ORDER BY id ASC';
+    const { rows } = await pool.query(query, params);
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);

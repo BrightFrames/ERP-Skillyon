@@ -31,8 +31,8 @@ export const createStudent = async (req, res, next) => {
     }
     
     const { rows } = await pool.query(
-      `INSERT INTO students (name, email, parent_email, class_id, gender, status, avatar, password, parent_password) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      `INSERT INTO students (name, email, parent_email, class_id, gender, status, avatar, password, parent_password, school_id) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
       [
         validatedData.name, 
         validatedData.email, 
@@ -42,7 +42,8 @@ export const createStudent = async (req, res, next) => {
         validatedData.status || 'Active',
         validatedData.avatar || null,
         hashedPassword,
-        hashedParentPassword
+        hashedParentPassword,
+        req.school_id
       ]
     );
 
@@ -69,6 +70,12 @@ export const getStudents = async (req, res, next) => {
     let whereClauses = [];
     let params = [];
     let paramIndex = 1;
+
+    if (req.school_id) {
+      whereClauses.push(`s.school_id = $${paramIndex}`);
+      params.push(req.school_id);
+      paramIndex++;
+    }
 
     if (search) {
       whereClauses.push(`(s.name ILIKE $${paramIndex} OR s.email ILIKE $${paramIndex} OR c.name ILIKE $${paramIndex})`);
@@ -138,7 +145,13 @@ export const getStudents = async (req, res, next) => {
 export const deleteStudent = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { rowCount } = await pool.query('DELETE FROM students WHERE id = $1', [id]);
+    let query = 'DELETE FROM students WHERE id = $1';
+    let params = [id];
+    if (req.school_id) {
+      query += ' AND school_id = $2';
+      params.push(req.school_id);
+    }
+    const { rowCount } = await pool.query(query, params);
     
     if (rowCount === 0) {
       return res.status(404).json({ error: 'Not Found', message: 'Student not found' });
@@ -188,10 +201,17 @@ export const updateStudent = async (req, res, next) => {
       }
     }
     
+    let schoolFilter = "";
+    if (req.school_id) {
+      schoolFilter = ` AND school_id = $${paramIndex}`;
+      params.push(req.school_id);
+      paramIndex++;
+    }
+
     const { rows } = await pool.query(
       `UPDATE students 
        SET name = $1, email = $2, parent_email = $3, class_id = $4, gender = $5, status = $6, avatar = $7 ${passwordQuery}
-       WHERE id = $8 RETURNING *`,
+       WHERE id = $8${schoolFilter} RETURNING *`,
       params
     );
 

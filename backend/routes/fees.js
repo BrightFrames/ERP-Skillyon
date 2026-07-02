@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import pool from '../db/index.js';
-import { authenticate, requireRole } from '../middleware/auth.js';
+import { authenticate, requireRole, requireSchool } from '../middleware/auth.js';
 
 const router = Router();
-router.use(authenticate, requireRole(['ADMIN', 'STAFF']));
+router.use(authenticate, requireSchool, requireRole(['ADMIN', 'STAFF']));
 
 // GET /api/fees — list with stats
 router.get('/', async (req, res) => {
@@ -12,12 +12,20 @@ router.get('/', async (req, res) => {
     let where = [];
     let params = [];
     let idx = 1;
+    
+    if (req.school_id) {
+      where.push(`school_id = $${idx++}`);
+      params.push(req.school_id);
+    }
 
     if (status) { where.push(`status = $${idx++}`); params.push(status); }
     if (search) { where.push(`(student_name ILIKE $${idx} OR class_name ILIKE $${idx})`); params.push(`%${search}%`); idx++; }
 
     const whereStr = where.length ? 'WHERE ' + where.join(' AND ') : '';
 
+    const whereStats = req.school_id ? `WHERE school_id = $1` : '';
+    const statsParams = req.school_id ? [req.school_id] : [];
+    
     const [txRes, statsRes] = await Promise.all([
       pool.query(`SELECT * FROM fee_transactions ${whereStr} ORDER BY id DESC`, params),
       pool.query(`SELECT
@@ -27,7 +35,7 @@ router.get('/', async (req, res) => {
         COUNT(*) FILTER (WHERE status = 'Paid') AS paid_count,
         COUNT(*) FILTER (WHERE status = 'Pending') AS pending_count,
         COUNT(*) FILTER (WHERE status = 'Overdue') AS overdue_count
-      FROM fee_transactions`),
+      FROM fee_transactions ${whereStats}`, statsParams),
     ]);
 
     res.json({ data: txRes.rows, stats: statsRes.rows[0] });
@@ -43,9 +51,9 @@ router.post('/', async (req, res) => {
   if (!student_name || !amount) return res.status(400).json({ error: 'student_name and amount are required' });
   try {
     const { rows } = await pool.query(
-      `INSERT INTO fee_transactions (student_id, student_name, class_name, amount, fee_type, status, due_date, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [student_id || null, student_name, class_name || null, amount, fee_type || 'Tuition', status || 'Pending', due_date || null, notes || null]
+      `INSERT INTO fee_transactions (student_id, student_name, class_name, amount, fee_type, status, due_date, notes, school_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [student_id || null, student_name, class_name || null, amount, fee_type || 'Tuition', status || 'Pending', due_date || null, notes || null, req.school_id || null]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -58,10 +66,16 @@ router.post('/', async (req, res) => {
 router.patch('/:id/status', async (req, res) => {
   const { status } = req.body;
   try {
-    const { rows } = await pool.query(
-      `UPDATE fee_transactions SET status = $1 WHERE id = $2 RETURNING *`,
-      [status, req.params.id]
-    );
+    let updateQuery = `UPDATE fee_transactions SET status = $1 WHERE id = $2`;
+    let updateParams = [status, req.params.id];
+    
+    if (req.school_id) {
+      updateQuery += ` AND school_id = $3`;
+      updateParams.push(req.school_id);
+    }
+    updateQuery += ` RETURNING *`;
+    
+    const { rows } = await pool.query(updateQuery, updateParams);
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(rows[0]);
   } catch (err) {
