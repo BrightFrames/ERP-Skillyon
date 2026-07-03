@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Search, UserCheck, BookOpen, Trash2, MoreVertical, X, GraduationCap, Users, Briefcase } from 'lucide-react';
+import { Plus, Search, UserCheck, BookOpen, Trash2, MoreVertical, X, GraduationCap, Users, Briefcase, Eye, EyeOff } from 'lucide-react';
 import api from './lib/api';
 
 const SUBJECTS = [
@@ -22,6 +22,7 @@ export default function TeachersPage() {
   const [showModal, setShowModal] = useState(false);
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
   const [formData, setFormData] = useState({ name: '', email: '', role: 'TEACHER', subject: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -30,6 +31,12 @@ export default function TeachersPage() {
     document.addEventListener('click', close);
     return () => document.removeEventListener('click', close);
   }, []);
+
+  useEffect(() => {
+    if (!showModal) {
+      setShowPassword(false);
+    }
+  }, [showModal]);
 
   const fetchStaff = async () => {
     setLoading(true);
@@ -287,13 +294,23 @@ export default function TeachersPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-zinc-600 mb-1.5">Password *</label>
-                <input
-                  required type="password"
-                  value={formData.password}
-                  onChange={e => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Set an initial password"
-                  className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
-                />
+                <div className="relative">
+                  <input
+                    required 
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="Set an initial password"
+                    className="w-full px-3 py-2.5 pr-10 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-zinc-600 mb-1.5">Role *</label>

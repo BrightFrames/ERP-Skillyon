@@ -31,3 +31,170 @@
     -webkit-text-fill-color: transparent;
   }
 }
+
+/* ==========================================================================
+   Dark Theme Overrides
+   ========================================================================== */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body,
+html.dark main,
+html.dark .bg-\[\#f8fafc\] {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Glass header override */
+html.dark header.glass {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+/* Card / Panel overrides */
+html.dark .bg-white {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-color: #1e293b !important;
+}
+
+/* Inner borders */
+html.dark .border-slate-200,
+html.dark .border-slate-200\/60,
+html.dark .border-zinc-200,
+html.dark .border-zinc-100,
+html.dark .divide-zinc-100 > * {
+  border-color: #1e293b !important;
+}
+
+/* Text color adjustments */
+html.dark .text-slate-900,
+html.dark .text-zinc-900,
+html.dark .text-zinc-800,
+html.dark .text-zinc-700 {
+  color: #f1f5f9 !important;
+}
+html.dark .text-zinc-600,
+html.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+html.dark .text-zinc-500,
+html.dark .text-slate-500,
+html.dark .text-zinc-400,
+html.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+/* Inputs and interactive elements */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+html.dark input:disabled,
+html.dark select:disabled {
+  background-color: #0f172a !important;
+  color: #475569 !important;
+  border-color: #1e293b !important;
+}
+
+/* Table rows and headers */
+html.dark table th {
+  background-color: #0f172a !important;
+  color: #94a3b8 !important;
+}
+html.dark table tbody tr {
+  border-bottom-color: #1e293b !important;
+}
+html.dark table tbody tr:hover {
+  background-color: #1e293b !important;
+}
+html.dark .bg-zinc-50,
+html.dark .bg-slate-50 {
+  background-color: #1e293b !important;
+}
+html.dark .hover\:bg-zinc-50:hover,
+html.dark .hover\:bg-slate-50:hover {
+  background-color: #334155 !important;
+}
+
+/* Modals */
+html.dark .bg-black\/50 {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+}
+
+/* Special white buttons */
+html.dark button.bg-white {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+html.dark button.bg-white:hover {
+  background-color: #334155 !important;
+}
+
+/* ==========================================================================
+   Display Density Overrides
+   ========================================================================== */
+
+/* Compact Density */
+html.density-compact th,
+html.density-compact td {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+html.density-compact input,
+html.density-compact select,
+html.density-compact button:not(.relative) {
+  padding-top: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
+}
+html.density-compact .py-3\.5 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+html.density-compact .p-6 {
+  padding: 1rem !important;
+}
+html.density-compact .py-4 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+html.density-compact .gap-6 {
+  gap: 1rem !important;
+}
+
+/* Spacious Density */
+html.density-spacious th,
+html.density-spacious td {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
+}
+html.density-spacious input,
+html.density-spacious select,
+html.density-spacious button:not(.relative) {
+  padding-top: 0.875rem !important;
+  padding-bottom: 0.875rem !important;
+}
+html.density-spacious .p-6 {
+  padding: 2rem !important;
+}
+html.density-spacious .py-4 {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+html.density-spacious .gap-6 {
+  gap: 2rem !important;
+}
+

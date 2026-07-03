@@ -19,6 +19,8 @@ import {
   GraduationCap,
   UserCheck
 } from 'lucide-react';
+import { useLanguage, t } from './lib/i18n';
+import { fetchAndApplySettings } from './lib/settings';
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
@@ -26,12 +28,12 @@ const navItems = [
   { name: 'Academic', path: '/classes', icon: BookOpen, roles: ['ADMIN', 'TEACHER'] },
   { name: 'Staff', path: '/teachers', icon: UserCheck, roles: ['ADMIN'] },
   { name: 'Messages', path: '/messages', icon: MessageSquare, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
-  { name: 'Fees', path: '/fees', icon: CreditCard, roles: ['ADMIN', 'STAFF'] },
   { name: 'Reports', path: '/reports', icon: BarChart2, roles: ['ADMIN'] },
   { name: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
 ];
 
 export default function Layout() {
+  const lang = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,6 +44,10 @@ export default function Layout() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const userStr = localStorage.getItem('user');
+
+  useEffect(() => {
+    fetchAndApplySettings();
+  }, []);
   const loggedInUser = userStr ? (() => { try { return JSON.parse(userStr); } catch { return {}; } })() : {};
   const displayName = loggedInUser.name || (loggedInUser.role === 'ADMIN' ? 'System Admin' : loggedInUser.role === 'TEACHER' ? 'Teacher' : 'Staff');
   const displayRole = loggedInUser.role || 'ADMIN';
@@ -62,7 +68,6 @@ export default function Layout() {
     { label: 'Students', path: '/students', icon: Users },
     { label: 'Academic / Gradebook', path: '/classes', icon: BookOpen },
     { label: 'Staff Management', path: '/teachers', icon: UserCheck },
-    { label: 'Fee Management', path: '/fees', icon: MessageSquare },
     { label: 'Reports & Analytics', path: '/reports', icon: BarChart2 },
     { label: 'Settings', path: '/settings', icon: Settings },
   ];
@@ -143,7 +148,7 @@ export default function Layout() {
                 <>
                   {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500 rounded-r-full" />}
                   <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-indigo-400' : 'group-hover:text-indigo-400 transition-colors'} />
-                  {item.name}
+                  {t(item.name, lang)}
                 </>
               )}
             </NavLink>
@@ -153,7 +158,7 @@ export default function Layout() {
         <div className="p-4 space-y-3 mb-4">
           <button className="flex w-full items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 transition-all border border-slate-700 shadow-sm hover:shadow-md">
             <Headset size={18} />
-            Support Center
+            {t("Support Center", lang)}
           </button>
           <button 
             onClick={() => {
@@ -164,7 +169,7 @@ export default function Layout() {
             className="flex w-full items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-semibold text-red-400 bg-red-400/10 hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
           >
             <LogOut size={18} />
-            Sign Out
+            {t("Sign Out", lang)}
           </button>
         </div>
       </aside>
@@ -188,7 +193,7 @@ export default function Layout() {
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search students, classes, or reports..."
+                placeholder={t("Search students, classes, or reports...", lang)}
                 value={currentSearch}
                 onChange={handleSearchChange}
                 className="w-full bg-transparent border-none outline-none py-3 pl-12 pr-12 text-sm text-slate-800 placeholder:text-slate-400 font-medium"
@@ -198,23 +203,9 @@ export default function Layout() {
           </div>
           
           <div className="flex items-center gap-4 lg:gap-6 ml-4">
-            <div className="hidden sm:flex items-center gap-2 text-slate-500">
-              <button className="p-2.5 hover:bg-slate-100 hover:text-indigo-600 rounded-full transition-all relative">
-                <Bell size={20} />
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white animate-pulse"></span>
-              </button>
-              <button className="p-2.5 hover:bg-slate-100 hover:text-indigo-600 rounded-full transition-all">
-                <CircleHelp size={20} />
-              </button>
-              <button className="p-2.5 hover:bg-slate-100 hover:text-indigo-600 rounded-full transition-all">
-                <Grid size={20} />
-              </button>
-            </div>
-            
-            <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
 
             <button className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 border border-indigo-500/50">
-              Check In
+              {t("Check In", lang)}
             </button>
             
             <button className="flex items-center gap-3 pl-2 group">

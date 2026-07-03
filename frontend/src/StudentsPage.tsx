@@ -11,6 +11,7 @@ import {
   X,
   Trash2,
   Eye,
+  EyeOff,
   Edit2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -32,6 +33,8 @@ export default function StudentsPage() {
     password: '',
     parent_password: ''
   });
+  const [showStudentPassword, setShowStudentPassword] = useState(false);
+  const [showParentPassword, setShowParentPassword] = useState(false);
   const [totalStudents, setTotalStudents] = useState(0);
   const [metrics, setMetrics] = useState({ male: 0, female: 0, newEnrollments: 0 });
   const [currentPage, setCurrentPage] = useState(0);
@@ -43,6 +46,13 @@ export default function StudentsPage() {
   const searchQuery = searchParams.get('search') || '';
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      setShowStudentPassword(false);
+      setShowParentPassword(false);
+    }
+  }, [isModalOpen]);
 
   const fetchStudents = async () => {
     try {
@@ -463,15 +473,24 @@ export default function StudentsPage() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-zinc-700 mb-1">Student Login Password {editingStudentId && <span className="text-zinc-400 font-normal">(Leave blank to keep unchanged)</span>}</label>
-                <input 
-                  type="password" 
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
-                  placeholder={editingStudentId ? '••••••••' : 'Enter password'}
-                  required={!editingStudentId}
-                />
+                <div className="relative">
+                  <input 
+                    type={showStudentPassword ? "text" : "password"} 
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                    placeholder={editingStudentId ? '••••••••' : 'Enter password'}
+                    required={!editingStudentId}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowStudentPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
+                  >
+                    {showStudentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-zinc-700 mb-1">Parent Email</label>
@@ -486,15 +505,24 @@ export default function StudentsPage() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-zinc-700 mb-1">Parent Login Password {editingStudentId && <span className="text-zinc-400 font-normal">(Leave blank to keep unchanged)</span>}</label>
-                <input 
-                  type="password" 
-                  name="parent_password"
-                  value={formData.parent_password}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
-                  placeholder={editingStudentId ? '••••••••' : 'Enter parent password'}
-                  required={!editingStudentId}
-                />
+                <div className="relative">
+                  <input 
+                    type={showParentPassword ? "text" : "password"} 
+                    name="parent_password"
+                    value={formData.parent_password}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                    placeholder={editingStudentId ? '••••••••' : 'Enter parent password'}
+                    required={!editingStudentId}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowParentPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none"
+                  >
+                    {showParentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-zinc-700 mb-1">Class/Grade</label>

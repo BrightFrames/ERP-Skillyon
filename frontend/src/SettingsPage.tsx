@@ -4,6 +4,8 @@ import {
   Save, Eye, EyeOff, ChevronRight, CheckCircle
 } from 'lucide-react';
 import api from './lib/api';
+import { applySettings } from './lib/settings';
+import { useLanguage, t } from './lib/i18n';
 
 const SECTIONS = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -14,9 +16,12 @@ const SECTIONS = [
 ];
 
 export default function SettingsPage() {
+  const lang = useLanguage();
   const [active, setActive] = useState('profile');
   const [saved, setSaved] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const userStr = localStorage.getItem('user');
@@ -49,7 +54,10 @@ export default function SettingsPage() {
       if (res.data) {
         if (res.data.profile && Object.keys(res.data.profile).length > 0) setProfile(prev => ({...prev, ...res.data.profile}));
         if (res.data.notifications && Object.keys(res.data.notifications).length > 0) setNotifications(res.data.notifications);
-        if (res.data.appearance && Object.keys(res.data.appearance).length > 0) setAppearance(res.data.appearance);
+        if (res.data.appearance && Object.keys(res.data.appearance).length > 0) {
+          setAppearance(res.data.appearance);
+          applySettings(res.data.appearance);
+        }
       }
       setLoading(false);
     }).catch(err => {
@@ -61,6 +69,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     try {
       await api.put('/user/settings', { profile, notifications, appearance });
+      applySettings(appearance);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (error) {
@@ -82,8 +91,8 @@ export default function SettingsPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#3b3dbf]">Settings</h1>
-        <p className="text-zinc-400 text-sm mt-0.5">Manage your account, preferences, and system configuration.</p>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#3b3dbf]">{t("Settings", lang)}</h1>
+        <p className="text-zinc-400 text-sm mt-0.5">{t("Manage your account, preferences, and system configuration.", lang)}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -103,7 +112,7 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center gap-3">
                   <s.icon size={16} />
-                  {s.label}
+                  {t(s.label, lang)}
                 </div>
                 {active === s.id && <ChevronRight size={14} />}
               </button>
@@ -180,19 +189,29 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-zinc-500 mb-1.5">New Password</label>
-                    <input
-                      type="password"
-                      placeholder="Enter new password"
-                      className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showNewPass ? 'text' : 'password'}
+                        placeholder="Enter new password"
+                        className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none pr-10 transition-colors"
+                      />
+                      <button onClick={() => setShowNewPass(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400">
+                        {showNewPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-zinc-500 mb-1.5">Confirm New Password</label>
-                    <input
-                      type="password"
-                      placeholder="Confirm new password"
-                      className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showConfirmPass ? 'text' : 'password'}
+                        placeholder="Confirm new password"
+                        className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none pr-10 transition-colors"
+                      />
+                      <button onClick={() => setShowConfirmPass(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400">
+                        {showConfirmPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div className="mt-6 pt-5 border-t border-zinc-100">
@@ -238,26 +257,26 @@ export default function SettingsPage() {
             {/* Appearance */}
             {active === 'appearance' && (
               <div>
-                <h2 className="text-base font-bold text-zinc-900 mb-5">Appearance</h2>
+                <h2 className="text-base font-bold text-zinc-900 mb-5">{t("Appearance", lang)}</h2>
                 <div className="flex flex-col gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-500 mb-3">Theme</label>
+                    <label className="block text-xs font-bold text-zinc-500 mb-3">{t("Theme", lang)}</label>
                     <div className="flex gap-3">
-                      {['light', 'dark', 'system'].map(t => (
+                      {['light', 'dark', 'system'].map(tName => (
                         <button
-                          key={t}
-                          onClick={() => setAppearance({ ...appearance, theme: t })}
+                          key={tName}
+                          onClick={() => setAppearance({ ...appearance, theme: tName })}
                           className={`flex-1 py-3 rounded-xl border text-sm font-bold capitalize transition-all ${
-                            appearance.theme === t ? 'bg-[#3b3dbf] text-white border-[#3b3dbf] shadow-md' : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                            appearance.theme === tName ? 'bg-[#3b3dbf] text-white border-[#3b3dbf] shadow-md' : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
                           }`}
                         >
-                          {t}
+                          {t(tName, lang)}
                         </button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-zinc-500 mb-3">Display Density</label>
+                    <label className="block text-xs font-bold text-zinc-500 mb-3">{t("Display Density", lang)}</label>
                     <div className="flex gap-3">
                       {['compact', 'comfortable', 'spacious'].map(d => (
                         <button
@@ -267,13 +286,13 @@ export default function SettingsPage() {
                             appearance.density === d ? 'bg-[#3b3dbf] text-white border-[#3b3dbf] shadow-md' : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
                           }`}
                         >
-                          {d}
+                          {t(d, lang)}
                         </button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-zinc-500 mb-1.5">Language</label>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5">{t("Language", lang)}</label>
                     <select
                       value={appearance.language}
                       onChange={e => setAppearance({ ...appearance, language: e.target.value })}
@@ -326,12 +345,12 @@ export default function SettingsPage() {
                   className="flex items-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-xl text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm"
                 >
                   <Save size={15} />
-                  Save Changes
+                  {t("Save Changes", lang)}
                 </button>
                 {saved && (
                   <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-500">
                     <CheckCircle size={14} />
-                    Saved successfully!
+                    {t("Saved successfully!", lang)}
                   </div>
                 )}
               </div>
