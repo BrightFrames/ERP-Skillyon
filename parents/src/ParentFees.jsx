@@ -1143,7 +1143,7 @@ export default function ParentFees({ childId }) {
                 <div>
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-6 h-6 text-[#3b3dbf]" />
-                    <span className="text-xl font-black tracking-tight text-[#3b3dbf]">EduCore ERP</span>
+                    <span className="text-xl font-black tracking-tight text-[#3b3dbf]">Skillyon ERP</span>
                   </div>
                   <p className="text-xs text-zinc-400 font-semibold mt-1">Smart School Administration Suite</p>
                 </div>

@@ -118,7 +118,7 @@ export default function Layout() {
             </div>
             <div>
               <h2 className="text-2xl font-black tracking-tight text-white leading-tight">
-                Edu<span className="text-indigo-400">Core</span>
+                Skill<span className="text-indigo-400">yon</span>
               </h2>
               <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">{roleDisplay}</p>
             </div>

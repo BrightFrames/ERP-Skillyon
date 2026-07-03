@@ -703,7 +703,7 @@ export default function FeesPage() {
             <div className="space-y-6 text-zinc-900 dark:text-slate-100 bg-white dark:bg-slate-900 p-2">
               <div className="flex items-start justify-between border-b border-zinc-100 dark:border-slate-850 pb-6">
                 <div>
-                  <h2 className="text-xl font-black text-[#3b3dbf]">EduCore ERP Suite</h2>
+                  <h2 className="text-xl font-black text-[#3b3dbf]">Skillyon ERP Suite</h2>
                   <p className="text-[10px] text-zinc-400 mt-1">Smart School Administration & Ledger</p>
                 </div>
                 <div className="text-right">

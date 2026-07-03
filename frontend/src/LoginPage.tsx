@@ -107,7 +107,7 @@ export default function LoginPage() {
                 <GraduationCap size={26} strokeWidth={2.5} />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">EduCore ERP</h1>
+                <h1 className="text-xl font-bold tracking-tight">Skillyon ERP</h1>
                 <p className="text-indigo-300 text-[10px] font-bold tracking-wider uppercase">Skillyon Platform</p>
               </div>
             </div>
@@ -145,7 +145,7 @@ export default function LoginPage() {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-1 lg:hidden">
               <GraduationCap size={22} className="text-[#3b3dbf]" />
-              <span className="text-base font-bold text-[#3b3dbf]">EduCore ERP</span>
+              <span className="text-base font-bold text-[#3b3dbf]">Skillyon ERP</span>
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-1">Welcome back</h2>
             <p className="text-zinc-400 text-sm">Select a demo role below to auto-fill credentials</p>
@@ -272,7 +272,7 @@ export default function LoginPage() {
       </div>
 
       <p className="mt-8 text-xs text-zinc-400">
-        © 2024 EduCore ERP · Skillyon Platform · Authorized access only
+        © 2024 Skillyon ERP · Skillyon Platform · Authorized access only
       </p>
     </div>
   );

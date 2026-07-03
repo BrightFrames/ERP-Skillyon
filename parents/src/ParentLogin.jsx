@@ -83,7 +83,7 @@ export default function ParentLogin({ onSuccess }) {
           <div className="w-9 h-9 rounded-lg bg-teal-600 text-white flex items-center justify-center">
             <GraduationCap size={20} strokeWidth={2.5} />
           </div>
-          <span className="text-xl font-bold text-gray-900 tracking-tight">EduCore</span>
+          <span className="text-xl font-bold text-gray-900 tracking-tight">Skillyon</span>
         </div>
 
         {/* Card */}

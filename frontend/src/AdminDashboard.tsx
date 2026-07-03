@@ -102,7 +102,7 @@ export default function AdminDashboard() {
         <div>
           <p className="text-sm font-semibold text-zinc-400 mb-1">{greetingTime()}, {userName} 👋</p>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1">Overview Dashboard</h1>
-          <p className="text-zinc-400 text-sm">Here's what's happening at EduCore today.</p>
+          <p className="text-zinc-400 text-sm">Here's what's happening at Skillyon today.</p>
         </div>
         <div className="flex items-center gap-3">
           {userRole === 'ADMIN' && (

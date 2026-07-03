@@ -313,7 +313,7 @@ export default function SettingsPage() {
                 <h2 className="text-base font-bold text-zinc-900 mb-5">System Information</h2>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   {[
-                    { label: 'System Version', value: 'EduCore ERP v2.0' },
+                    { label: 'System Version', value: 'Skillyon ERP v2.0' },
                     { label: 'Environment', value: 'Development' },
                     { label: 'Database', value: 'PostgreSQL' },
                     { label: 'Backend', value: 'Express.js' },

@@ -51,7 +51,7 @@ export default function App() {
             <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center">
               <GraduationCap size={18} strokeWidth={2.5} />
             </div>
-            <span className="font-bold text-lg text-slate-900 tracking-tight dark:text-slate-100">EduCore</span>
+            <span className="font-bold text-lg text-slate-900 tracking-tight dark:text-slate-100">Skillyon</span>
             <span className="hidden sm:inline-block ml-1 px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[10px] font-bold uppercase tracking-wider dark:bg-slate-800 dark:text-slate-400">Student</span>
           </div>
 

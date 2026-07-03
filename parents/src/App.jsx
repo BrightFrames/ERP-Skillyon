@@ -145,7 +145,7 @@ export default function App() {
           <div className="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center">
             <GraduationCap size={18} strokeWidth={2.5} />
           </div>
-          <span className="text-base font-bold text-gray-900 tracking-tight dark:text-slate-100">EduCore</span>
+          <span className="text-base font-bold text-gray-900 tracking-tight dark:text-slate-100">Skillyon</span>
           <span className="text-[9px] font-semibold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded-full ml-auto tracking-wider uppercase dark:bg-teal-950/40 dark:text-teal-400">Parent</span>
           <button className="md:hidden ml-2 text-gray-400 hover:text-gray-600" onClick={() => setMobileMenuOpen(false)}>
             <X size={18} />

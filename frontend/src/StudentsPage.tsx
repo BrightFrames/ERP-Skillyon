@@ -430,7 +430,7 @@ export default function StudentsPage() {
 
       {/* Global Footer */}
       <div className="mt-auto pt-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center text-xs font-semibold text-zinc-500 gap-4">
-        <p>© 2024 EduCore ERP. All Rights Reserved.</p>
+        <p>© 2024 Skillyon ERP. All Rights Reserved.</p>
         <div className="flex gap-6">
           <a href="#" className="hover:text-zinc-800 transition-colors">Privacy Policy</a>
           <a href="#" className="hover:text-zinc-800 transition-colors">Terms of Service</a>
