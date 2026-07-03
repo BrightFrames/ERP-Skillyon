@@ -24,6 +24,7 @@ export default function StudentsPage() {
   const [editingStudentId, setEditingStudentId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: '',
+    father_name: '',
     email: '',
     parent_email: '',
     class_id: '',
@@ -89,7 +90,7 @@ export default function StudentsPage() {
 
   const openAddModal = () => {
     setEditingStudentId(null);
-    setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '', password: '', parent_password: '' });
+    setFormData({ name: '', father_name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '', password: '', parent_password: '' });
     setIsModalOpen(true);
   };
 
@@ -97,6 +98,7 @@ export default function StudentsPage() {
     setEditingStudentId(student.id);
     setFormData({
       name: student.name || '',
+      father_name: student.father_name || '',
       email: student.email || '',
       parent_email: student.parent_email || '',
       class_id: student.class_id || '',
@@ -133,7 +135,7 @@ export default function StudentsPage() {
       
       setIsModalOpen(false);
       setEditingStudentId(null);
-      setFormData({ name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '', password: '', parent_password: '' });
+      setFormData({ name: '', father_name: '', email: '', parent_email: '', class_id: '', gender: 'Male', status: 'Active', avatar: '', password: '', parent_password: '' });
       fetchStudents();
     } catch (error) {
       console.error('Failed to save student', error);
@@ -458,6 +460,17 @@ export default function StudentsPage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
                   placeholder="e.g. John Doe"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Father's Name</label>
+                <input 
+                  type="text" 
+                  name="father_name"
+                  value={formData.father_name}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
+                  placeholder="e.g. Robert Doe"
                 />
               </div>
               <div>

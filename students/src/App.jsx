@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import StudentLogin from './StudentLogin';
-import { LayoutDashboard, Calendar, GraduationCap, CreditCard, LogOut, CheckCircle2, Clock, FileText, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Calendar, GraduationCap, CreditCard, LogOut, CheckCircle2, Clock, FileText, ChevronRight, Settings } from 'lucide-react';
+import StudentSettings from './StudentSettings';
+import { fetchAndApplySettings } from './settings';
+import { useLanguage, t } from './i18n';
 
 export default function App() {
   const [user, setUser] = useState(null)
   const [tab, setTab] = useState('dashboard')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const lang = useLanguage()
 
   useEffect(() => {
     const init = async () => {
+      // Fetch and apply global appearance settings
+      fetchAndApplySettings()
+
       const userStr = localStorage.getItem('student_user')
       if (userStr) {
         setUser(JSON.parse(userStr))
@@ -32,19 +39,20 @@ export default function App() {
     { id: 'attendance', label: 'Attendance', icon: Calendar },
     { id: 'academics', label: 'Academics', icon: GraduationCap },
     { id: 'fees', label: 'Fees', icon: CreditCard },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-sky-500/30">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-sky-500/30 transition-colors dark:bg-slate-950 dark:text-slate-100">
       {/* Top Navigation */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-40">
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-40 dark:bg-slate-900 dark:border-slate-800/80">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center">
               <GraduationCap size={18} strokeWidth={2.5} />
             </div>
-            <span className="font-bold text-lg text-slate-900 tracking-tight">EduCore</span>
-            <span className="hidden sm:inline-block ml-1 px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[10px] font-bold uppercase tracking-wider">Student</span>
+            <span className="font-bold text-lg text-slate-900 tracking-tight dark:text-slate-100">EduCore</span>
+            <span className="hidden sm:inline-block ml-1 px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[10px] font-bold uppercase tracking-wider dark:bg-slate-800 dark:text-slate-400">Student</span>
           </div>
 
           {/* Desktop Nav */}
@@ -55,26 +63,26 @@ export default function App() {
                 onClick={() => setTab(item.id)}
                 className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
                   tab === item.id 
-                    ? 'bg-sky-50 text-sky-600' 
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                    ? 'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400' 
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 <item.icon size={16} strokeWidth={tab === item.id ? 2.5 : 2} />
-                {item.label}
+                {t(item.label, lang)}
               </button>
             ))}
           </nav>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
-              <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100 dark:bg-slate-850 dark:border-slate-800">
+              <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold dark:bg-slate-800 dark:text-indigo-400">
                 {user.name?.charAt(0).toUpperCase()}
               </div>
-              <span className="text-sm font-semibold text-slate-700">{user.name?.split(' ')[0]}</span>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{user.name?.split(' ')[0]}</span>
             </div>
             <button 
               onClick={logout} 
-              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
+              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors dark:hover:bg-rose-950/20 dark:hover:text-rose-400"
               title="Logout"
             >
               <LogOut size={18} />
@@ -83,7 +91,7 @@ export default function App() {
         </div>
 
         {/* Mobile Nav Scrollable */}
-        <div className="md:hidden border-t border-slate-100 bg-white/80 backdrop-blur-md">
+        <div className="md:hidden border-t border-slate-100 bg-white/80 backdrop-blur-md dark:bg-slate-900/90 dark:border-slate-800">
           <div className="flex overflow-x-auto px-4 py-2 gap-2 scrollbar-hide">
             {navItems.map(item => (
               <button
@@ -91,12 +99,12 @@ export default function App() {
                 onClick={() => setTab(item.id)}
                 className={`whitespace-nowrap px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
                   tab === item.id 
-                    ? 'bg-sky-50 text-sky-600 border border-sky-100' 
-                    : 'text-slate-500 border border-transparent'
+                    ? 'bg-sky-50 text-sky-600 border border-sky-100 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-850' 
+                    : 'text-slate-500 border border-transparent dark:text-slate-400'
                 }`}
               >
                 <item.icon size={16} strokeWidth={tab === item.id ? 2.5 : 2} />
-                {item.label}
+                {t(item.label, lang)}
               </button>
             ))}
           </div>
@@ -110,11 +118,13 @@ export default function App() {
           {tab === 'attendance' && <Attendance />}
           {tab === 'academics' && <Academics />}
           {tab === 'fees' && <Fees />}
+          {tab === 'settings' && <StudentSettings />}
         </div>
       </main>
     </div>
   )
 }
+
 
 function Dashboard({ user, setTab }) {
   return (

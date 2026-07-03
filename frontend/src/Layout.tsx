@@ -204,10 +204,6 @@ export default function Layout() {
           
           <div className="flex items-center gap-4 lg:gap-6 ml-4">
 
-            <button className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 border border-indigo-500/50">
-              {t("Check In", lang)}
-            </button>
-            
             <button className="flex items-center gap-3 pl-2 group">
               <div className="hidden sm:block text-right">
                 <div className="text-sm font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">{displayName}</div>

@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 // Zod schemas for validation
 const studentSchema = z.object({
   name: z.string().min(2),
+  father_name: z.string().optional().nullable(),
   email: z.string().email().optional().nullable(),
   parent_email: z.string().email().optional().nullable(),
   class_id: z.number().int().positive().optional().nullable(),
@@ -31,10 +32,11 @@ export const createStudent = async (req, res, next) => {
     }
     
     const { rows } = await pool.query(
-      `INSERT INTO students (name, email, parent_email, class_id, gender, status, avatar, password, parent_password, school_id) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      `INSERT INTO students (name, father_name, email, parent_email, class_id, gender, status, avatar, password, parent_password, school_id) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
       [
-        validatedData.name, 
+        validatedData.name,
+        validatedData.father_name || null,
         validatedData.email, 
         validatedData.parent_email, 
         validatedData.class_id,
@@ -113,7 +115,7 @@ export const getStudents = async (req, res, next) => {
     const total = parseInt(metrics.total || 0, 10);
 
     const rowsQueryStr = `
-      SELECT s.id, s.name, s.email, s.parent_email, c.name as class_name, s.enrollment_date, s.gender, s.status, s.avatar 
+      SELECT s.id, s.name, s.father_name, s.email, s.parent_email, c.name as class_name, s.enrollment_date, s.gender, s.status, s.avatar 
       FROM students s
       LEFT JOIN classes c ON s.class_id = c.id
       ${whereStr}
