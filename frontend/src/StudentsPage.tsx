@@ -301,7 +301,12 @@ export default function StudentsPage() {
             <tbody className="divide-y divide-zinc-100 font-semibold">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-zinc-500 font-medium">Loading students...</td>
+                  <td colSpan={6} className="px-6 py-12">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="w-8 h-8 rounded-full border-4 border-zinc-200 border-t-[#3b3dbf] animate-spin"></div>
+                      <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Loading students...</span>
+                    </div>
+                  </td>
                 </tr>
               ) : students.length === 0 ? (
                 <tr>

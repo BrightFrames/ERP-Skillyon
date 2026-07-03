@@ -175,11 +175,19 @@ function Dashboard({ user, setTab }) {
 
 function Attendance() {
   const [data, setData] = useState({ summary: null, active: [] });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch('/api/student-portal/attendance', {
       headers: { Authorization: `Bearer ${localStorage.getItem('student_token')}` }
-    }).then(r => r.json()).then(res => setData({ summary: res.summary, active: res.data || [] }))
+    })
+      .then(r => r.json())
+      .then(res => {
+        setData({ summary: res.summary, active: res.data || [] });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [])
 
   return (
@@ -213,21 +221,29 @@ function Attendance() {
           <h3 className="font-bold text-slate-800">Recent Records</h3>
         </div>
         <div className="divide-y divide-slate-50">
-          {data.active.map((r, i) => (
-            <div key={i} className="px-5 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
-              <div>
-                <div className="font-semibold text-slate-800">{new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                <div className="text-xs text-slate-400">{new Date(r.date).toLocaleDateString('en-US', { weekday: 'long' })}</div>
-              </div>
-              <div className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                r.status === 'PRESENT' ? 'bg-teal-50 text-teal-600' : 'bg-rose-50 text-rose-600'
-              }`}>
-                {r.status === 'PRESENT' ? <CheckCircle2 size={14} /> : <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>}
-                {r.status}
-              </div>
+          {loading ? (
+            <div className="p-8 flex flex-col items-center justify-center gap-3">
+              <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-sky-500 animate-spin"></div>
+              <span className="text-xs font-semibold text-slate-400">Loading attendance...</span>
             </div>
-          ))}
-          {data.active.length === 0 && <div className="p-8 text-center text-slate-400 text-sm font-medium">No recent records.</div>}
+          ) : data.active.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-sm font-medium">No recent records.</div>
+          ) : (
+            data.active.map((r, i) => (
+              <div key={i} className="px-5 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
+                <div>
+                  <div className="font-semibold text-slate-800">{new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                  <div className="text-xs text-slate-400">{new Date(r.date).toLocaleDateString('en-US', { weekday: 'long' })}</div>
+                </div>
+                <div className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                  r.status === 'PRESENT' ? 'bg-teal-50 text-teal-600' : 'bg-rose-50 text-rose-600'
+                }`}>
+                  {r.status === 'PRESENT' ? <CheckCircle2 size={14} /> : <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>}
+                  {r.status}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -236,10 +252,19 @@ function Attendance() {
 
 function Academics() {
   const [marks, setMarks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    setLoading(true);
     fetch('/api/student-portal/academics', {
       headers: { Authorization: `Bearer ${localStorage.getItem('student_token')}` }
-    }).then(r => r.json()).then(res => setMarks(res.data || []))
+    })
+      .then(r => r.json())
+      .then(res => {
+        setMarks(res.data || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [])
   
   return (
@@ -261,31 +286,45 @@ function Academics() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {marks.map((m, i) => {
-                const pct = Math.round((m.score / m.max_score) * 100);
-                return (
-                  <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-5 py-4 font-semibold text-slate-800">{m.exam_name}</td>
-                    <td className="px-5 py-4 text-slate-600">{m.subject}</td>
-                    <td className="px-5 py-4">
-                      <span className="font-bold text-slate-900">{m.score}</span>
-                      <span className="text-slate-400">/{m.max_score}</span>
-                    </td>
-                    <td className="px-5 py-4 min-w-[150px]">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full ${pct >= 75 ? 'bg-sky-500' : pct >= 50 ? 'bg-amber-400' : 'bg-rose-400'}`}
-                            style={{ width: `${pct}%` }}
-                          />
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="p-8">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-sky-500 animate-spin"></div>
+                      <span className="text-xs font-semibold text-slate-400">Loading academics...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : marks.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="p-8 text-center text-slate-400 text-sm font-medium">No academics data found.</td>
+                </tr>
+              ) : (
+                marks.map((m, i) => {
+                  const pct = Math.round((m.score / m.max_score) * 100);
+                  return (
+                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-5 py-4 font-semibold text-slate-800">{m.exam_name}</td>
+                      <td className="px-5 py-4 text-slate-600">{m.subject}</td>
+                      <td className="px-5 py-4">
+                        <span className="font-bold text-slate-900">{m.score}</span>
+                        <span className="text-slate-400">/{m.max_score}</span>
+                      </td>
+                      <td className="px-5 py-4 min-w-[150px]">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full ${pct >= 75 ? 'bg-sky-500' : pct >= 50 ? 'bg-amber-400' : 'bg-rose-400'}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs font-bold ${pct >= 75 ? 'text-sky-600' : pct >= 50 ? 'text-amber-600' : 'text-rose-600'}`}>{pct}%</span>
                         </div>
-                        <span className={`text-xs font-bold ${pct >= 75 ? 'text-sky-600' : pct >= 50 ? 'text-amber-600' : 'text-rose-600'}`}>{pct}%</span>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-              {marks.length === 0 && <tr><td colSpan="4" className="p-8 text-center text-slate-400 text-sm font-medium">No academics data found.</td></tr>}
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -296,10 +335,19 @@ function Academics() {
 
 function Fees() {
   const [fees, setFees] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    setLoading(true);
     fetch('/api/student-portal/fees', {
       headers: { Authorization: `Bearer ${localStorage.getItem('student_token')}` }
-    }).then(r => r.json()).then(res => setFees(res.data || []))
+    })
+      .then(r => r.json())
+      .then(res => {
+        setFees(res.data || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [])
 
   return (
@@ -311,25 +359,33 @@ function Fees() {
 
       <div className="bg-white rounded-[20px] border border-slate-100 overflow-hidden">
         <div className="divide-y divide-slate-50">
-          {fees.map((f, i) => (
-            <div key={i} className="px-5 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors">
-              <div>
-                <div className="font-bold text-slate-800 text-lg mb-0.5">{f.term}</div>
-                <div className="text-sm text-slate-500 flex items-center gap-1.5">
-                  <Calendar size={14} /> Due: {new Date(f.due_date).toLocaleDateString()}
+          {loading ? (
+            <div className="p-8 flex flex-col items-center justify-center gap-3">
+              <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-sky-500 animate-spin"></div>
+              <span className="text-xs font-semibold text-slate-400">Loading fees...</span>
+            </div>
+          ) : fees.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-sm font-medium">No fee records found.</div>
+          ) : (
+            fees.map((f, i) => (
+              <div key={i} className="px-5 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors">
+                <div>
+                  <div className="font-bold text-slate-800 text-lg mb-0.5">{f.term}</div>
+                  <div className="text-sm text-slate-500 flex items-center gap-1.5">
+                    <Calendar size={14} /> Due: {new Date(f.due_date).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                  <span className="font-bold text-xl text-slate-900">₹{f.amount}</span>
+                  <span className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                    f.status === 'PAID' ? 'bg-teal-50 text-teal-600' : 'bg-rose-50 text-rose-600'
+                  }`}>
+                    {f.status}
+                  </span>
                 </div>
               </div>
-              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                <span className="font-bold text-xl text-slate-900">₹{f.amount}</span>
-                <span className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider ${
-                  f.status === 'PAID' ? 'bg-teal-50 text-teal-600' : 'bg-rose-50 text-rose-600'
-                }`}>
-                  {f.status}
-                </span>
-              </div>
-            </div>
-          ))}
-          {fees.length === 0 && <div className="p-8 text-center text-slate-400 text-sm font-medium">No fee records found.</div>}
+            ))
+          )}
         </div>
       </div>
     </div>
