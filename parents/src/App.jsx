@@ -42,22 +42,55 @@ export default function App() {
   const [tab, setTab] = useState('dashboard')
   const [toast, setToast] = useState(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
   const lang = useLanguage()
 
   const userStr = localStorage.getItem('user')
   const loggedInUser = userStr ? (() => { try { return JSON.parse(userStr) } catch { return {} } })() : {}
   const displayName = loggedInUser.name || loggedInUser.email || 'Parent'
 
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const res = await fetch('/api/parent/notifications', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setNotifications(json.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to load notifications', err);
+    }
+  };
+
+  const markNotificationsAsRead = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      await fetch('/api/parent/notifications/read', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchNotifications();
+    } catch (err) {
+      console.error('Failed to mark notifications read', err);
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       // Initialize layout appearance settings (theme, density, language)
       fetchAndApplySettings()
+      fetchNotifications()
 
       let user = null
       try {
         const userStr = localStorage.getItem('user')
         user = userStr ? JSON.parse(userStr) : null
-        if (!user || !user.children) {
+        if (!user || !user.children || user.children.length === 0) {
           const token = localStorage.getItem('token')
           if (token) {
             const res = await fetch('/api/user/profile', { headers: { Authorization: `Bearer ${token}` } })
@@ -88,6 +121,7 @@ export default function App() {
       if (kids.length > 0) setSelectedChild(kids[0].id)
       setTab('dashboard')
       setToast('Signed in successfully')
+      fetchNotifications()
     }} />
   }
 
@@ -188,12 +222,52 @@ export default function App() {
               {t(navItems.find(n => n.id === tab)?.label || 'Dashboard', lang)}
             </h1>
           </div>
-
           <div className="flex items-center gap-2">
-            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors relative dark:hover:bg-slate-850">
-              <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  if (!showNotifications) {
+                    markNotificationsAsRead();
+                  }
+                }}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors relative dark:hover:bg-slate-850 cursor-pointer flex items-center justify-center"
+              >
+                <Bell size={18} />
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-550 rounded-full animate-pulse border border-white dark:border-slate-900"></span>
+                )}
+              </button>
+              
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-slate-100 shadow-2xl z-50 py-2 dark:bg-slate-900 dark:border-slate-800">
+                  <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-100">{t("Notifications", lang)}</span>
+                    {notifications.some(n => !n.read) && (
+                      <button 
+                        onClick={markNotificationsAsRead}
+                        className="text-[10px] text-teal-650 hover:text-teal-700 font-bold uppercase cursor-pointer"
+                      >
+                        {t("Mark Read", lang)}
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-64 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/40">
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-xs text-slate-400 font-semibold">{t("No new notifications", lang)}</div>
+                    ) : (
+                      notifications.map(n => (
+                        <div key={n.id} className={`px-4 py-3 hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-all ${!n.read ? 'bg-teal-50/10 dark:bg-teal-950/5' : ''}`}>
+                          <p className="text-xs font-bold text-slate-850 dark:text-slate-200">{t(n.title, lang)}</p>
+                          <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">{t(n.message, lang)}</p>
+                          <span className="text-[8px] text-slate-400 font-bold block mt-1">{new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="h-5 w-px bg-gray-200 mx-1 hidden sm:block dark:bg-slate-800"></div>
             <div className="flex items-center gap-2 pl-1">
               <div className="w-8 h-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-xs font-bold dark:bg-slate-800 dark:text-teal-400">

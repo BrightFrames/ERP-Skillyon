@@ -305,6 +305,177 @@ export default function StudentProfilePage() {
         )}
       </div>
 
+      {/* Student Billing & Fee Management Timeline */}
+      <StudentFeesTimeline student={student} />
     </div>
   );
 }
+
+// Sub-component to manage student fees list and rendering inside profile page
+function StudentFeesTimeline({ student }: { student: any }) {
+  const [fees, setFees] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!student) return;
+    const fetchFeesTimeline = async () => {
+      setLoading(true);
+      try {
+        const [feesRes, invRes, payRes] = await Promise.all([
+          api.get(`/fees?search=${encodeURIComponent(student.name)}`),
+          api.get(`/fees/invoices?search=${encodeURIComponent(student.name)}`),
+          api.get(`/fees/payments?search=${encodeURIComponent(student.name)}`)
+        ]);
+        
+        // Exact filter matching this student's ID
+        const matchedFees = (feesRes.data.data || []).filter((f: any) => f.student_id === student.id);
+        const matchedInvoices = (invRes.data.data || []).filter((i: any) => i.student_id === student.id);
+        const matchedPayments = (payRes.data.data || []).filter((p: any) => p.student_id === student.id);
+
+        setFees(matchedFees);
+        setInvoices(matchedInvoices);
+        setPayments(matchedPayments);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeesTimeline();
+  }, [student]);
+
+  const totalPaid = fees.reduce((s, f) => s + Number(f.paid_amount || 0), 0);
+  const totalDue = fees.reduce((s, f) => s + Number(f.remaining_amount || 0), 0);
+  const totalFine = fees.reduce((s, f) => s + Number(f.fine_amount || 0), 0);
+
+  const getStatusBadgeClass = (status: string) => {
+    const s = (status || 'Pending').toLowerCase();
+    if (s === 'paid') return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+    if (s === 'overdue') return 'bg-red-50 text-red-500 border-red-100';
+    return 'bg-indigo-50 text-[#3b3dbf] border-indigo-100';
+  };
+
+  const downloadReceipt = (p: any) => {
+    const blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receipt_${p.receipt_number}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading) return <div className="text-center py-6 text-zinc-350">Loading billing timelines...</div>;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-6 flex flex-col gap-6">
+      <div>
+        <h3 className="font-bold text-base text-zinc-900">Student Fees Ledger</h3>
+        <p className="text-xs text-zinc-400 mt-0.5">Summary of dues, invoices timeline, and paid receipts logs.</p>
+      </div>
+
+      {/* Mini Stats row */}
+      <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="bg-zinc-50/50 p-4 border border-zinc-100 rounded-xl">
+          <div className="text-sm font-bold text-teal-600">₹{totalPaid.toLocaleString()}</div>
+          <div className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5">Total Paid</div>
+        </div>
+        <div className="bg-zinc-50/50 p-4 border border-zinc-100 rounded-xl">
+          <div className="text-sm font-bold text-rose-600">₹{totalDue.toLocaleString()}</div>
+          <div className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5">Total Due</div>
+        </div>
+        <div className="bg-zinc-50/50 p-4 border border-zinc-100 rounded-xl">
+          <div className="text-sm font-bold text-amber-500">₹{totalFine.toLocaleString()}</div>
+          <div className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5">Fine Accrued</div>
+        </div>
+      </div>
+
+      {/* Tabs / Sub-sections */}
+      <div className="space-y-6">
+        {/* Assignments subtable */}
+        <div>
+          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2.5">Installments & Category Statuses</h4>
+          <div className="overflow-x-auto border border-zinc-100 rounded-xl">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-zinc-50 border-b border-zinc-100 text-zinc-400 font-bold">
+                <tr>
+                  <th className="px-4 py-2.5">Category</th>
+                  <th className="px-4 py-2.5">Base</th>
+                  <th className="px-4 py-2.5">Paid</th>
+                  <th className="px-4 py-2.5">Fine</th>
+                  <th className="px-4 py-2.5">Due Date</th>
+                  <th className="px-4 py-2.5">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-50 font-semibold">
+                {fees.length === 0 ? (
+                  <tr><td colSpan={6} className="text-center py-6 text-zinc-300">No installments assigned.</td></tr>
+                ) : (
+                  fees.map(f => (
+                    <tr key={f.id}>
+                      <td className="px-4 py-3 text-zinc-800">{f.fee_type_name}</td>
+                      <td className="px-4 py-3">₹{Number(f.amount).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-teal-650">₹{Number(f.paid_amount)}</td>
+                      <td className="px-4 py-3 text-amber-500">₹{Number(f.fine_amount)}</td>
+                      <td className="px-4 py-3 text-zinc-400">{new Date(f.due_date).toLocaleDateString()}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex px-2 py-0.5 border text-[9px] font-bold rounded-full ${getStatusBadgeClass(f.status)}`}>
+                          {f.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Payments subtable */}
+        <div>
+          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2.5">Payments Timeline</h4>
+          <div className="overflow-x-auto border border-zinc-100 rounded-xl">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-zinc-50 border-b border-zinc-100 text-zinc-400 font-bold">
+                <tr>
+                  <th className="px-4 py-2.5">Receipt</th>
+                  <th className="px-4 py-2.5">Item</th>
+                  <th className="px-4 py-2.5">Method</th>
+                  <th className="px-4 py-2.5">Date</th>
+                  <th className="px-4 py-2.5">Amount</th>
+                  <th className="px-4 py-2.5 text-center">Download</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-50 font-semibold">
+                {payments.length === 0 ? (
+                  <tr><td colSpan={6} className="text-center py-6 text-zinc-300">No payment receipts yet.</td></tr>
+                ) : (
+                  payments.map(p => (
+                    <tr key={p.id}>
+                      <td className="px-4 py-3 text-zinc-400">#{p.receipt_number}</td>
+                      <td className="px-4 py-3 text-zinc-800">{p.fee_type_name}</td>
+                      <td className="px-4 py-3 uppercase text-[10px]">{p.payment_method}</td>
+                      <td className="px-4 py-3">{new Date(p.payment_date).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-teal-600 font-bold">₹{Number(p.amount).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => downloadReceipt(p)}
+                          className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-650 cursor-pointer"
+                        >
+                          Download JSON
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+

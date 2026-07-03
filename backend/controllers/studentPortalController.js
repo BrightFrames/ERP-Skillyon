@@ -1,4 +1,5 @@
 import pool from '../db/index.js';
+import { checkAndApplyLateFees } from '../utils/feesHelper.js';
 
 export const getMyAttendanceToday = async (req, res, next) => {
   try {
@@ -38,12 +39,26 @@ export const getMyAttendanceMonthly = async (req, res, next) => {
 export const getMyFees = async (req, res, next) => {
   try {
     const studentId = req.user.id;
+
+    // Automatically transition due transactions & update late fee penalties
+    await checkAndApplyLateFees();
+
     const { rows } = await pool.query(
-      `SELECT id, term, amount, status, due_date FROM fees WHERE student_id = $1 ORDER BY due_date ASC`,
+      `SELECT 
+        fa.id,
+        ft.name AS term,
+        fa.amount,
+        UPPER(fa.status) AS status,
+        fa.due_date
+       FROM fee_assignments fa
+       LEFT JOIN fee_types ft ON fa.fee_type_id = ft.id
+       WHERE fa.student_id = $1 
+       ORDER BY fa.due_date ASC`,
       [studentId]
     );
     res.json({ data: rows });
   } catch (err) {
+    console.error('getMyFees error:', err);
     res.status(500).json({ error: 'Failed to fetch fees' });
   }
 };

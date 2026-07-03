@@ -27,6 +27,7 @@ const navItems = [
   { name: 'Students', path: '/students', icon: Users, roles: ['ADMIN', 'TEACHER'] },
   { name: 'Academic', path: '/classes', icon: BookOpen, roles: ['ADMIN', 'TEACHER'] },
   { name: 'Staff', path: '/teachers', icon: UserCheck, roles: ['ADMIN'] },
+  { name: 'Fees', path: '/fees', icon: CreditCard, roles: ['ADMIN', 'STAFF'] },
   { name: 'Messages', path: '/messages', icon: MessageSquare, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
   { name: 'Reports', path: '/reports', icon: BarChart2, roles: ['ADMIN'] },
   { name: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
