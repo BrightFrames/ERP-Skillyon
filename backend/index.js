@@ -24,6 +24,11 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Health Check
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'Skillyon ERP Backend API is running securely.' });
+});
+
 // Routes
 app.use('/api/user', userRoutes);
 app.use('/api/students', studentRoutes);
