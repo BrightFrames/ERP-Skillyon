@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
@@ -127,6 +129,27 @@ html.dark body {
   background-color: #030712 !important;
   color: #f3f4f6;
 }
+html.dark .text-white,
+html.dark .text-slate-950,
+html.dark .text-slate-900,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-600,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #f3f4f6 !important;
+}
+html.dark header,
+html.dark aside,
+html.dark .bg-white {
+  background-color: #0b0f19 !important;
+  border-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  color: #9ca3af !important;
+}
 html.dark aside,
 html.dark header,
 html.dark .bg-white {
@@ -134,26 +157,18 @@ html.dark .bg-white {
   border-color: #1f2937 !important;
   color: #f3f4f6 !important;
 }
-html.dark .text-slate-900,
-html.dark .text-slate-800,
-html.dark .text-slate-700,
-html.dark text-slate-800,
-html.dark h2, html.dark h3, html.dark h4, html.dark h5 {
-  color: #f3f4f6 !important;
-}
-html.dark .text-slate-500 {
-  color: #9ca3af !important;
-}
-html.dark .text-slate-400 {
-  color: #6b7280 !important;
-}
-html.dark border-slate-100,
 html.dark .border-slate-100,
 html.dark .border-slate-200 {
   border-color: #1f2937 !important;
 }
 html.dark .bg-slate-50 {
   background-color: #0e1322 !important;
+}
+html.dark .bg-slate-100 {
+  background-color: #111827 !important;
+}
+html.dark .bg-slate-200 {
+  background-color: #1f2937 !important;
 }
 html.dark input,
 html.dark select,
@@ -166,6 +181,11 @@ html.dark input::placeholder,
 html.dark select::placeholder,
 html.dark textarea::placeholder {
   color: #4b5563 !important;
+}
+html.dark .shadow-slate-200\/50,
+html.dark .shadow-slate-200\/20,
+html.dark .shadow-slate-200\/70 {
+  --tw-shadow-color: rgba(15, 23, 42, 0.65) !important;
 }
 
 /* ==========================================
@@ -229,8 +249,24 @@ html.density-spacious .py-2\.5 {
 html.density-spacious .gap-6 {
   gap: 2rem !important;
 }
-html.density-spacious .gap-4 {
-  gap: 1.5rem !important;
+
+/* Smooth theme transition */
+*, *::before, *::after {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow;
+  transition-duration: 350ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* View Transition Theme Toggle Reveal */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}
 

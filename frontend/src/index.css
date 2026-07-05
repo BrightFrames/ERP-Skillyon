@@ -1,14 +1,81 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-ring: hsl(var(--ring));
+}
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 47.4% 11.2%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --primary: 238 49% 49%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --ring: 238 49% 49%;
+}
+
+html.dark {
+  --background: 222.2 47.4% 6.5%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 47.4% 8.5%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 47.4% 8.5%;
+  --popover-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --primary: 238 49% 59%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --ring: 238 49% 59%;
+  color-scheme: dark;
 }
 
 @layer base {
+  html {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
@@ -32,113 +99,88 @@
   }
 }
 
-/* ==========================================================================
-   Dark Theme Overrides
-   ========================================================================== */
-html.dark {
-  color-scheme: dark;
-}
+  html.dark body,
+  html.dark main {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
 
-html.dark body,
-html.dark main,
-html.dark .bg-\[\#f8fafc\] {
-  background-color: #0b0f19 !important;
-  color: #f1f5f9 !important;
-}
+  html.dark .bg-white,
+  html.dark .bg-zinc-50,
+  html.dark .bg-slate-50,
+  html.dark .bg-zinc-100,
+  html.dark .bg-slate-100 {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
 
-/* Glass header override */
-html.dark header.glass {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border-color: rgba(51, 65, 85, 0.5) !important;
-}
+  html.dark .border-zinc-200,
+  html.dark .border-zinc-200\/60,
+  html.dark .border-zinc-100,
+  html.dark .border-slate-200,
+  html.dark .border-slate-200\/60,
+  html.dark .border-slate-100,
+  html.dark .divide-zinc-100 > *,
+  html.dark .divide-slate-100 > * {
+    border-color: hsl(var(--border)) !important;
+  }
 
-/* Card / Panel overrides */
-html.dark .bg-white {
-  background-color: #0f172a !important;
-  color: #f1f5f9 !important;
-  border-color: #1e293b !important;
-}
+  html.dark .text-zinc-900,
+  html.dark .text-zinc-800,
+  html.dark .text-zinc-700,
+  html.dark .text-slate-900,
+  html.dark .text-slate-800,
+  html.dark .text-slate-700 {
+    color: hsl(var(--foreground)) !important;
+  }
 
-/* Inner borders */
-html.dark .border-slate-200,
-html.dark .border-slate-200\/60,
-html.dark .border-zinc-200,
-html.dark .border-zinc-100,
-html.dark .divide-zinc-100 > * {
-  border-color: #1e293b !important;
-}
+  html.dark .text-zinc-600,
+  html.dark .text-slate-600 {
+    color: hsl(var(--muted-foreground)) !important;
+  }
 
-/* Text color adjustments */
-html.dark .text-slate-900,
-html.dark .text-zinc-900,
-html.dark .text-zinc-800,
-html.dark .text-zinc-700 {
-  color: #f1f5f9 !important;
-}
-html.dark .text-zinc-600,
-html.dark .text-slate-600 {
-  color: #cbd5e1 !important;
-}
-html.dark .text-zinc-500,
-html.dark .text-slate-500,
-html.dark .text-zinc-400,
-html.dark .text-slate-400 {
-  color: #94a3b8 !important;
-}
+  html.dark .text-zinc-500,
+  html.dark .text-zinc-400,
+  html.dark .text-slate-500,
+  html.dark .text-slate-400 {
+    color: hsl(var(--muted-foreground)) !important;
+  }
 
-/* Inputs and interactive elements */
-html.dark input,
-html.dark select,
-html.dark textarea {
-  background-color: #1e293b !important;
-  color: #f1f5f9 !important;
-  border-color: #334155 !important;
-}
-html.dark input::placeholder,
-html.dark textarea::placeholder {
-  color: #64748b !important;
-}
-html.dark input:disabled,
-html.dark select:disabled {
-  background-color: #0f172a !important;
-  color: #475569 !important;
-  border-color: #1e293b !important;
-}
+  html.dark input,
+  html.dark select,
+  html.dark textarea {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
 
-/* Table rows and headers */
-html.dark table th {
-  background-color: #0f172a !important;
-  color: #94a3b8 !important;
-}
-html.dark table tbody tr {
-  border-bottom-color: #1e293b !important;
-}
-html.dark table tbody tr:hover {
-  background-color: #1e293b !important;
-}
-html.dark .bg-zinc-50,
-html.dark .bg-slate-50 {
-  background-color: #1e293b !important;
-}
-html.dark .hover\:bg-zinc-50:hover,
-html.dark .hover\:bg-slate-50:hover {
-  background-color: #334155 !important;
-}
+  html.dark input::placeholder,
+  html.dark textarea::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+  }
 
-/* Modals */
-html.dark .bg-black\/50 {
-  background-color: rgba(0, 0, 0, 0.75) !important;
-}
+  html.dark input:disabled,
+  html.dark select:disabled {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
 
-/* Special white buttons */
-html.dark button.bg-white {
-  background-color: #1e293b !important;
-  color: #f1f5f9 !important;
-  border-color: #334155 !important;
-}
-html.dark button.bg-white:hover {
-  background-color: #334155 !important;
-}
+  html.dark .bg-black\/50,
+  html.dark .bg-black\/40,
+  html.dark .bg-black\/60 {
+    background-color: rgba(0, 0, 0, 0.65) !important;
+  }
+
+  html.dark button.bg-white {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  html.dark button.bg-white:hover {
+    background-color: hsl(var(--muted)) !important;
+  }
 
 /* ==========================================================================
    Display Density Overrides
@@ -194,7 +236,27 @@ html.density-spacious .py-4 {
   padding-top: 1.5rem !important;
   padding-bottom: 1.5rem !important;
 }
-html.density-spacious .gap-6 {
-  gap: 2rem !important;
+
+/* Smooth theme transition */
+*,
+*::before,
+*::after {
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke,
+    box-shadow;
+  transition-duration: 350ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* View Transition Theme Toggle Reveal */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}

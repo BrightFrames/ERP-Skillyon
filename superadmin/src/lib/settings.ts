@@ -6,6 +6,19 @@ export interface AppearanceSettings {
   language: string;
 }
 
+function getResolvedTheme(theme: string): "light" | "dark" {
+  if (theme === "dark") return "dark";
+  if (theme === "system" && typeof window !== "undefined") {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+  return "light";
+}
+
+let systemThemeListener: ((e: MediaQueryListEvent) => void) | null = null;
+let systemThemeQuery: MediaQueryList | null = null;
+
 export function getAppearance(): AppearanceSettings {
   try {
     const cached = localStorage.getItem('appearance');
@@ -27,7 +40,10 @@ export function getAppearance(): AppearanceSettings {
   };
 }
 
-let systemThemeListener: ((e: MediaQueryListEvent) => void) | null = null;
+
+export function syncAppearance() {
+  applySettings(getAppearance());
+}
 
 export function applySettings(appearance: AppearanceSettings) {
   if (!appearance) return;
@@ -35,9 +51,10 @@ export function applySettings(appearance: AppearanceSettings) {
 
   // Cleanup old listener
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  if (systemThemeListener) {
-    mediaQuery.removeEventListener('change', systemThemeListener);
+  if (systemThemeListener && systemThemeQuery) {
+    systemThemeQuery.removeEventListener('change', systemThemeListener);
     systemThemeListener = null;
+    systemThemeQuery = null;
   }
 
   // 1. Apply Theme
@@ -56,8 +73,11 @@ export function applySettings(appearance: AppearanceSettings) {
     systemThemeListener = (e: MediaQueryListEvent) => {
       setDarkClass(e.matches);
     };
+    systemThemeQuery = mediaQuery;
     mediaQuery.addEventListener('change', systemThemeListener);
   }
+
+  root.style.colorScheme = getResolvedTheme(appearance.theme);
 
   // 2. Apply Density
   root.classList.remove('density-compact', 'density-comfortable', 'density-spacious');

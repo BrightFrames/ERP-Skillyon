@@ -1,94 +1,51 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
 }
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: "Plus Jakarta Sans", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 }
 
 /* Soft scrollbar */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
 
 /* Skeleton shimmer */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 .skeleton {
   background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 12px;
-}
-
-/* ==========================================
-   DARK THEME OVERRIDES
-   ========================================== */
-html.dark {
-  background-color: #030712 !important;
-  color-scheme: dark;
-}
-html.dark body {
-  background-color: #030712 !important;
-  color: #f3f4f6;
-}
-html.dark aside,
-html.dark header,
-html.dark .bg-white {
-  background-color: #0b0f19 !important;
-  border-color: #1f2937 !important;
-  color: #f3f4f6 !important;
-}
-html.dark text-gray-900,
-html.dark .text-gray-900,
-html.dark .text-slate-900,
-html.dark .text-slate-800,
-html.dark .text-zinc-900,
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5 {
-  color: #f3f4f6 !important;
-}
-html.dark .text-gray-500,
-html.dark .text-slate-500,
-html.dark .text-zinc-500 {
-  color: #9ca3af !important;
-}
-html.dark .text-gray-400,
-html.dark .text-slate-400,
-html.dark .text-zinc-400 {
-  color: #6b7280 !important;
-}
-html.dark border-gray-100,
-html.dark .border-gray-100,
-html.dark .border-slate-100,
-html.dark .border-zinc-200 {
-  border-color: #1f2937 !important;
-}
-html.dark .bg-gray-50,
-html.dark .bg-slate-50,
-html.dark .bg-zinc-50 {
-  background-color: #0e1322 !important;
-}
-html.dark input,
-html.dark select,
-html.dark textarea {
-  background-color: #111827 !important;
-  border-color: #374151 !important;
-  color: #f3f4f6 !important;
-}
-html.dark input::placeholder,
-html.dark select::placeholder,
-html.dark textarea::placeholder {
-  color: #4b5563 !important;
 }
 
 /* ==========================================
@@ -103,14 +60,6 @@ html.density-compact th {
 html.density-compact button:not(.shrink-0),
 html.density-compact input,
 html.density-compact select {
-  padding-top: 0.375rem !important;
-  padding-bottom: 0.375rem !important;
-}
-html.density-compact .py-4 {
-  padding-top: 0.5rem !important;
-  padding-bottom: 0.5rem !important;
-}
-html.density-compact .py-3 {
   padding-top: 0.375rem !important;
   padding-bottom: 0.375rem !important;
 }
@@ -154,6 +103,98 @@ html.density-spacious .gap-6 {
 }
 html.density-spacious .gap-4 {
   gap: 1.5rem !important;
+}
+
+/* ==========================================
+   DARK THEME OVERRIDES
+   ========================================== */
+html.dark {
+  background-color: #030712 !important;
+  color-scheme: dark;
+}
+html.dark body {
+  background-color: #030712 !important;
+  color: #f3f4f6;
+}
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-600,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #f3f4f6 !important;
+}
+html.dark .text-gray-500,
+html.dark .text-gray-400,
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: #9ca3af !important;
+}
+html.dark header,
+html.dark aside,
+html.dark .bg-white {
+  background-color: #0b0f19 !important;
+  border-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-gray-100,
+html.dark .border-gray-200 {
+  border-color: #1f2937 !important;
+}
+html.dark .bg-slate-50 {
+  background-color: #0e1322 !important;
+}
+html.dark .bg-gray-50 {
+  background-color: #0e1322 !important;
+}
+html.dark .bg-slate-100,
+html.dark .bg-gray-100 {
+  background-color: #111827 !important;
+}
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f3f4f6 !important;
+}
+html.dark .shadow-slate-200\/50,
+html.dark .shadow-slate-200\/20,
+html.dark .shadow-gray-200\/20 {
+  --tw-shadow-color: rgba(15, 23, 42, 0.65) !important;
+}
+html.dark button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+html.dark .divide-slate-50 > * {
+  border-color: #1f2937 !important;
+}
+html.dark .bg-slate-100 {
+  background-color: #1f2937 !important;
+}
+
+/* Smooth theme transition */
+*, *::before, *::after {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow;
+  transition-duration: 350ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* View Transition Theme Toggle Reveal */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
 }
 
 
