@@ -373,9 +373,9 @@ export default function StudentsPage() {
         </div>
 
         {/* Table Content */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-600">
-            <thead className="bg-zinc-50/50 text-zinc-500 font-bold border-b border-zinc-100">
+        <div className="w-full overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-t-xl border-b-0">
+          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+            <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="px-6 py-4">Student Name</th>
                 <th className="px-6 py-4">Student ID</th>
@@ -385,13 +385,13 @@ export default function StudentsPage() {
                 <th className="px-6 py-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 font-semibold">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12">
                     <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-8 h-8 rounded-full border-4 border-zinc-200 border-t-[#3b3dbf] animate-spin"></div>
-                      <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                      <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-indigo-600 animate-spin dark:border-slate-700 dark:border-t-indigo-500"></div>
+                      <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider dark:text-slate-500">
                         Loading students...
                       </span>
                     </div>
@@ -401,7 +401,7 @@ export default function StudentsPage() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-8 text-center text-zinc-500 font-medium"
+                    className="px-6 py-8 text-center text-slate-500 font-medium dark:text-slate-400 bg-slate-50/30 dark:bg-slate-900/20"
                   >
                     No students found. Add a new student to get started.
                   </td>
@@ -410,7 +410,7 @@ export default function StudentsPage() {
                 students.map((student, index) => (
                   <tr
                     key={index}
-                    className="hover:bg-zinc-50/50 transition-colors"
+                    className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <Link
@@ -423,39 +423,39 @@ export default function StudentsPage() {
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=random`
                           }
                           alt={student.name}
-                          className="w-10 h-10 rounded-full bg-zinc-200 object-cover"
+                          className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 object-cover"
                         />
                         <div>
-                          <div className="text-zinc-900 font-bold hover:text-[#3b3dbf] transition-colors">
+                          <div className="text-slate-900 dark:text-slate-100 font-semibold hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                             {student.name}
                           </div>
-                          <div className="text-xs text-zinc-500">
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
                             {student.email || "N/A"}
                           </div>
                         </div>
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-zinc-500">
+                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
                       {student.id >= 1000
                         ? student.id
                         : `#STU-2024-${student.id.toString().padStart(3, "0")}`}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full text-xs font-bold whitespace-nowrap">
+                      <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-semibold whitespace-nowrap">
                         {student.class_name || "Not Assigned"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-zinc-700">
+                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
                       {student.gender || "Unknown"}
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                           student.status === "Active"
-                            ? "bg-indigo-50 text-[#3b3dbf]"
+                            ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"
                             : student.status === "Inactive"
-                              ? "bg-red-50 text-red-500"
-                              : "bg-zinc-100 text-zinc-600"
+                              ? "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                         }`}
                       >
                         {student.status || "Active"}
@@ -469,15 +469,15 @@ export default function StudentsPage() {
                             activeMenuId === student.id ? null : student.id,
                           );
                         }}
-                        className="text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 p-2 rounded-lg transition-colors inline-flex"
+                        className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-slate-300 p-2 rounded-lg transition-colors inline-flex"
                       >
                         <MoreVertical size={18} />
                       </button>
                       {activeMenuId === student.id && (
-                        <div className="absolute right-10 top-10 w-48 bg-white border border-zinc-200 rounded-xl shadow-lg z-10 py-2 overflow-hidden flex flex-col items-start text-sm">
+                        <div className="absolute right-10 top-10 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg z-10 py-2 overflow-hidden flex flex-col items-start text-sm">
                           <Link
                             to={`/students/${student.id}`}
-                            className="w-full px-4 py-2 text-left hover:bg-zinc-50 flex items-center gap-2 text-zinc-700 font-semibold transition-colors"
+                            className="w-full px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold transition-colors"
                           >
                             <Eye size={16} /> View Profile
                           </Link>
@@ -486,17 +486,17 @@ export default function StudentsPage() {
                               e.stopPropagation();
                               openEditModal(student);
                             }}
-                            className="w-full px-4 py-2 text-left hover:bg-zinc-50 flex items-center gap-2 text-zinc-700 font-semibold transition-colors"
+                            className="w-full px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold transition-colors"
                           >
                             <Edit2 size={16} /> Edit Student
                           </button>
-                          <div className="w-full h-px bg-zinc-100 my-1"></div>
+                          <div className="w-full h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDelete(student.id);
                             }}
-                            className="w-full px-4 py-2 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 font-semibold transition-colors"
+                            className="w-full px-4 py-2 text-left hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold transition-colors"
                           >
                             <Trash2 size={16} /> Delete Student
                           </button>
@@ -511,11 +511,12 @@ export default function StudentsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="p-4 md:px-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-zinc-50/50">
+        {/* Pagination */}
+        <div className="p-4 md:px-6 border border-slate-200 dark:border-slate-800 rounded-b-xl flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50 dark:bg-slate-800/50">
           <button
             disabled={currentPage === 0}
             onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
-            className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft size={16} />
             Previous
@@ -528,10 +529,10 @@ export default function StudentsPage() {
               <button
                 key={i}
                 onClick={() => setCurrentPage(i)}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
                   currentPage === i
-                    ? "bg-[#3b3dbf] text-white shadow-sm"
-                    : "text-zinc-600 hover:bg-zinc-100"
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
                 {i + 1}
@@ -540,17 +541,17 @@ export default function StudentsPage() {
 
             {Math.ceil(totalStudents / limit) > 3 && (
               <>
-                <span className="w-8 h-8 flex items-center justify-center text-zinc-400 text-sm font-bold">
+                <span className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm font-semibold">
                   ...
                 </span>
                 <button
                   onClick={() =>
                     setCurrentPage(Math.ceil(totalStudents / limit) - 1)
                   }
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
                     currentPage === Math.ceil(totalStudents / limit) - 1
-                      ? "bg-[#3b3dbf] text-white shadow-sm"
-                      : "text-zinc-600 hover:bg-zinc-100"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
                   {Math.ceil(totalStudents / limit)}
@@ -562,7 +563,7 @@ export default function StudentsPage() {
           <button
             disabled={currentPage >= Math.ceil(totalStudents / limit) - 1}
             onClick={() => setCurrentPage((prev) => prev + 1)}
-            className="flex items-center gap-1.5 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-zinc-600 text-sm font-bold hover:bg-zinc-50 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
             <ChevronRight size={16} />
@@ -768,15 +769,24 @@ export default function StudentsPage() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                  Avatar URL (Optional)
+                  Avatar Image (Optional)
                 </label>
                 <input
-                  type="url"
-                  name="avatar"
-                  value={formData.avatar}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all"
-                  placeholder="e.g. https://images.unsplash.com/..."
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setFormData({ ...formData, avatar: reader.result as string });
+                      };
+                      reader.readAsDataURL(file);
+                    } else {
+                      setFormData({ ...formData, avatar: "" });
+                    }
+                  }}
+                  className="w-full px-4 py-2 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#3b3dbf]/20 focus:border-[#3b3dbf] transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                 />
               </div>
               <div className="mt-4 flex gap-3">

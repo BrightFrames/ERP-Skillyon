@@ -159,7 +159,7 @@ export default function Layout() {
 
       {/* Sidebar - Premium Theme */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-card shadow-[4px_0_24px_rgba(0,0,0,0.1)] border-r border-border flex flex-col transform transition-transform duration-300 ease-in-out md:transform-none ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+        className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-card border-r border-border flex flex-col transform transition-transform duration-300 ease-in-out md:transform-none ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         <div className="p-6 flex flex-col gap-1">
           <div className="flex items-center justify-between md:justify-start gap-3 mb-2">
@@ -190,25 +190,22 @@ export default function Layout() {
               to={item.path}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium group ${
                   isActive
-                    ? "text-foreground bg-primary/10 shadow-[inset_1px_1px_0_rgba(255,255,255,0.1)] border border-primary/20"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  {isActive && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[linear-gradient(to_bottom,#818cf8,#a855f7)] rounded-r-full" />
-                  )}
                   <item.icon
-                    size={20}
+                    size={18}
                     strokeWidth={isActive ? 2.5 : 2}
                     className={
                       isActive
-                        ? "text-indigo-400"
-                        : "group-hover:text-indigo-400 transition-colors"
+                        ? "text-primary"
+                        : "text-muted-foreground group-hover:text-foreground transition-colors"
                     }
                   />
                   {t(item.name, lang)}
@@ -239,22 +236,21 @@ export default function Layout() {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col w-full md:w-auto h-full overflow-hidden bg-background relative">
-        <div className="absolute top-0 left-0 w-full h-64 bg-[linear-gradient(to_bottom,rgba(224,231,255,0.55),transparent)] pointer-events-none"></div>
         {/* Top Header */}
-        <header className="h-20 shrink-0 glass border-b border-border flex items-center justify-between px-6 lg:px-10 z-10 sticky top-0">
+        <header className="h-16 shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border flex items-center justify-between px-6 lg:px-8 z-10 sticky top-0">
           <div className="flex items-center flex-1 gap-4">
             <button
-              className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground bg-muted rounded-lg"
+              className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={20} />
             </button>
 
             {/* Search Input */}
-            <div className="hidden sm:flex items-center relative w-full max-w-md bg-card border border-border shadow-sm focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 rounded-2xl transition-all group">
+            <div className="hidden sm:flex items-center relative w-full max-w-md bg-muted/50 border border-transparent hover:bg-muted/80 focus-within:bg-background focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 rounded-lg transition-all group">
               <Search
-                size={18}
-                className="text-muted-foreground absolute left-4 group-focus-within:text-primary transition-colors"
+                size={16}
+                className="text-muted-foreground absolute left-3 group-focus-within:text-primary transition-colors"
               />
               <input
                 ref={searchInputRef}
@@ -262,9 +258,9 @@ export default function Layout() {
                 placeholder={t("Search students, classes, or reports...", lang)}
                 value={currentSearch}
                 onChange={handleSearchChange}
-                className="w-full bg-transparent border-none outline-none py-3 pl-12 pr-12 text-sm text-foreground placeholder:text-muted-foreground font-medium"
+                className="w-full bg-transparent border-none outline-none py-2 pl-9 pr-12 text-sm text-foreground placeholder:text-muted-foreground font-medium"
               />
-              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold bg-muted border border-border text-muted-foreground px-2 py-1 rounded-md shadow-sm">
+              <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-semibold bg-background border border-border text-muted-foreground px-1.5 py-0.5 rounded shadow-sm">
                 ⌘K
               </kbd>
             </div>
@@ -272,16 +268,16 @@ export default function Layout() {
 
           <div className="flex items-center gap-4 lg:gap-6 ml-4">
             <ThemeToggle />
-            <button className="flex items-center gap-3 pl-2 group">
+            <button className="flex items-center gap-3 group">
               <div className="hidden sm:block text-right">
-                <div className="text-sm font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
+                <div className="text-sm font-semibold text-foreground leading-tight group-hover:text-primary transition-colors">
                   {displayName}
                 </div>
-                <div className="text-xs font-semibold text-muted-foreground">
+                <div className="text-xs text-muted-foreground font-medium">
                   {displayRole}
                 </div>
               </div>
-              <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold border-2 border-background shadow-md shrink-0 group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm shrink-0">
                 {displayName
                   .split(" ")
                   .map((n: string) => n[0])

@@ -122,21 +122,21 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
 
   return (
     <>
-      <div className={`bg-white border border-slate-200/70 rounded-3xl shadow-sm overflow-hidden animate-fade-in dark:bg-slate-900 dark:border-slate-800 ${compact ? '' : 'stagger-1'}`}>
+      <div className={`bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800`}>
         
         {!compact && (
-          <div className="px-8 py-6 border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-slate-50/50 dark:border-slate-850 dark:bg-slate-900/40">
+          <div className="px-6 py-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 dark:border-slate-800">
             <div>
-              <h3 className="text-lg font-bold text-slate-800 tracking-tight dark:text-slate-100">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                 Registered Schools
               </h3>
-              <p className="text-xs text-slate-500 mt-1 font-medium dark:text-slate-400">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Manage {schools.length} school{schools.length !== 1 ? 's' : ''} across the platform
               </p>
             </div>
             
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center p-1 rounded-xl bg-white border border-slate-200 shadow-sm dark:bg-slate-850 dark:border-slate-750">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center p-1 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
                 {['ALL', 'ACTIVE', 'TRIAL', 'SUSPENDED'].map(status => (
                   <button
                     key={status}
@@ -152,23 +152,20 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
                 ))}
               </div>
 
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search schools…"
-                  className="pl-11 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all duration-200 w-full sm:w-64 shadow-sm dark:bg-slate-850 dark:border-slate-750 dark:text-slate-200 dark:placeholder-slate-500"
+                  className="pl-9 pr-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
                 />
               </div>
               
               <button
                 onClick={() => setShowForm(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 active:scale-[0.98]"
-                style={{
-                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 Add School
@@ -178,14 +175,14 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
         )}
 
         {filtered.length === 0 ? (
-          <div className="py-24 text-center animate-fade-in">
-            <div className="w-24 h-24 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto mb-6 shadow-sm dark:bg-slate-850 dark:border-slate-800">
-              <Building2 className="w-10 h-10 text-slate-300 dark:text-slate-600" />
+          <div className="py-20 text-center">
+            <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto mb-4 dark:bg-slate-800/50 dark:border-slate-700">
+              <Building2 className="w-8 h-8 text-slate-400" />
             </div>
-            <h4 className="text-lg font-bold text-slate-700 mb-2 tracking-tight dark:text-slate-200">
+            <h4 className="text-base font-semibold text-slate-900 mb-1 dark:text-slate-100">
               {search || statusFilter !== 'ALL' ? 'No matching schools found' : 'No schools registered yet'}
             </h4>
-            <p className="text-sm text-slate-400 max-w-sm mx-auto font-medium dark:text-slate-500">
+            <p className="text-sm text-slate-500 max-w-sm mx-auto dark:text-slate-400">
               {search || statusFilter !== 'ALL'
                 ? 'Try adjusting your filters or search query.'
                 : 'Get started by onboarding the first school to the platform.'}
@@ -193,9 +190,9 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
             {(!search && statusFilter === 'ALL' && !compact) && (
               <button
                 onClick={() => setShowForm(true)}
-                className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors cursor-pointer border border-indigo-100/50 shadow-sm dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30"
+                className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors cursor-pointer"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
                 Add First School
               </button>
             )}
@@ -204,20 +201,20 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100 dark:bg-slate-900/30 dark:border-slate-850">
-                  <th className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-8 py-5 whitespace-nowrap dark:text-slate-500">
+                <tr className="bg-slate-50 border-b border-slate-200 dark:bg-slate-900/50 dark:border-slate-800">
+                  <th className="text-xs font-semibold text-slate-500 px-6 py-3 whitespace-nowrap dark:text-slate-400 text-left">
                     School Details
                   </th>
-                  <th className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-8 py-5 whitespace-nowrap dark:text-slate-500">
+                  <th className="text-xs font-semibold text-slate-500 px-6 py-3 whitespace-nowrap dark:text-slate-400 text-left">
                     Status
                   </th>
-                  <th className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-8 py-5 whitespace-nowrap text-center dark:text-slate-500">
+                  <th className="text-xs font-semibold text-slate-500 px-6 py-3 whitespace-nowrap text-center dark:text-slate-400">
                     Population
                   </th>
-                  <th className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-8 py-5 whitespace-nowrap dark:text-slate-500">
+                  <th className="text-xs font-semibold text-slate-500 px-6 py-3 whitespace-nowrap dark:text-slate-400 text-left">
                     Onboarded
                   </th>
-                  <th className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-8 py-5 whitespace-nowrap text-right dark:text-slate-500">
+                  <th className="text-xs font-semibold text-slate-500 px-6 py-3 whitespace-nowrap text-right dark:text-slate-400">
                     Actions
                   </th>
                 </tr>
@@ -231,16 +228,16 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
                       className="group transition-colors duration-200 hover:bg-slate-50/60 dark:hover:bg-slate-850/40"
                     >
                       {/* School Name & ID */}
-                      <td className="px-8 py-5 align-middle">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform dark:bg-indigo-950/40 dark:border-indigo-900/50">
-                            <Building2 className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
+                      <td className="px-6 py-4 align-middle">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 dark:bg-indigo-950/40 dark:border-indigo-900/50">
+                            <Building2 className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-slate-800 tracking-tight dark:text-slate-100">
+                            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                               {school.name}
                             </p>
-                            <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-wider dark:text-slate-500">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                               ID: SCH-{school.id.toString().padStart(4, '0')}
                             </p>
                           </div>
@@ -248,53 +245,53 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
                       </td>
 
                       {/* Status Badge */}
-                      <td className="px-8 py-5 align-middle">
-                        <div className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border ${statusStyle.bg} ${statusStyle.text} shadow-sm`}>
+                      <td className="px-6 py-4 align-middle">
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${statusStyle.bg} ${statusStyle.text}`}>
                           {statusStyle.icon}
-                          <span className="tracking-wide">{school.subscription_status}</span>
+                          {school.subscription_status}
                         </div>
                       </td>
 
                       {/* Population Stats */}
-                      <td className="px-8 py-5 align-middle">
-                        <div className="flex items-center justify-center gap-6">
+                      <td className="px-6 py-4 align-middle">
+                        <div className="flex items-center justify-center gap-4">
                           <div className="flex flex-col items-center">
-                            <div className="flex items-center gap-2 text-sm font-extrabold text-slate-700 dark:text-slate-200">
+                            <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
                               <GraduationCap className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
                               {school.student_count}
                             </div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1 dark:text-slate-500">Students</span>
+                            <span className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Students</span>
                           </div>
-                          <div className="w-px h-8 bg-slate-200/80 dark:bg-slate-800/80" />
+                          <div className="w-px h-6 bg-slate-200 dark:bg-slate-800" />
                           <div className="flex flex-col items-center">
-                            <div className="flex items-center gap-2 text-sm font-extrabold text-slate-700 dark:text-slate-200">
+                            <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
                               <Users className="w-4 h-4 text-violet-500 dark:text-violet-400" />
                               {school.staff_count}
                             </div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1 dark:text-slate-500">Staff</span>
+                            <span className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">Staff</span>
                           </div>
                         </div>
                       </td>
 
                       {/* Created */}
-                      <td className="px-8 py-5 align-middle">
+                      <td className="px-6 py-4 align-middle">
                         <div className="flex flex-col">
-                          <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
                             {formatDate(school.created_at)}
                           </span>
-                          <span className="text-[11px] font-medium text-slate-400 mt-1 dark:text-slate-500">
+                          <span className="text-xs text-slate-500 mt-0.5 dark:text-slate-400">
                             {school.subscription_expires_at ? `Expires ${formatDate(school.subscription_expires_at)}` : 'No expiry'}
                           </span>
                         </div>
                       </td>
 
                       {/* Actions */}
-                      <td className="px-8 py-5 align-middle text-right">
-                        <div className="inline-flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <td className="px-6 py-4 align-middle text-right">
+                        <div className="inline-flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => setEditSchool(school)}
                             title="Edit Subscription"
-                            className="p-2.5 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all cursor-pointer shadow-sm dark:hover:text-indigo-400 dark:hover:bg-indigo-950/30 dark:hover:border-indigo-900/50"
+                            className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer dark:hover:text-indigo-400 dark:hover:bg-indigo-950/30"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
@@ -302,12 +299,12 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
                             onClick={() => handleDelete(school)}
                             disabled={deletingId === school.id}
                             title="Delete School"
-                            className="p-2.5 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition-all cursor-pointer shadow-sm disabled:opacity-50 dark:hover:text-red-400 dark:hover:bg-red-950/30 dark:hover:border-red-900/50"
+                            className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50 dark:hover:text-red-400 dark:hover:bg-red-950/30"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-                        <button className="p-2.5 inline-flex items-center justify-center rounded-xl text-slate-400 group-hover:hidden w-10 h-10">
+                        <button className="p-2 inline-flex items-center justify-center rounded-lg text-slate-400 group-hover:hidden w-8 h-8">
                           <MoreHorizontal className="w-4 h-4" />
                         </button>
                       </td>

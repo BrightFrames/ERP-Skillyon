@@ -168,62 +168,52 @@ export default function Dashboard() {
       <aside className="w-64 flex-none h-full bg-white dark:bg-slate-950 flex flex-col border-r border-slate-200 dark:border-slate-800 z-20 transition-colors duration-300">
         
         {/* Logo / Branding */}
-        <div className="h-16 flex-none flex items-center gap-3 px-6 border-b border-slate-100 dark:border-white/5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/10">
-            <Shield className="w-4 h-4 text-white" />
+        <div className="h-16 flex-none flex items-center gap-3 px-6 border-b border-slate-200 dark:border-slate-800">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+            <Shield className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-extrabold text-slate-800 dark:text-white tracking-tight">Skillyon</h1>
-            <p className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-widest mt-0.5">Super Admin</p>
+            <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Skillyon</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Super Admin</p>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto">
-          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-550 uppercase tracking-widest px-3 mb-4">Navigation</p>
+        <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
+          <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 px-3 mb-3">Navigation</p>
           {NAV_ITEMS.map((item) => {
             const isActive = activeView === item.view
             return (
               <button
                 key={item.view}
                 onClick={() => setActiveView(item.view)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer group ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer group ${
                   isActive
-                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-white shadow-[0_1px_2px_rgba(0,0,0,0.02)]'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
+                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
                 }`}
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                  isActive 
-                    ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' 
-                    : 'bg-slate-100 dark:bg-white/5 text-slate-450 dark:text-slate-500 group-hover:bg-slate-200/60 dark:group-hover:bg-white/10 group-hover:text-slate-700 dark:group-hover:text-slate-300'
-                }`}>
-                  <item.icon className="w-[18px] h-[18px]" />
-                </div>
+                <item.icon className="w-5 h-5" />
                 {t(item.label, lang)}
-                {isActive && <ChevronRight className="w-4 h-4 ml-auto text-indigo-500/70 dark:text-slate-500" />}
               </button>
             )
           })}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50">
-          <div className="flex items-center gap-3 p-2 mb-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-150 dark:border-white/5 shadow-sm dark:shadow-none">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white uppercase shadow-md shadow-indigo-500/20">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+          <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-lg">
+            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-sm font-semibold text-slate-700 dark:text-slate-300">
               {user?.name?.[0] || 'S'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{user?.name || 'Super Admin'}</p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Platform Owner</p>
-              </div>
+              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{user?.name || 'Super Admin'}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user?.email || 'Admin'}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-white hover:bg-rose-50/60 dark:hover:bg-red-500/10 hover:border-rose-100 dark:hover:border-red-500/20 border border-transparent transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-white hover:bg-rose-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             {t("Sign out", lang)}
@@ -235,25 +225,20 @@ export default function Dashboard() {
       <div className="flex-1 min-w-0 flex flex-col h-full bg-slate-50/50 dark:bg-slate-900/40">
         
         {/* Top Header */}
-        <header className="h-16 flex-none bg-white dark:bg-slate-900 border-b border-slate-200/60 dark:border-slate-800 px-6 lg:px-8 flex items-center justify-between z-10 shadow-sm shadow-slate-200/20 dark:shadow-none">
+        <header className="h-16 flex-none bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 lg:px-8 flex items-center justify-between z-10">
           <div>
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight">{t(viewTitle[activeView].title, lang)}</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t(viewTitle[activeView].subtitle, lang)}</p>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t(viewTitle[activeView].title, lang)}</h2>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <button
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 border border-indigo-100 dark:bg-indigo-950/20 dark:border-indigo-900/30">
-              <Shield className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-              <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Verified Admin</span>
-            </div>
           </div>
         </header>
 
@@ -271,81 +256,69 @@ export default function Dashboard() {
               {/* ───── DASHBOARD VIEW ───── */}
               {activeView === 'dashboard' && (
                 <div className="animate-fade-in space-y-8 max-w-7xl mx-auto">
-                  
                   {/* Hero Banner */}
-                  <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 lg:p-10 text-white relative overflow-hidden shadow-2xl shadow-indigo-500/10">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
-                    <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Zap className="w-4 h-4 text-amber-400" />
-                          <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">{getGreeting()}</span>
-                        </div>
-                        <h3 className="text-3xl font-extrabold tracking-tight mb-2">{user?.name || 'Super Admin'}</h3>
-                        <p className="text-slate-300 text-sm md:text-base max-w-xl">
-                          You are currently managing <strong className="text-white">{totalSchools}</strong> schools on the Skillyon platform, serving a total of <strong className="text-white">{platformStats.total_students}</strong> enrolled students.
-                        </p>
-                      </div>
-                      <div className="hidden md:flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-                        <Activity className="w-6 h-6 text-emerald-400" />
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">System Status</p>
-                          <p className="text-sm font-bold text-emerald-400">All systems operational</p>
-                        </div>
-                      </div>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
+                        {getGreeting()}, {user?.name || 'Super Admin'}
+                      </h3>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm">
+                        You are currently managing <span className="font-medium text-slate-900 dark:text-white">{totalSchools}</span> schools serving <span className="font-medium text-slate-900 dark:text-white">{platformStats.total_students}</span> students.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      All systems operational
                     </div>
                   </div>
 
                   {/* Stat Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((stat, i) => (
                       <div
                         key={stat.label}
-                        className={`bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800 shadow-sm shadow-slate-200/50 dark:shadow-none relative overflow-hidden group hover:shadow-lg hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 animate-card-entrance stagger-${i + 1}`}
+                        className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between"
                       >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${stat.iconBg} transition-transform group-hover:scale-110 group-hover:-rotate-3`}>
+                        <div className="flex items-start justify-between mb-2">
+                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</p>
+                          <div className={`p-2 rounded-lg ${stat.iconBg}`}>
                             {stat.icon}
                           </div>
                         </div>
                         <div>
-                          <p className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-1">{stat.value}</p>
-                          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.label}</p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{stat.value}</p>
                         </div>
-                        {/* Soft background gradient on hover */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
                       </div>
                     ))}
                   </div>
 
                   {/* Quick Metrics */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800 shadow-sm shadow-slate-200/50 dark:shadow-none flex items-center gap-5 animate-card-entrance stagger-5">
-                      <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center">
-                        <Users className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                      <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                        <Users className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Platform Staff</p>
-                        <p className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{platformStats.total_staff}</p>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Platform Staff</p>
+                        <p className="text-xl font-bold text-slate-900 dark:text-slate-100">{platformStats.total_staff}</p>
                       </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800 shadow-sm shadow-slate-200/50 dark:shadow-none flex items-center gap-5 animate-card-entrance stagger-5">
-                      <div className="w-14 h-14 rounded-2xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-100 dark:border-cyan-900/50 flex items-center justify-center">
-                        <GraduationCap className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
+                    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                      <div className="p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">
+                        <GraduationCap className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Total Students</p>
-                        <p className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{platformStats.total_students}</p>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Students</p>
+                        <p className="text-xl font-bold text-slate-900 dark:text-slate-100">{platformStats.total_students}</p>
                       </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/70 dark:border-slate-800 shadow-sm shadow-slate-200/50 dark:shadow-none flex items-center gap-5 animate-card-entrance stagger-5">
-                      <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center">
-                        <TrendingUp className="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
+                    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                      <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                        <TrendingUp className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Active Rate</p>
-                        <p className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Rate</p>
+                        <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
                           {totalSchools > 0 ? Math.round((activeSchools / totalSchools) * 100) : 0}%
                         </p>
                       </div>
@@ -476,9 +449,9 @@ function SettingsView({ user, lang }: { user: any; lang: string }) {
   return (
     <div className="space-y-6">
       {/* Profile Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/70 dark:border-slate-800 p-8 shadow-sm animate-card-entrance stagger-1">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
             <User className="w-5 h-5 text-slate-500" />
           </div>
           <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">Profile Information</h4>
@@ -486,29 +459,29 @@ function SettingsView({ user, lang }: { user: any; lang: string }) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Name</label>
-            <div className="px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 text-sm text-slate-800 dark:text-slate-200 font-semibold">
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Name</label>
+            <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-200 font-medium">
               {user?.name || 'Super Admin'}
             </div>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Email</label>
-            <div className="px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 text-sm text-slate-800 dark:text-slate-200 font-semibold">
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Email</label>
+            <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-200 font-medium">
               {user?.email || 'N/A'}
             </div>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Role</label>
-            <div className="px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 flex items-center gap-3">
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Role</label>
+            <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center gap-2">
               <Shield className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-              <span className="text-sm font-bold text-indigo-700 dark:text-indigo-400">SUPER ADMIN</span>
+              <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">SUPER ADMIN</span>
             </div>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Access Level</label>
-            <div className="px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 flex items-center gap-3">
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Access Level</label>
+            <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center gap-2">
               <Globe className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-              <span className="text-sm font-bold text-emerald-750 dark:text-emerald-400">Full Platform Access</span>
+              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Full Platform Access</span>
             </div>
           </div>
         </div>
@@ -522,57 +495,57 @@ function SettingsView({ user, lang }: { user: any; lang: string }) {
       </div>
 
       {/* Security Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/70 dark:border-slate-800 p-8 shadow-sm animate-card-entrance stagger-2">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-            <Key className="w-5 h-5 text-slate-500 animate-pulse" />
+          <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+            <Key className="w-5 h-5 text-slate-500" />
           </div>
           <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">Security Settings</h4>
         </div>
 
         {message && (
-          <div className={`mb-6 flex items-start gap-3 p-4 rounded-2xl border animate-slide-down ${
+          <div className={`mb-6 flex items-start gap-2 p-3 rounded-lg border ${
             message.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-              : 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/30 text-red-700 dark:text-red-400'
+              ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400'
           }`}>
             {message.type === 'success' ? (
-              <CheckCircle className="w-5 h-5 mt-0.5 shrink-0" />
+              <CheckCircle className="w-5 h-5 shrink-0" />
             ) : (
-              <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />
+              <AlertTriangle className="w-5 h-5 shrink-0" />
             )}
-            <p className="text-sm font-medium">{message.text}</p>
+            <p className="text-sm font-medium mt-0.5">{message.text}</p>
           </div>
         )}
 
-        <form onSubmit={handlePasswordChange} className="space-y-5">
+        <form onSubmit={handlePasswordChange} className="space-y-4">
           <div className="max-w-md">
-            <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
               Current Password
             </label>
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type={showCurrent ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
                 placeholder="Enter current password"
-                className="w-full pl-11 pr-12 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all"
+                className="w-full pl-9 pr-10 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
               />
               <button
                 type="button"
                 onClick={() => setShowCurrent(!showCurrent)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
               >
                 {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 New Password
               </label>
               <div className="relative group">
@@ -582,19 +555,19 @@ function SettingsView({ user, lang }: { user: any; lang: string }) {
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                   placeholder="Enter new password"
-                  className="w-full px-4 pr-12 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all"
+                  className="w-full px-3 pr-10 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNew(!showNew)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                 >
                   {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                 Confirm New Password
               </label>
               <input
@@ -603,16 +576,16 @@ function SettingsView({ user, lang }: { user: any; lang: string }) {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder="Confirm new password"
-                className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all"
+                className="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
           </div>
           
-          <div className="pt-4">
+          <div className="pt-2">
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all cursor-pointer disabled:opacity-50 shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors cursor-pointer disabled:opacity-50"
             >
               {saving ? (
                 <>
