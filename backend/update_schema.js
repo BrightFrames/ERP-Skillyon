@@ -6,7 +6,7 @@ async function updateSchema() {
       ALTER TABLE students 
       ADD COLUMN IF NOT EXISTS gender VARCHAR(20) DEFAULT 'Unknown',
       ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'Active',
-      ADD COLUMN IF NOT EXISTS avatar VARCHAR(500)
+      ADD COLUMN IF NOT EXISTS avatar TEXT
     `);
 
     // Update the seeded students with their mock data
