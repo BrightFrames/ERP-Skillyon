@@ -19,7 +19,17 @@ const PORT = process.env.PORT || 5000;
 
 // Security and Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177', 'https://erp-skillyon-student.vercel.app/', 'https://erp-skillyon-pare.vercel.app/'], // Allow multiple Vite ports
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:5176',
+    'http://localhost:5177',
+    'https://erp-skillyon-frontend.vercel.app',
+    'https://erp-skillyon-super.vercel.app',
+    'https://erp-skillyon-pare.vercel.app',
+    'https://erp-skillyon-student.vercel.app'
+  ],
   credentials: true
 }));
 app.use(express.json());
