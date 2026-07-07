@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from './routes/user.js';
 import studentRoutes from './routes/students.js';
@@ -17,26 +16,34 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security and Middleware
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
-    'http://localhost:5176',
-    'http://localhost:5177',
-    'https://erp-skillyon-frontend.vercel.app',
-    'https://erp-skillyon-super.vercel.app',
-    'https://erp-skillyon-pare.vercel.app',
-    'https://erp-skillyon-student.vercel.app'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-}));
+// CORS Middleware - manual implementation for Vercel compatibility
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  'http://localhost:5176',
+  'http://localhost:5177',
+  'https://erp-skillyon-frontend.vercel.app',
+  'https://erp-skillyon-super.vercel.app',
+  'https://erp-skillyon-pare.vercel.app',
+  'https://erp-skillyon-student.vercel.app'
+];
 
-// Handle preflight requests explicitly
-app.options('*', cors());
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // Handle preflight OPTIONS request immediately
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 app.use(express.json());
 
