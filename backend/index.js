@@ -26,6 +26,7 @@ const allowedOrigins = [
   'http://localhost:5177',
   'https://erp-skillyon-frontend.vercel.app',
   'https://erp-skillyon-super.vercel.app',
+  'https://erp-skillyon-sa.vercel.app',
   'https://erp-skillyon-pare.vercel.app',
   'https://erp-skillyon-student.vercel.app'
 ];
