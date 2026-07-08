@@ -165,9 +165,10 @@ export default function StudentsPage() {
         parent_password: "",
       });
       fetchStudents();
-    } catch (error) {
-      console.error("Failed to save student", error);
-      alert("Failed to save student. Please check your inputs.");
+    } catch (error: any) {
+      console.error("Failed to save student", error.response?.data || error);
+      const errorDetail = error.response?.data?.details?.[0]?.message || 'Please check your inputs.';
+      alert(`Failed to save student: ${errorDetail}`);
     }
   };
 
@@ -657,6 +658,7 @@ export default function StudentsPage() {
                       editingStudentId ? "••••••••" : "Enter password"
                     }
                     required={!editingStudentId}
+                    minLength={6}
                   />
                   <button
                     type="button"
@@ -704,6 +706,7 @@ export default function StudentsPage() {
                       editingStudentId ? "••••••••" : "Enter parent password"
                     }
                     required={!editingStudentId}
+                    minLength={6}
                   />
                   <button
                     type="button"

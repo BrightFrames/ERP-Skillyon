@@ -37,9 +37,9 @@ export const createStudent = async (req, res, next) => {
       [
         validatedData.name,
         validatedData.father_name || null,
-        validatedData.email, 
-        validatedData.parent_email, 
-        validatedData.class_id,
+        validatedData.email || null, 
+        validatedData.parent_email || null, 
+        validatedData.class_id || null,
         validatedData.gender || 'Unknown',
         validatedData.status || 'Active',
         validatedData.avatar || null,
@@ -175,15 +175,16 @@ export const updateStudent = async (req, res, next) => {
     let passwordQuery = "";
     let params = [
       validatedData.name, 
-      validatedData.email, 
-      validatedData.parent_email, 
-      validatedData.class_id,
+      validatedData.father_name || null,
+      validatedData.email || null, 
+      validatedData.parent_email || null, 
+      validatedData.class_id || null,
       validatedData.gender || 'Unknown',
       validatedData.status || 'Active',
       validatedData.avatar || null,
       id
     ];
-    let paramIndex = 9;
+    let paramIndex = 10;
 
     if (validatedData.password) {
       const hash = await bcrypt.hash(validatedData.password, 10);
@@ -212,8 +213,8 @@ export const updateStudent = async (req, res, next) => {
 
     const { rows } = await pool.query(
       `UPDATE students 
-       SET name = $1, email = $2, parent_email = $3, class_id = $4, gender = $5, status = $6, avatar = $7 ${passwordQuery}
-       WHERE id = $8${schoolFilter} RETURNING *`,
+       SET name = $1, father_name = $2, email = $3, parent_email = $4, class_id = $5, gender = $6, status = $7, avatar = $8 ${passwordQuery}
+       WHERE id = $9${schoolFilter} RETURNING *`,
       params
     );
 
