@@ -6,7 +6,7 @@ import "./styles.css";
 const originalFetch = window.fetch;
 window.fetch = function (url, options) {
   if (typeof url === 'string' && url.startsWith('/api/')) {
-    const apiBase = (import.meta.env.VITE_API_URL || 'https://erp-skillyon-beta.vercel.app').replace(/\/$/, '');
+    const apiBase = (import.meta.env.VITE_API_URL || 'https://erp-skillyon-b.vercel.app').replace(/\/$/, '');
     url = `${apiBase}${url}`;
   }
   return originalFetch(url, options);
