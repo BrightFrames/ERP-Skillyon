@@ -54,11 +54,14 @@ async function migrate() {
     // 4. Create SUPER_ADMIN if not exists
     const adminCheck = await pool.query(`SELECT id FROM staff WHERE role = 'SUPER_ADMIN'`);
     if (adminCheck.rows.length === 0) {
+      const superadminEmail = process.env.SUPERADMIN_EMAIL || 'superadmin@erp.com';
+      const superadminPassword = process.env.SUPERADMIN_PASSWORD || 'password123';
+      const hashedSuperadminPassword = await bcrypt.hash(superadminPassword, 10);
       await pool.query(`
         INSERT INTO staff (name, email, password, role, school_id)
-        VALUES ('Super Admin', 'superadmin@erp.com', $1, 'SUPER_ADMIN', NULL)
-      `, [hashedPassword]);
-      console.log("Super Admin created: superadmin@erp.com / password123");
+        VALUES ('Super Admin', $1, $2, 'SUPER_ADMIN', NULL)
+      `, [superadminEmail, hashedSuperadminPassword]);
+      console.log(`Super Admin created: ${superadminEmail} / ${superadminPassword}`);
     }
 
     // 5. Add school_id to other tables

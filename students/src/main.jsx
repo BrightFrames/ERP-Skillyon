@@ -6,7 +6,7 @@ import "./styles.css";
 const originalFetch = window.fetch;
 window.fetch = function (url, options) {
   if (typeof url === 'string' && url.startsWith('/api/')) {
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
     url = `${apiBase}${url}`;
   }
   return originalFetch(url, options);

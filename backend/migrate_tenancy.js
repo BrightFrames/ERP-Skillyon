@@ -43,14 +43,16 @@ async function migrate() {
     }
 
     // 5. Create SUPER_ADMIN user
-    const hashedPassword = await bcrypt.hash('super-admin-123', 10);
+    const superadminEmail = process.env.SUPERADMIN_EMAIL || 'superadmin@skillyon.com';
+    const superadminPassword = process.env.SUPERADMIN_PASSWORD || 'super-admin-123';
+    const hashedPassword = await bcrypt.hash(superadminPassword, 10);
     await client.query(
       `INSERT INTO staff (name, email, password, role, school_id)
        VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT (email) DO NOTHING`,
-      ['Platform Owner', 'superadmin@skillyon.com', hashedPassword, 'SUPER_ADMIN', null]
+      ['Platform Owner', superadminEmail, hashedPassword, 'SUPER_ADMIN', null]
     );
-    console.log('✅ SUPER_ADMIN user created (superadmin@skillyon.com)');
+    console.log(`✅ SUPER_ADMIN user created (${superadminEmail})`);
 
     await client.query('COMMIT');
     console.log('\n🎉 Multi-tenancy migration completed successfully!');
