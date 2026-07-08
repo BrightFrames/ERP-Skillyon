@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+const apiBase = (import.meta.env.VITE_API_URL || 'https://erp-skillyon-beta.vercel.app').replace(/\/$/, '');
 const api = axios.create({
   baseURL: `${apiBase}/api`,
 });
