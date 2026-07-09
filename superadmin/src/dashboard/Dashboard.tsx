@@ -165,35 +165,44 @@ export default function Dashboard() {
     <div className="flex flex-row h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-hidden text-slate-800 dark:text-slate-200">
       
       {/* ─── Sidebar ─── */}
-      <aside className="w-64 flex-none h-full bg-white dark:bg-slate-950 flex flex-col border-r border-slate-200 dark:border-slate-800 z-20 transition-colors duration-300">
+      <aside className="w-64 flex-none h-full bg-[#0f172a] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] shadow-[4px_0_24px_rgba(0,0,0,0.1)] border-r border-slate-800/50 flex flex-col z-20">
         
         {/* Logo / Branding */}
-        <div className="h-16 flex-none flex items-center gap-3 px-6 border-b border-slate-200 dark:border-slate-800">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Skillyon</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Super Admin</p>
+        <div className="p-6 flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+              <Shield className="w-5 h-5" strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="text-xl font-black tracking-tight text-white leading-tight">
+                Skill<span className="text-indigo-400">yon</span>
+              </h2>
+              <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Super Admin</p>
+            </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
-          <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 px-3 mb-3">Navigation</p>
+        <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto mt-2">
+          <p className="text-[10px] font-bold text-slate-500 tracking-[0.2em] uppercase px-4 mb-3">Navigation</p>
           {NAV_ITEMS.map((item) => {
             const isActive = activeView === item.view
             return (
               <button
                 key={item.view}
                 onClick={() => setActiveView(item.view)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer group ${
+                className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group cursor-pointer ${
                   isActive
-                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
+                    ? 'text-white bg-white/10 shadow-[inset_1px_1px_0_rgba(255,255,255,0.1)] border border-white/10'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
                 }`}
               >
-                <item.icon className="w-5 h-5" />
+                {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500 rounded-r-full" />}
+                <item.icon
+                  className={`w-5 h-5 ${
+                    isActive ? 'text-indigo-400' : 'group-hover:text-indigo-400 transition-colors'
+                  }`}
+                />
                 {t(item.label, lang)}
               </button>
             )
@@ -201,19 +210,19 @@ export default function Dashboard() {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+        <div className="p-4 border-t border-slate-800/50 bg-[#0f172a]/50">
           <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-lg">
-            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {user?.name?.[0] || 'S'}
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center text-sm font-bold border border-white shadow-sm shrink-0">
+              {user?.name?.[0]?.toUpperCase() || 'S'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{user?.name || 'Super Admin'}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user?.email || 'Admin'}</p>
+              <p className="text-sm font-bold text-white truncate leading-tight">{user?.name || 'Super Admin'}</p>
+              <p className="text-[10px] font-semibold text-slate-500 truncate mt-0.5">{user?.email || 'Admin'}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-white hover:bg-rose-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-400 bg-red-400/10 hover:bg-red-500 hover:text-white transition-all border border-red-500/20 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             {t("Sign out", lang)}

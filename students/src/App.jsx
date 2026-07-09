@@ -11,6 +11,8 @@ import {
   FileText,
   ChevronRight,
   Settings,
+  Menu,
+  X,
 } from "lucide-react";
 import StudentSettings from "./StudentSettings";
 import { fetchAndApplySettings } from "./settings";
@@ -55,89 +57,123 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-sky-500/30 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      {/* Top Navigation */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-40 dark:bg-slate-900 dark:border-slate-800/80">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center">
-              <GraduationCap size={18} strokeWidth={2.5} />
+    <div className="flex h-screen bg-[#f8fafc] font-sans text-slate-900 overflow-hidden selection:bg-indigo-500/30 dark:bg-slate-950 dark:text-slate-100">
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Premium Theme */}
+      <aside
+        className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-[#0f172a] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] shadow-[4px_0_24px_rgba(0,0,0,0.1)] border-r border-slate-800/50 flex flex-col transform transition-transform duration-300 ease-in-out md:transform-none ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+      >
+        {/* Brand */}
+        <div className="p-6 flex flex-col gap-1">
+          <div className="flex items-center justify-between md:justify-start gap-3 mb-2">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+              <GraduationCap size={24} strokeWidth={2.5} />
             </div>
-            <span className="font-bold text-lg text-slate-900 tracking-tight dark:text-slate-100">
-              Skillyon
-            </span>
-            <span className="hidden sm:inline-block ml-1 px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[10px] font-bold uppercase tracking-wider dark:bg-slate-800 dark:text-slate-400">
-              Student
-            </span>
-          </div>
-
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setTab(item.id)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
-                  tab === item.id
-                    ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                }`}
-              >
-                <item.icon size={16} strokeWidth={tab === item.id ? 2.5 : 2} />
-                {t(item.label, lang)}
-              </button>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100 dark:bg-slate-850 dark:border-slate-800">
-              <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold dark:bg-slate-800 dark:text-indigo-400">
-                {user.name?.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                {user.name?.split(" ")[0]}
-              </span>
+            <div>
+              <h2 className="text-2xl font-black tracking-tight text-white leading-tight">
+                Skill<span className="text-indigo-400">yon</span>
+              </h2>
+              <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Student Portal</p>
             </div>
             <button
-              onClick={logout}
-              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors dark:hover:bg-rose-950/20 dark:hover:text-rose-400"
-              title="Logout"
+              className="md:hidden text-zinc-400 hover:text-white ml-auto"
+              onClick={() => setIsMobileMenuOpen(false)}
             >
-              <LogOut size={18} />
+              <X size={24} />
             </button>
           </div>
         </div>
 
-        {/* Mobile Nav Scrollable */}
-        <div className="md:hidden border-t border-slate-100 bg-white/80 backdrop-blur-md dark:bg-slate-900/90 dark:border-slate-800">
-          <div className="flex overflow-x-auto px-4 py-2 gap-2 scrollbar-hide">
-            {navItems.map((item) => (
+        {/* Nav links */}
+        <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto mt-2">
+          {navItems.map((item) => {
+            const active = tab === item.id;
+            return (
               <button
                 key={item.id}
-                onClick={() => setTab(item.id)}
-                className={`whitespace-nowrap px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
-                  tab === item.id
-                    ? "bg-sky-50 text-sky-600 border border-sky-100 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-850"
-                    : "text-slate-500 border border-transparent dark:text-slate-400"
+                onClick={() => {
+                  setTab(item.id);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group cursor-pointer ${
+                  active
+                    ? 'text-white bg-white/10 shadow-[inset_1px_1px_0_rgba(255,255,255,0.1)] border border-white/10'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
                 }`}
               >
-                <item.icon size={16} strokeWidth={tab === item.id ? 2.5 : 2} />
+                {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500 rounded-r-full" />}
+                <item.icon size={20} strokeWidth={active ? 2.5 : 2} className={active ? 'text-indigo-400' : 'group-hover:text-indigo-400 transition-colors'} />
                 {t(item.label, lang)}
               </button>
-            ))}
-          </div>
-        </div>
-      </header>
+            );
+          })}
+        </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 w-full max-w-5xl mx-auto p-4 sm:p-6 lg:py-8">
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-          {tab === "dashboard" && <Dashboard user={user} setTab={setTab} />}
-          {tab === "attendance" && <Attendance />}
-          {tab === "academics" && <Academics />}
-          {tab === "fees" && <Fees />}
-          {tab === "settings" && <StudentSettings />}
+        {/* Footer */}
+        <div className="p-4 border-t border-slate-800/50 bg-[#0f172a]/50 mb-4">
+          <button
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-semibold text-red-400 bg-red-400/10 hover:bg-red-500 hover:text-white transition-all border border-red-500/20 cursor-pointer"
+          >
+            <LogOut size={18} />
+            {t("Sign out", lang)}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col w-full md:w-auto h-full overflow-hidden bg-[#f8fafc] dark:bg-slate-950 relative">
+        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-indigo-50/50 to-transparent pointer-events-none dark:from-indigo-950/20"></div>
+        {/* Top Header */}
+        <header className="h-20 shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-6 lg:px-10 z-10 sticky top-0 dark:bg-slate-900/80 dark:border-slate-800/50">
+          <div className="flex items-center gap-4">
+            <button
+              className="md:hidden p-2 -ml-2 text-zinc-650 hover:text-zinc-900 bg-zinc-100 rounded-lg dark:bg-slate-800 dark:text-slate-350"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu size={20} />
+            </button>
+            <div className="text-xl font-bold text-slate-800 dark:text-slate-100">
+              {t(navItems.find((item) => item.id === tab)?.label || "", lang)}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 lg:gap-6 ml-4">
+            <ThemeToggle />
+            <div className="flex items-center gap-3 pl-2 group">
+              <div className="hidden sm:block text-right">
+                <div className="text-sm font-bold text-slate-900 leading-tight dark:text-slate-100">
+                  {user.name}
+                </div>
+                <div className="text-xs font-semibold text-slate-500">
+                  {t("Student", lang)}
+                </div>
+              </div>
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center text-sm font-bold border-2 border-white shadow-md shrink-0 dark:border-slate-800">
+                {user.name?.charAt(0).toUpperCase()}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 z-10 relative">
+          <div className="max-w-5xl mx-auto h-full">
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+              {tab === "dashboard" && <Dashboard user={user} setTab={setTab} />}
+              {tab === "attendance" && <Attendance />}
+              {tab === "academics" && <Academics />}
+              {tab === "fees" && <Fees />}
+              {tab === "settings" && <StudentSettings />}
+            </div>
+          </div>
         </div>
       </main>
     </div>
