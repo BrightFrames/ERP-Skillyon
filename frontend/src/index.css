@@ -44,22 +44,22 @@
 }
 
 html.dark {
-  --background: 222.2 47.4% 6.5%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 47.4% 8.5%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 47.4% 8.5%;
-  --popover-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
+  --background: 224 71.4% 4.1%; /* #030712 */
+  --foreground: 210 20% 95%; /* #f3f4f6 */
+  --card: 222.9 38.9% 7.1%; /* #0b0f19 */
+  --card-foreground: 210 20% 95%;
+  --popover: 222.9 38.9% 7.1%;
+  --popover-foreground: 210 20% 95%;
+  --muted: 215 27.9% 16.9%; /* #1f2937 */
+  --muted-foreground: 215 16.3% 65%; /* #9ca3af */
+  --border: 215 27.9% 16.9%; /* #1f2937 */
+  --input: 215 27.9% 16.9%; /* #1f2937 */
   --primary: 238 49% 59%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  --secondary: 215 27.9% 16.9%;
+  --secondary-foreground: 210 20% 95%;
+  --accent: 215 27.9% 16.9%;
+  --accent-foreground: 210 20% 95%;
   --ring: 238 49% 59%;
   color-scheme: dark;
 }
@@ -105,13 +105,24 @@ html.dark {
     color: hsl(var(--foreground));
   }
 
-  html.dark .bg-white,
-  html.dark .bg-zinc-50,
-  html.dark .bg-slate-50,
-  html.dark .bg-zinc-100,
-  html.dark .bg-slate-100 {
+  html.dark .bg-white {
     background-color: hsl(var(--card)) !important;
     color: hsl(var(--card-foreground)) !important;
+  }
+
+  html.dark .bg-zinc-50,
+  html.dark .bg-slate-50 {
+    background-color: #0e1322 !important;
+  }
+
+  html.dark .bg-zinc-100,
+  html.dark .bg-slate-100 {
+    background-color: #111827 !important;
+  }
+
+  html.dark .bg-zinc-200,
+  html.dark .bg-slate-200 {
+    background-color: #1f2937 !important;
   }
 
   html.dark .border-zinc-200,
@@ -260,6 +271,12 @@ html.density-spacious .py-4 {
 ::view-transition-new(root) {
   z-index: 9999;
   will-change: clip-path;
+}
+
+/* Dark Mode top header background override to match body background */
+html.dark header {
+  background-color: hsl(var(--background) / 80%) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
 /* Disable CSS transitions during the View Transition to prevent lag and double-fades */

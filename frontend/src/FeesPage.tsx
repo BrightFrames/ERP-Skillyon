@@ -339,7 +339,7 @@ export default function FeesPage() {
                     <tr><td colSpan={8} className="px-6 py-10 text-center text-zinc-300">No payment logs found.</td></tr>
                   ) : (
                     payments.map(p => (
-                      <tr key={p.id} className="hover:bg-zinc-50/40 dark:hover:bg-slate-850/15">
+                      <tr key={p.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors">
                         <td className="px-6 py-4 text-zinc-400">#{p.receipt_number}</td>
                         <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">{p.student_name}</td>
                         <td className="px-6 py-4">{p.class_name}</td>
@@ -421,7 +421,7 @@ export default function FeesPage() {
                   <tr><td colSpan={10} className="px-6 py-10 text-center text-zinc-300">No invoices generated yet.</td></tr>
                 ) : (
                   invoices.map(i => (
-                    <tr key={i.id} className="hover:bg-zinc-50/40 dark:hover:bg-slate-850/15">
+                    <tr key={i.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors">
                       <td className="px-6 py-4 text-zinc-400">#{i.invoice_number}</td>
                       <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">{i.student_name}</td>
                       <td className="px-6 py-4">{i.class_name}</td>
@@ -511,7 +511,7 @@ export default function FeesPage() {
                   <tr><td colSpan={9} className="px-6 py-10 text-center text-zinc-300">No fee assignments recorded.</td></tr>
                 ) : (
                   assignments.map(a => (
-                    <tr key={a.id} className="hover:bg-zinc-50/40 dark:hover:bg-slate-850/15">
+                    <tr key={a.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors">
                       <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">{a.student_name}</td>
                       <td className="px-6 py-4">{a.class_name}</td>
                       <td className="px-6 py-4">{a.fee_type_name}</td>

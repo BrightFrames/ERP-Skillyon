@@ -225,7 +225,7 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
                   return (
                     <tr
                       key={school.id}
-                      className="group transition-colors duration-200 hover:bg-slate-50/60 dark:hover:bg-slate-850/40"
+                      className="group transition-colors duration-200 hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10"
                     >
                       {/* School Name & ID */}
                       <td className="px-6 py-4 align-middle">

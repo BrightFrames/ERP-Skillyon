@@ -104,8 +104,8 @@ export default function App() {
                 }}
                 className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group cursor-pointer ${
                   active
-                    ? 'text-white bg-white/10 shadow-[inset_1px_1px_0_rgba(255,255,255,0.1)] border border-white/10'
-                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                    ? 'text-indigo-300 bg-indigo-500/12 border border-indigo-500/30 shadow-[0_4px_12px_rgba(99,102,241,0.08)]'
+                    : 'text-slate-400 hover:bg-indigo-500/5 hover:text-indigo-300'
                 }`}
               >
                 {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500 rounded-r-full" />}
@@ -326,7 +326,7 @@ function Attendance() {
             data.active.map((r, i) => (
               <div
                 key={i}
-                className="px-5 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
+                className="px-5 py-4 flex items-center justify-between hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors"
               >
                 <div>
                   <div className="font-semibold text-slate-800">
@@ -431,7 +431,7 @@ function Academics() {
                   return (
                     <tr
                       key={i}
-                      className="hover:bg-slate-50/50 transition-colors"
+                      className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors"
                     >
                       <td className="px-5 py-4 font-semibold text-slate-800">
                         {m.exam_name}
@@ -513,7 +513,7 @@ function Fees() {
             fees.map((f, i) => (
               <div
                 key={i}
-                className="px-5 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors"
+                className="px-5 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors"
               >
                 <div>
                   <div className="font-bold text-slate-800 text-lg mb-0.5">

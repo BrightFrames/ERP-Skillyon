@@ -142,7 +142,12 @@ html.dark .text-slate-700,
 html.dark .text-slate-600 {
   color: #f3f4f6 !important;
 }
-html.dark header,
+html.dark header {
+  background-color: #030712cc !important;
+  border-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  backdrop-filter: blur(12px);
+}
 html.dark aside,
 html.dark .bg-white {
   background-color: #0b0f19 !important;
@@ -151,7 +156,6 @@ html.dark .bg-white {
   color: #9ca3af !important;
 }
 html.dark aside,
-html.dark header,
 html.dark .bg-white {
   background-color: #0b0f19 !important;
   border-color: #1f2937 !important;

@@ -411,7 +411,7 @@ export default function StudentsPage() {
                 students.map((student, index) => (
                   <tr
                     key={index}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
+                    className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <Link

@@ -596,7 +596,7 @@ export default function ParentFees({ childId }) {
                     <tr><td colSpan={6} className="text-center py-8 text-slate-300">{t("No transactions found.", lang)}</td></tr>
                   ) : (
                     payments.map(p => (
-                      <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-855/10">
+                      <tr key={p.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10">
                         <td className="px-6 py-3.5 text-slate-400">{p.receipt_number}</td>
                         <td className="px-6 py-3.5 text-slate-800 dark:text-slate-200">{getCategoryDetails(p.fee_name).label}</td>
                         <td className="px-6 py-3.5">

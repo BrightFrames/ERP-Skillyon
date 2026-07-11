@@ -201,7 +201,7 @@ export default function WorkersPage() {
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-zinc-300 text-sm">No workers found.</td></tr>
               ) : filtered.map((w, i) => (
-                <tr key={w.id} className="hover:bg-zinc-50/60 transition-colors group">
+                <tr key={w.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${avatarColors[i % avatarColors.length]}`}>

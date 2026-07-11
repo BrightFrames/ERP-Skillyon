@@ -399,7 +399,7 @@ export default function AdminDashboard() {
                 recentStudents.map((s) => (
                   <tr
                     key={s.id}
-                    className="hover:bg-slate-50/80 transition-colors group"
+                    className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors group"
                   >
                     <td className="px-7 py-4">
                       <div className="flex items-center gap-4">
@@ -507,11 +507,11 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="p-4 bg-indigo-50/80 rounded-xl mt-2 border border-indigo-100">
+              <div className="p-4 bg-indigo-50/80 dark:bg-indigo-950/30 rounded-xl mt-2 border border-indigo-100 dark:border-indigo-900/50">
                 <p className="text-xs font-bold text-indigo-500 uppercase tracking-wider">
                   Preview
                 </p>
-                <p className="text-base font-black text-indigo-900 mt-1">
+                <p className="text-base font-black text-indigo-900 dark:text-indigo-200 mt-1">
                   {newGrade || newSection
                     ? `Grade ${newGrade.trim()} - ${newSection.trim().toUpperCase()}`
                     : "Grade ... - ..."}

@@ -267,7 +267,7 @@ export default function MessagesPage() {
                   <button
                     key={student.id}
                     onClick={() => handleSelectStudent(student)}
-                    className="w-full p-4 flex gap-3 text-left hover:bg-slate-50 border-b border-slate-100 last:border-b-0 transition-colors dark:hover:bg-slate-800/50 dark:border-slate-800/60"
+                    className="w-full p-4 flex gap-3 text-left hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 border-b border-slate-100 last:border-b-0 transition-colors dark:border-slate-800/60"
                   >
                     <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 dark:bg-slate-800 dark:text-indigo-300">
                       {student.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()}
@@ -303,8 +303,8 @@ export default function MessagesPage() {
                     <button
                       key={chat.student_id}
                       onClick={() => handleSelectChat(chat)}
-                      className={`w-full p-4 flex gap-3 text-left hover:bg-slate-50 border-b border-slate-100 last:border-b-0 transition-colors relative dark:hover:bg-slate-800/50 dark:border-slate-800/60 ${
-                        isSelected ? 'bg-indigo-50/50 dark:bg-slate-800' : ''
+                      className={`w-full p-4 flex gap-3 text-left hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 border-b border-slate-100 last:border-b-0 transition-colors relative dark:border-slate-800/60 ${
+                        isSelected ? 'bg-indigo-500/10 dark:bg-slate-800' : ''
                       }`}
                     >
                       {isSelected && (

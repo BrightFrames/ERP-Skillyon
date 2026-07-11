@@ -101,7 +101,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-[#f8fafc] font-sans text-slate-900 overflow-hidden selection:bg-indigo-500/30">
+    <div className="flex h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 overflow-hidden selection:bg-indigo-500/30">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
@@ -141,8 +141,8 @@ export default function Layout() {
               className={({ isActive }) =>
                 `flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group ${
                   isActive
-                    ? 'text-white bg-white/10 shadow-[inset_1px_1px_0_rgba(255,255,255,0.1)] border border-white/10'
-                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                    ? 'text-indigo-300 bg-indigo-500/12 border border-indigo-500/30 shadow-[0_4px_12px_rgba(99,102,241,0.08)]'
+                    : 'text-slate-400 hover:bg-indigo-500/5 hover:text-indigo-300'
                 }`
               }
             >
@@ -177,7 +177,7 @@ export default function Layout() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col w-full md:w-auto h-full overflow-hidden bg-[#f8fafc] relative">
+      <main className="flex-1 flex flex-col w-full md:w-auto h-full overflow-hidden bg-[#f8fafc] dark:bg-slate-900/40 relative">
         <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-indigo-50/50 to-transparent pointer-events-none"></div>
         {/* Top Header */}
         <header className="h-20 shrink-0 glass border-b border-slate-200/60 flex items-center justify-between px-6 lg:px-10 z-10 sticky top-0">

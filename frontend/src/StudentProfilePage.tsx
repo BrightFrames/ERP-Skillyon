@@ -224,7 +224,7 @@ export default function StudentProfilePage() {
                   const pct = g ? Math.round((g.score / (a.max_score || 100)) * 100) : null;
                   const gi = pct !== null ? getGrade(pct) : null;
                   return (
-                    <tr key={a.id} className="hover:bg-zinc-50/50 transition-colors">
+                    <tr key={a.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors">
                       <td className="px-6 py-3.5 font-semibold text-zinc-800">{a.name}</td>
                       <td className="px-6 py-3.5 text-center">
                         <span className="px-2 py-1 bg-indigo-50 text-[#3b3dbf] text-[10px] font-bold rounded-full">{a.type}</span>
