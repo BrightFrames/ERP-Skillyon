@@ -27,6 +27,8 @@ import {
   Save,
   Info,
   Palette,
+  Menu,
+  X,
 } from 'lucide-react'
 import api from '../lib/api'
 import SchoolsList from './SchoolsList'
@@ -70,6 +72,7 @@ function getGreeting() {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [schools, setSchools] = useState<SchoolData[]>([])
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<NavView>('dashboard')
@@ -164,8 +167,16 @@ export default function Dashboard() {
   return (
     <div className="flex flex-row h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-hidden text-slate-800 dark:text-slate-200">
       
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/55 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ─── Sidebar ─── */}
-      <aside className="w-64 flex-none h-full bg-[#0f172a] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] shadow-[4px_0_24px_rgba(0,0,0,0.1)] border-r border-slate-800/50 flex flex-col z-20">
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#0f172a] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] shadow-[4px_0_24px_rgba(0,0,0,0.1)] border-r border-slate-800/50 flex flex-col transform transition-transform duration-300 ease-in-out md:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         
         {/* Logo / Branding */}
         <div className="p-6 flex flex-col gap-1">
@@ -179,6 +190,12 @@ export default function Dashboard() {
               </h2>
               <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Super Admin</p>
             </div>
+            <button 
+              className="md:hidden text-slate-400 hover:text-white ml-auto cursor-pointer p-1 rounded-lg hover:bg-white/5"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
@@ -190,7 +207,10 @@ export default function Dashboard() {
             return (
               <button
                 key={item.view}
-                onClick={() => setActiveView(item.view)}
+                onClick={() => {
+                  setActiveView(item.view);
+                  setSidebarOpen(false);
+                }}
                 className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group cursor-pointer ${
                   isActive
                     ? 'text-white bg-white/10 shadow-[inset_1px_1px_0_rgba(255,255,255,0.1)] border border-white/10'
@@ -235,7 +255,13 @@ export default function Dashboard() {
         
         {/* Top Header */}
         <header className="h-16 flex-none bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 lg:px-8 flex items-center justify-between z-10">
-          <div>
+          <div className="flex items-center">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-2 -ml-2 mr-3 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t(viewTitle[activeView].title, lang)}</h2>
           </div>
           <div className="flex items-center gap-4">

@@ -173,10 +173,10 @@ export default function ClassesPage() {
   ];
 
   return (
-    <div className="flex h-full gap-6 text-zinc-900 pb-6">
+    <div className="flex flex-col md:flex-row h-full gap-6 text-zinc-900 pb-6">
 
       {/* LEFT: Class List Panel */}
-      <div className="w-60 shrink-0 flex flex-col gap-3">
+      <div className="w-full md:w-60 shrink-0 flex flex-col gap-3">
         <div>
           <h2 className="text-lg font-bold text-zinc-900">My Classes</h2>
           <p className="text-xs text-zinc-400 font-medium mt-0.5">Select a class to grade</p>
