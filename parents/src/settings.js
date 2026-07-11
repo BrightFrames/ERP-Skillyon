@@ -19,7 +19,7 @@ export function getAppearance() {
   };
 }
 
-function getResolvedTheme(theme) {
+export function getResolvedTheme(theme) {
   if (theme === "dark") return "dark";
   if (theme === "system" && typeof window !== "undefined") {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";

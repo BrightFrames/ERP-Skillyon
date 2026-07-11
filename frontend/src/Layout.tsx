@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useLanguage, t } from './lib/i18n';
 import { fetchAndApplySettings } from './lib/settings';
+import ThemeToggle from './components/ThemeToggle';
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
@@ -204,6 +205,7 @@ export default function Layout() {
           </div>
           
           <div className="flex items-center gap-4 lg:gap-6 ml-4">
+            <ThemeToggle />
 
             <button className="flex items-center gap-3 pl-2 group">
               <div className="hidden sm:block text-right">

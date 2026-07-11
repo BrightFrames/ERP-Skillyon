@@ -6,7 +6,7 @@ export interface AppearanceSettings {
   language: string;
 }
 
-function getResolvedTheme(theme: string): "light" | "dark" {
+export function getResolvedTheme(theme: string): "light" | "dark" {
   if (theme === "dark") return "dark";
   if (theme === "system" && typeof window !== "undefined") {
     return window.matchMedia("(prefers-color-scheme: dark)").matches

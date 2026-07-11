@@ -1,96 +1,53 @@
-import { useState, useEffect } from 'react';
-import { Sun, Moon } from 'lucide-react';
-import { getAppearance, applySettings } from '../lib/settings';
-
-function getResolvedTheme(theme: string) {
-  if (theme === 'dark') return 'dark';
-  if (theme === 'system' && typeof window !== 'undefined') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  return 'light';
-}
+import React from "react";
+import { Sun, Moon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "./ThemeProvider";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState(() => getResolvedTheme(getAppearance().theme));
+  const { resolvedTheme, setTheme } = useTheme();
 
-  useEffect(() => {
-    const handleSync = () => {
-      setTheme(getResolvedTheme(getAppearance().theme));
-    };
-    window.addEventListener('appearance-changed', handleSync);
-    return () => window.removeEventListener('appearance-changed', handleSync);
-  }, []);
-
-  const toggleTheme = (selectedTheme: 'light' | 'dark', event: React.MouseEvent<HTMLButtonElement>) => {
-    if (theme === selectedTheme) return;
-
-    const supportsViewTransition = (document as any).startViewTransition;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (!supportsViewTransition || prefersReducedMotion) {
-      const appearance = getAppearance();
-      appearance.theme = selectedTheme;
-      applySettings(appearance);
-      setTheme(selectedTheme);
-      return;
-    }
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-
-    const transition = (document as any).startViewTransition(() => {
-      const appearance = getAppearance();
-      appearance.theme = selectedTheme;
-      applySettings(appearance);
-      setTheme(selectedTheme);
-    });
-
-    transition.ready.then(() => {
-      const clipPath = [
-        `circle(0px at ${x}px ${y}px)`,
-        `circle(${Math.hypot(window.innerWidth, window.innerHeight)}px at ${x}px ${y}px)`,
-      ];
-      document.documentElement.animate(
-        {
-          clipPath: clipPath,
-        },
-        {
-          duration: 500,
-          easing: 'ease-in-out',
-          pseudoElement: '::view-transition-new(root)',
-        }
-      );
-    });
+  const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const nextTheme = resolvedTheme === "light" ? "dark" : "light";
+    setTheme(nextTheme, event);
   };
 
   return (
-    <div className="flex items-center bg-slate-100/80 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/40 p-1 rounded-full shadow-inner relative select-none">
-      {/* Light Option */}
-      <button
-        onClick={(e) => toggleTheme('light', e)}
-        className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 cursor-pointer ${
-          theme === 'light'
-            ? 'text-white bg-gradient-to-r from-violet-600 to-indigo-600 shadow-[0_2px_10px_rgba(91,61,245,0.4)] scale-105'
-            : 'text-slate-500 hover:text-slate-800 hover:scale-105'
-        }`}
-        title="Light Mode"
-      >
-        <Sun size={16} strokeWidth={2.5} className={theme === 'light' ? 'drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]' : ''} />
-      </button>
+    <motion.button
+      onClick={handleToggle}
+      className="relative flex items-center justify-center w-9 h-9 rounded-full border border-slate-200/50 bg-white/60 backdrop-blur-md shadow-sm hover:shadow-md dark:border-slate-800/50 dark:bg-slate-900/60 dark:shadow-[0_0_15px_rgba(99,102,241,0.15)] text-slate-700 dark:text-indigo-400 cursor-pointer overflow-hidden outline-none select-none"
+      whileHover={{ scale: 1.05, y: -1 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      title={resolvedTheme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+      aria-label={resolvedTheme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+    >
+      <span className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-purple-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
 
-      {/* Dark Option */}
-      <button
-        onClick={(e) => toggleTheme('dark', e)}
-        className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 cursor-pointer ${
-          theme === 'dark'
-            ? 'text-white bg-gradient-to-r from-violet-600 to-indigo-600 shadow-[0_2px_10px_rgba(91,61,245,0.4)] scale-105'
-            : 'text-slate-400 hover:text-slate-200 dark:hover:text-slate-100 hover:scale-105'
-        }`}
-        title="Dark Mode"
-      >
-        <Moon size={16} strokeWidth={2.5} className={theme === 'dark' ? 'drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]' : ''} />
-      </button>
-    </div>
+      <AnimatePresence mode="wait" initial={false}>
+        {resolvedTheme === "light" ? (
+          <motion.span
+            key="sun"
+            className="flex items-center justify-center"
+            initial={{ rotate: -90, scale: 0.4, opacity: 0 }}
+            animate={{ rotate: 0, scale: 1, opacity: 1 }}
+            exit={{ rotate: 90, scale: 0.4, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+          >
+            <Sun size={16} strokeWidth={2.5} className="text-amber-500 filter drop-shadow-[0_0_2px_rgba(245,158,11,0.2)]" />
+          </motion.span>
+        ) : (
+          <motion.span
+            key="moon"
+            className="flex items-center justify-center"
+            initial={{ rotate: -90, scale: 0.4, opacity: 0 }}
+            animate={{ rotate: 0, scale: 1, opacity: 1 }}
+            exit={{ rotate: 90, scale: 0.4, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+          >
+            <Moon size={16} strokeWidth={2.5} className="text-indigo-400 filter drop-shadow-[0_0_8px_rgba(129,140,248,0.4)]" />
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.button>
   );
 }

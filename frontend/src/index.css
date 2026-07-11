@@ -259,4 +259,15 @@ html.density-spacious .py-4 {
 }
 ::view-transition-new(root) {
   z-index: 9999;
+  will-change: clip-path;
+}
+
+/* Disable CSS transitions during the View Transition to prevent lag and double-fades */
+html.view-transition-active,
+html.view-transition-active body,
+html.view-transition-active *,
+html.view-transition-active *::before,
+html.view-transition-active *::after {
+  transition: none !important;
+  animation: none !important;
 }
