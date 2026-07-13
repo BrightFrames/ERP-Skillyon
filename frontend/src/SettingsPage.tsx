@@ -20,8 +20,6 @@ const SECTIONS = [
   { id: "profile", label: "Profile", icon: User },
   { id: "security", label: "Security", icon: Lock },
   { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "appearance", label: "Appearance", icon: Palette },
-  { id: "system", label: "System", icon: Globe },
 ];
 
 export default function SettingsPage() {

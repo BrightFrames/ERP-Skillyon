@@ -4,16 +4,18 @@ import api from "./lib/api";
 import {
   GraduationCap,
   ShieldCheck,
-  Shield,
-  User,
-  Briefcase,
   AtSign,
   Lock,
   Eye,
   EyeOff,
   ChevronRight,
-  Zap,
+  ArrowRight,
+  Shield,
+  User,
+  Briefcase,
 } from "lucide-react";
+import ThemeToggle from "./components/ThemeToggle";
+import { motion } from "framer-motion";
 
 const DEMO_ACCOUNTS = [
   {
@@ -21,10 +23,7 @@ const DEMO_ACCOUNTS = [
     label: "Admin",
     email: "admin@school.erp",
     password: "demo-password",
-    name: "System Admin",
     icon: Shield,
-    color: "bg-violet-50 border-violet-200 text-violet-700",
-    activeColor: "border-[#3b3dbf] bg-indigo-50 text-[#3b3dbf]",
     desc: "Full system access",
   },
   {
@@ -32,10 +31,7 @@ const DEMO_ACCOUNTS = [
     label: "Teacher",
     email: "sarah.j@school.edu",
     password: "demo-password",
-    name: "Sarah Jenkins",
     icon: User,
-    color: "bg-teal-50 border-teal-200 text-teal-700",
-    activeColor: "border-[#3b3dbf] bg-indigo-50 text-[#3b3dbf]",
     desc: "Gradebook & students",
   },
   {
@@ -43,10 +39,7 @@ const DEMO_ACCOUNTS = [
     label: "Staff",
     email: "janice.d@school.edu",
     password: "demo-password",
-    name: "Janice Doe",
     icon: Briefcase,
-    color: "bg-orange-50 border-orange-200 text-orange-700",
-    activeColor: "border-[#3b3dbf] bg-indigo-50 text-[#3b3dbf]",
     desc: "Fees & records",
   },
 ];
@@ -60,7 +53,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Auto-fill credentials when role changes
+  // Initialize with admin credentials
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) navigate("/");
+  }, [navigate]);
+
   const selectRole = (r: "admin" | "teacher" | "staff") => {
     const acc = DEMO_ACCOUNTS.find((a) => a.role === r)!;
     setRole(r);
@@ -68,11 +66,6 @@ export default function LoginPage() {
     setPassword(acc.password);
     setError("");
   };
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) navigate("/");
-  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,252 +85,330 @@ export default function LoginPage() {
     }
   };
 
-  const currentAcc = DEMO_ACCOUNTS.find((a) => a.role === role)!;
-
   return (
-    <div className="min-h-screen bg-linear-to-br from-background via-background to-primary/10 flex flex-col items-center justify-center p-4">
-      <div className="flex flex-col lg:flex-row w-full max-w-5xl bg-card rounded-3xl shadow-2xl shadow-indigo-100/50 overflow-hidden border border-border min-h-150">
-        {/* Left Panel — Branding */}
-        <div className="hidden lg:flex lg:w-5/12 bg-linear-to-br from-[#3b3dbf] via-[#3035b5] to-[#1e20a0] text-white p-12 flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-black opacity-10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans px-4 text-slate-900 dark:text-slate-100 transition-colors duration-500">
+      {/* Premium Dynamic Background Grid & Mesh */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-100/40 via-slate-50 to-slate-100 dark:from-indigo-950/20 dark:via-slate-955 dark:to-slate-955 pointer-events-none transition-colors duration-500"></div>
+      
+      {/* Floating Animated Background Orbs */}
+      <motion.div 
+        className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-indigo-500/10 dark:bg-indigo-500/5 blur-[120px] pointer-events-none"
+        animate={{
+          x: [0, 40, 0],
+          y: [0, -50, 0],
+        }}
+        transition={{
+          duration: 15,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div 
+        className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-purple-500/10 dark:bg-purple-500/5 blur-[120px] pointer-events-none"
+        animate={{
+          x: [0, -50, 0],
+          y: [0, 40, 0],
+        }}
+        transition={{
+          duration: 18,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
 
+      {/* Floating Theme Toggle */}
+      <div className="absolute top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
+      {/* Glassmorphic Container Wrapper */}
+      <motion.div 
+        className="relative w-full max-w-5xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl shadow-[0_30px_100px_-20px_rgba(99,102,241,0.15)] dark:shadow-[0_30px_100px_-20px_rgba(0,0,0,0.8)] border border-slate-255/60 dark:border-slate-800/80 overflow-hidden flex flex-col lg:flex-row min-h-[600px]"
+        initial={{ opacity: 0, y: 40, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {/* Left Branding Panel */}
+        <div className="w-full lg:w-5/12 bg-gradient-to-br from-[#3b3dbf] via-[#3035b5] to-[#1e20a0] text-white p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden shrink-0">
+          {/* Internal Glow Effects */}
+          <div className="absolute top-0 right-0 w-82 h-82 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/20 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
+
+          {/* Top Logo Section */}
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-12">
-              <div className="bg-white/20 p-2.5 rounded-xl">
-                <GraduationCap size={26} strokeWidth={2.5} />
+            <motion.div 
+              className="flex items-center gap-3.5 mb-10"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              <div className="bg-white/20 p-2.5 rounded-2xl shadow-inner backdrop-blur-md">
+                <GraduationCap size={28} strokeWidth={2.5} className="animate-float text-indigo-100" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">
-                  Skillyon ERP
+                <h1 className="text-2xl font-black tracking-tight leading-none">
+                  Skillyon
                 </h1>
-                <p className="text-indigo-300 text-[10px] font-bold tracking-wider uppercase">
-                  Skillyon Platform
+                <p className="text-indigo-200 text-[10px] font-bold tracking-[0.2em] uppercase mt-1">
+                  ERP Platform
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <h2 className="text-4xl font-bold leading-tight mb-4">
+            <motion.h2 
+              className="text-3xl lg:text-4xl font-extrabold leading-tight mb-5 tracking-tight"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
               Manage your school
               <br />
               smarter, together.
-            </h2>
-            <p className="text-indigo-200 text-sm leading-relaxed max-w-xs">
-              Gradebooks, fees, attendance, staff management and analytics — all
-              in one place.
-            </p>
+            </motion.h2>
+            
+            <motion.p 
+              className="text-indigo-100 text-sm leading-relaxed max-w-xs font-medium"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              Streamlined gradebooks, analytics, fees, staff management and records — consolidated into a unified workspace.
+            </motion.p>
 
-            {/* Feature pills */}
-            <div className="flex flex-wrap gap-2 mt-8">
+            {/* Feature Badges */}
+            <motion.div 
+              className="flex flex-wrap gap-2 mt-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+            >
               {[
                 "Gradebook",
-                "Fee Tracking",
-                "Staff Mgmt",
-                "Reports",
+                "Fees Tracking",
+                "Staff Management",
+                "Reports & Analytics",
                 "Attendance",
-              ].map((f) => (
+              ].map((f, i) => (
                 <span
                   key={f}
-                  className="px-3 py-1 bg-white/10 border border-white/10 rounded-full text-xs font-semibold text-indigo-100"
+                  className="px-3.5 py-1.5 bg-white/10 border border-white/10 hover:border-white/20 hover:bg-white/15 rounded-full text-xs font-bold text-indigo-55 transition-all duration-200"
                 >
                   {f}
                 </span>
               ))}
-            </div>
+            </motion.div>
           </div>
 
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4">
-              <ShieldCheck className="text-indigo-300 shrink-0" size={22} />
+          {/* Bottom Security Badge */}
+          <motion.div 
+            className="relative z-10 mt-10 lg:mt-0"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            <div className="inline-flex items-center gap-3.5 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 shadow-lg shadow-black/10">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <ShieldCheck className="text-indigo-200" size={22} />
+              </div>
               <div>
-                <p className="text-sm font-bold">Secure Access Portal</p>
-                <p className="text-xs text-indigo-300">
-                  Role-based authentication · JWT secured
+                <p className="text-sm font-extrabold leading-none">Secure Access Portal</p>
+                <p className="text-[11px] text-indigo-200 mt-1">
+                  Role-based authorization · JWT encryption
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Right Panel — Form */}
-        <div className="w-full lg:w-7/12 p-8 md:p-12 flex flex-col justify-center">
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-1 lg:hidden">
-              <GraduationCap size={22} className="text-[#3b3dbf]" />
-              <span className="text-base font-bold text-[#3b3dbf]">
+        {/* Right Form Panel */}
+        <div className="w-full lg:w-7/12 p-8 lg:p-14 flex flex-col justify-center bg-white/30 dark:bg-slate-900/30 transition-colors duration-500">
+          <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            {/* Mobile Header Logo */}
+            <div className="flex items-center gap-2 mb-2 lg:hidden">
+              <div className="bg-[#3b3dbf] p-1.5 rounded-lg text-white">
+                <GraduationCap size={20} strokeWidth={2.5} />
+              </div>
+              <span className="text-lg font-black text-[#3b3dbf] tracking-tight">
                 Skillyon ERP
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Welcome back
             </h2>
-            <p className="text-muted-foreground text-sm">
-              Select a demo role below to auto-fill credentials
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">
+              Select a console role below to test or enter custom credentials.
             </p>
-          </div>
+          </motion.div>
 
-          {/* Demo Role Cards */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {DEMO_ACCOUNTS.map((acc) => (
-              <button
-                key={acc.role}
-                type="button"
-                onClick={() => selectRole(acc.role)}
-                className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border-2 transition-all ${
-                  role === acc.role
-                    ? acc.activeColor + " shadow-md shadow-indigo-100"
-                    : "border-border text-muted-foreground hover:border-border/80 hover:bg-muted"
-                }`}
-              >
-                <acc.icon size={18} />
-                <span className="text-xs font-bold">{acc.label}</span>
-                <span className="text-[10px] font-medium opacity-60">
-                  {acc.desc}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Credential Hint */}
-          <div className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-5 flex items-center gap-3">
-            <Zap size={14} className="text-[#3b3dbf] shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-primary">
-                Demo credentials auto-filled
-              </p>
-              <p className="text-[10px] text-muted-foreground font-medium truncate">
-                {currentAcc.email} · password: demo-password
-              </p>
-            </div>
-            <ChevronRight
-              size={14}
-              className="text-muted-foreground shrink-0"
-            />
-          </div>
+          {/* Role Cards Selector */}
+          <motion.div 
+            className="grid grid-cols-3 gap-3 mb-6"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.4 }}
+          >
+            {DEMO_ACCOUNTS.map((acc) => {
+              const Icon = acc.icon;
+              const isActive = role === acc.role;
+              return (
+                <motion.button
+                  key={acc.role}
+                  type="button"
+                  onClick={() => selectRole(acc.role)}
+                  className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl border-2 transition-all cursor-pointer relative overflow-hidden ${
+                    isActive
+                      ? "border-[#3b3dbf] bg-indigo-50/50 dark:bg-indigo-955/20 text-[#3b3dbf] dark:text-indigo-350 shadow-md shadow-indigo-50/40 dark:shadow-none"
+                      : "border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-350 dark:hover:border-slate-700"
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Icon size={18} className={isActive ? "text-[#3b3dbf] dark:text-indigo-400" : ""} />
+                  <span className="text-xs font-extrabold">{acc.label}</span>
+                  <span className="text-[9px] font-bold opacity-60 text-center leading-none mt-0.5">
+                    {acc.desc}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </motion.div>
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-5 text-sm font-medium">
+            <motion.div 
+              className="bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-450 px-4 py-3 rounded-2xl mb-6 text-sm font-semibold flex items-center gap-2"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
               {error}
-            </div>
+            </motion.div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-muted-foreground mb-1.5">
+          <form onSubmit={handleLogin} className="space-y-5">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+            >
+              <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
                 Email Address
               </label>
-              <div className="relative">
+              <div className="relative group">
                 <AtSign
                   size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3b3dbf] transition-colors"
                 />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-muted focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
+                  placeholder="name@school.com"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/80 focus:bg-white dark:focus:bg-slate-950 focus:outline-none focus:ring-4 focus:ring-[#3b3dbf]/15 focus:border-[#3b3dbf] transition-all text-sm font-semibold text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-muted-foreground">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Password
                 </label>
                 <a
                   href="#"
-                  className="text-xs font-bold text-primary hover:text-primary/80"
+                  className="text-xs font-bold text-[#3b3dbf] dark:text-indigo-400 hover:underline"
                 >
                   Forgot Password?
                 </a>
               </div>
-              <div className="relative">
+              <div className="relative group">
                 <Lock
                   size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3b3dbf] transition-colors"
                 />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-11 py-3 rounded-xl border border-border bg-muted focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium tracking-widest"
+                  placeholder="••••••••"
+                  className="w-full pl-12 pr-12 py-3.5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/80 focus:bg-white dark:focus:bg-slate-955 focus:outline-none focus:ring-4 focus:ring-[#3b3dbf]/15 focus:border-[#3b3dbf] transition-all text-sm font-semibold text-slate-800 dark:text-slate-200"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-655 dark:hover:text-slate-350 transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-center gap-2 pt-1">
+            <motion.div 
+              className="flex items-center gap-2.5 pt-1.5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.4 }}
+            >
               <input
                 id="remember"
                 type="checkbox"
-                className="w-4 h-4 rounded border-border text-primary accent-primary"
+                className="w-4.5 h-4.5 rounded-md border-slate-200 dark:border-slate-800 text-[#3b3dbf] accent-[#3b3dbf] cursor-pointer"
               />
               <label
                 htmlFor="remember"
-                className="text-xs font-semibold text-muted-foreground"
+                className="text-xs font-bold text-slate-550 dark:text-slate-400 cursor-pointer select-none"
               >
                 Keep me logged in for 30 days
               </label>
-            </div>
+            </motion.div>
 
-            <button
-              type="submit"
-              disabled={loading || !email || !password}
-              className="w-full bg-primary hover:bg-primary/90 active:scale-[0.99] text-primary-foreground font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200/50 hover:shadow-indigo-300/60 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.4 }}
             >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  Sign In <ChevronRight size={16} />
-                </>
-              )}
-            </button>
+              <motion.button
+                type="submit"
+                disabled={loading || !email || !password}
+                className="w-full bg-[#3b3dbf] hover:bg-[#3035b5] text-white font-extrabold py-4 rounded-2xl shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-3 cursor-pointer"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign In <ArrowRight size={16} strokeWidth={2.5} />
+                  </>
+                )}
+              </motion.button>
+            </motion.div>
           </form>
-
-          {/* All accounts reference */}
-          <div className="mt-6 pt-5 border-t border-zinc-100">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">
-              All Demo Accounts
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.role}
-                  onClick={() => selectRole(acc.role)}
-                  className="text-left p-2.5 rounded-xl bg-zinc-50 hover:bg-indigo-50 border border-zinc-100 hover:border-indigo-100 transition-colors"
-                >
-                  <p className="text-[10px] font-bold text-zinc-500">
-                    {acc.name}
-                  </p>
-                  <p className="text-[10px] text-zinc-400 font-medium truncate">
-                    {acc.email}
-                  </p>
-                  <span className="inline-block mt-1 text-[9px] font-bold uppercase tracking-wider text-[#3b3dbf] bg-indigo-50 px-1.5 py-0.5 rounded-full">
-                    {acc.role}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
-      </div>
+      </motion.div>
 
-      <p className="mt-8 text-xs text-zinc-400">
+      <motion.p 
+        className="absolute bottom-6 text-xs text-slate-400 dark:text-slate-600 font-bold z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+      >
         © 2024 Skillyon ERP · Skillyon Platform · Authorized access only
-      </p>
+      </motion.p>
     </div>
   );
 }

@@ -34,7 +34,6 @@ const navItems = [
   { id: "fees", label: "Fees", icon: CreditCard },
   { id: "communication", label: "Messages", icon: MessageSquare },
   { id: "transport", label: "Transport", icon: Bus },
-  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export default function App() {

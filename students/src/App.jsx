@@ -53,7 +53,6 @@ export default function App() {
     { id: "attendance", label: "Attendance", icon: Calendar },
     { id: "academics", label: "Academics", icon: GraduationCap },
     { id: "fees", label: "Fees", icon: CreditCard },
-    { id: "settings", label: "Settings", icon: Settings },
   ];
 
   return (

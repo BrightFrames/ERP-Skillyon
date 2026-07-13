@@ -93,11 +93,12 @@ export default function Layout() {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    const currentPath = location.pathname;
-    const newSearchParams = new URLSearchParams(location.search);
-    if (val) { newSearchParams.set('search', val); } else { newSearchParams.delete('search'); }
+    const newSearchParams = new URLSearchParams();
+    if (val) {
+      newSearchParams.set('search', val);
+    }
     const searchString = newSearchParams.toString();
-    navigate(`${currentPath}${searchString ? '?' + searchString : ''}`, { replace: true });
+    navigate(`/students${searchString ? '?' + searchString : ''}`, { replace: true });
   };
 
   return (
