@@ -79,6 +79,41 @@ export const getStudents = async (req, res, next) => {
       paramIndex++;
     }
 
+    // Role-based filtering for Teachers
+    if (req.user && String(req.user.role).toUpperCase() === 'TEACHER') {
+      const teacherRes = await pool.query(
+        'SELECT is_class_teacher, class_teacher_of, assigned_classes FROM staff WHERE id = $1',
+        [req.user.id]
+      );
+      if (teacherRes.rows.length === 0) {
+        return res.status(200).json({ data: [], total: 0, metrics: { male: 0, female: 0, newEnrollments: 0 }, page, limit });
+      }
+      const teacher = teacherRes.rows[0];
+      const permittedClassIds = new Set();
+      if (teacher.is_class_teacher && teacher.class_teacher_of) {
+        permittedClassIds.add(parseInt(teacher.class_teacher_of, 10));
+      }
+      let rawAssigned = teacher.assigned_classes;
+      if (typeof rawAssigned === 'string') {
+        try { rawAssigned = JSON.parse(rawAssigned); } catch { rawAssigned = []; }
+      }
+      if (Array.isArray(rawAssigned)) {
+        rawAssigned.forEach(cid => {
+          const parsed = parseInt(cid, 10);
+          if (!isNaN(parsed)) permittedClassIds.add(parsed);
+        });
+      }
+
+      const allowedArray = Array.from(permittedClassIds);
+      if (allowedArray.length === 0) {
+        return res.status(200).json({ data: [], total: 0, metrics: { male: 0, female: 0, newEnrollments: 0 }, page, limit });
+      }
+
+      whereClauses.push(`s.class_id = ANY($${paramIndex}::int[])`);
+      params.push(allowedArray);
+      paramIndex++;
+    }
+
     if (search) {
       whereClauses.push(`(s.name ILIKE $${paramIndex} OR s.email ILIKE $${paramIndex} OR c.name ILIKE $${paramIndex})`);
       params.push(`%${search}%`);

@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const apiBase = (import.meta.env.VITE_API_URL || 'https://erp-skillyon-b.vercel.app').replace(/\/$/, '');
+const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const apiBase = isLocal 
+  ? 'http://localhost:5000' 
+  : (import.meta.env.VITE_API_URL || 'https://erp-skillyon-b.vercel.app').replace(/\/$/, '');
 const api = axios.create({
   baseURL: `${apiBase}/api`,
 });

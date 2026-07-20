@@ -115,7 +115,7 @@ export default function Layout() {
       <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-[#0f172a] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] shadow-[4px_0_24px_rgba(0,0,0,0.1)] border-r border-slate-800/50 flex flex-col transform transition-transform duration-300 ease-in-out md:transform-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="p-6 flex flex-col gap-1">
           <div className="flex items-center justify-between md:justify-start gap-3 mb-2">
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+            <div className="bg-[#3b3dbf] p-2 rounded-xl text-white shadow-sm">
               <GraduationCap size={24} strokeWidth={2.5} />
             </div>
             <div>
@@ -149,7 +149,7 @@ export default function Layout() {
             >
               {({ isActive }) => (
                 <>
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-400 to-purple-500 rounded-r-full" />}
+                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 rounded-r-full" />}
                   <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-indigo-400' : 'group-hover:text-indigo-400 transition-colors'} />
                   {t(item.name, lang)}
                 </>
@@ -159,7 +159,7 @@ export default function Layout() {
         </nav>
 
         <div className="p-4 space-y-3 mb-4">
-          <button className="flex w-full items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 transition-all border border-slate-700 shadow-sm hover:shadow-md">
+          <button className="flex w-full items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-semibold text-white bg-indigo-600/80 hover:bg-indigo-600 transition-all border border-indigo-500/30 shadow-sm hover:shadow-md cursor-pointer">
             <Headset size={18} />
             {t("Support Center", lang)}
           </button>
@@ -178,10 +178,9 @@ export default function Layout() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col w-full md:w-auto h-full overflow-hidden bg-[#f8fafc] dark:bg-slate-900/40 relative">
-        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-indigo-50/50 to-transparent pointer-events-none"></div>
+      <main className="flex-1 flex flex-col w-full md:w-auto h-full overflow-hidden bg-zinc-50 dark:bg-zinc-950 relative">
         {/* Top Header */}
-        <header className="h-20 shrink-0 glass border-b border-slate-200/60 flex items-center justify-between px-6 lg:px-10 z-10 sticky top-0">
+        <header className="h-20 shrink-0 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-6 lg:px-10 z-10 sticky top-0">
           <div className="flex items-center flex-1 gap-4">
             <button 
               className="md:hidden p-2 -ml-2 text-zinc-600 hover:text-zinc-900 bg-zinc-100 rounded-lg"

@@ -10,10 +10,10 @@
   --color-brand-600: #4f46e5;
   --color-brand-700: #4338ca;
   
-  --color-surface-dark: #0a0e1a;
-  --color-surface-sidebar: #0d1117;
-  --color-surface-card: #111827;
-  --color-surface-elevated: #1a1f2e;
+  --color-surface-dark: #09090b;
+  --color-surface-sidebar: #09090b;
+  --color-surface-card: #18181b;
+  --color-surface-elevated: #27272a;
 }
 
 @layer base {
@@ -122,11 +122,11 @@
    DARK THEME OVERRIDES
    ========================================== */
 html.dark {
-  background-color: #030712 !important;
+  background-color: #09090b !important;
   color-scheme: dark;
 }
 html.dark body {
-  background-color: #030712 !important;
+  background-color: #09090b !important;
   color: #f3f4f6;
 }
 html.dark .text-white,
@@ -136,49 +136,41 @@ html.dark .text-gray-900,
 html.dark .text-gray-800,
 html.dark .text-gray-700,
 html.dark .text-gray-600,
-html.dark .text-slate-900,
 html.dark .text-slate-800,
 html.dark .text-slate-700,
 html.dark .text-slate-600 {
   color: #f3f4f6 !important;
 }
 html.dark header {
-  background-color: #030712cc !important;
-  border-color: #1f2937 !important;
+  background-color: #09090bcc !important;
+  border-color: #27272a !important;
   color: #f3f4f6 !important;
   backdrop-filter: blur(12px);
 }
 html.dark aside,
 html.dark .bg-white {
-  background-color: #0b0f19 !important;
-  border-color: #1f2937 !important;
-  color: #f3f4f6 !important;
-  color: #9ca3af !important;
-}
-html.dark aside,
-html.dark .bg-white {
-  background-color: #0b0f19 !important;
-  border-color: #1f2937 !important;
+  background-color: #18181b !important;
+  border-color: #27272a !important;
   color: #f3f4f6 !important;
 }
 html.dark .border-slate-100,
 html.dark .border-slate-200 {
-  border-color: #1f2937 !important;
+  border-color: #27272a !important;
 }
 html.dark .bg-slate-50 {
-  background-color: #0e1322 !important;
+  background-color: #09090b !important;
 }
 html.dark .bg-slate-100 {
-  background-color: #111827 !important;
+  background-color: #18181b !important;
 }
 html.dark .bg-slate-200 {
-  background-color: #1f2937 !important;
+  background-color: #27272a !important;
 }
 html.dark input,
 html.dark select,
 html.dark textarea {
-  background-color: #111827 !important;
-  border-color: #374151 !important;
+  background-color: #09090b !important;
+  border-color: #27272a !important;
   color: #f3f4f6 !important;
 }
 html.dark input::placeholder,

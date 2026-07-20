@@ -13,7 +13,15 @@ export const login = async (req, res, next) => {
 
     // Real staff from DB — password check (join with schools for tenant info)
     const { rows } = await pool.query(
-      'SELECT s.id, s.name, s.email, s.role, s.subject, s.password, s.school_id, sc.name as school_name, sc.subscription_status FROM staff s LEFT JOIN schools sc ON s.school_id = sc.id WHERE s.email = $1',
+      `SELECT 
+        s.id, s.name, s.email, s.role, s.subject, s.password, s.school_id,
+        s.is_class_teacher, s.class_teacher_of, s.assigned_classes, s.assigned_subjects,
+        sc.name as school_name, sc.subscription_status,
+        c.name AS class_teacher_of_name
+       FROM staff s 
+       LEFT JOIN schools sc ON s.school_id = sc.id 
+       LEFT JOIN classes c ON s.class_teacher_of = c.id
+       WHERE s.email = $1`,
       [email]
     );
     if (rows.length === 0) {
@@ -53,6 +61,11 @@ export const login = async (req, res, next) => {
         subject: user.subject || null,
         school_id: user.school_id || null,
         school_name: user.school_name || null,
+        is_class_teacher: user.is_class_teacher || false,
+        class_teacher_of: user.class_teacher_of || null,
+        class_teacher_of_name: user.class_teacher_of_name || null,
+        assigned_classes: user.assigned_classes || [],
+        assigned_subjects: user.assigned_subjects || []
       }
     });
 
@@ -186,7 +199,13 @@ export const getProfile = async (req, res, next) => {
 
     // Secure Parameterized Query
     const { rows } = await pool.query(
-      'SELECT id, name, email, role, subject, join_date FROM staff WHERE id = $1', 
+      `SELECT 
+        s.id, s.name, s.email, s.role, s.subject, s.join_date,
+        s.is_class_teacher, s.class_teacher_of, s.assigned_classes, s.assigned_subjects,
+        c.name AS class_teacher_of_name
+       FROM staff s 
+       LEFT JOIN classes c ON s.class_teacher_of = c.id
+       WHERE s.id = $1`, 
       [userId]
     );
 

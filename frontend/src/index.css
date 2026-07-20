@@ -25,42 +25,42 @@
 
 :root {
   --background: 0 0% 100%;
-  --foreground: 222.2 47.4% 11.2%;
+  --foreground: 240 10% 3.9%;
   --card: 0 0% 100%;
-  --card-foreground: 222.2 47.4% 11.2%;
+  --card-foreground: 240 10% 3.9%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --primary: 238 49% 49%;
+  --popover-foreground: 240 10% 3.9%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --primary: 239 53% 49%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --ring: 238 49% 49%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --ring: 239 53% 49%;
 }
 
 html.dark {
-  --background: 224 71.4% 4.1%; /* #030712 */
-  --foreground: 210 20% 95%; /* #f3f4f6 */
-  --card: 222.9 38.9% 7.1%; /* #0b0f19 */
-  --card-foreground: 210 20% 95%;
-  --popover: 222.9 38.9% 7.1%;
-  --popover-foreground: 210 20% 95%;
-  --muted: 215 27.9% 16.9%; /* #1f2937 */
-  --muted-foreground: 215 16.3% 65%; /* #9ca3af */
-  --border: 215 27.9% 16.9%; /* #1f2937 */
-  --input: 215 27.9% 16.9%; /* #1f2937 */
-  --primary: 238 49% 59%;
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 239 84% 67%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 215 27.9% 16.9%;
-  --secondary-foreground: 210 20% 95%;
-  --accent: 215 27.9% 16.9%;
-  --accent-foreground: 210 20% 95%;
-  --ring: 238 49% 59%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --ring: 239 84% 67%;
   color-scheme: dark;
 }
 
@@ -112,17 +112,17 @@ html.dark {
 
   html.dark .bg-zinc-50,
   html.dark .bg-slate-50 {
-    background-color: #0e1322 !important;
+    background-color: #09090b !important;
   }
 
   html.dark .bg-zinc-100,
   html.dark .bg-slate-100 {
-    background-color: #111827 !important;
+    background-color: #18181b !important;
   }
 
   html.dark .bg-zinc-200,
   html.dark .bg-slate-200 {
-    background-color: #1f2937 !important;
+    background-color: #27272a !important;
   }
 
   html.dark .border-zinc-200,

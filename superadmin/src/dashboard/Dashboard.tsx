@@ -181,7 +181,7 @@ export default function Dashboard() {
         {/* Logo / Branding */}
         <div className="p-6 flex flex-col gap-1">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30">
+            <div className="bg-[#3b3dbf] p-2 rounded-xl text-white shadow-sm">
               <Shield className="w-5 h-5" strokeWidth={2.5} />
             </div>
             <div>
