@@ -1,6 +1,6 @@
-import { Plus, Edit2, TrendingUp, Users, BookOpen, AlertTriangle, ChevronRight } from 'lucide-react';
+import { Plus, Edit2, TrendingUp, Users, BookOpen, AlertTriangle, ChevronRight, Upload, FileText, Trash2, Paperclip, Download, X, CheckCircle2, Clock } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import api from './lib/api';
 
 export default function ClassesPage() {
@@ -14,7 +14,30 @@ export default function ClassesPage() {
   const [editingGrade, setEditingGrade] = useState<{ studentId: number; assessmentId: number } | null>(null);
   const [tempScore, setTempScore] = useState<string>('');
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
-  const [newAssessment, setNewAssessment] = useState({ name: '', type: 'Quiz', max_score: '100' });
+  const [newAssessment, setNewAssessment] = useState<{
+    name: string;
+    type: string;
+    max_score: string;
+    due_date: string;
+    description: string;
+    attachment_name: string;
+    attachment_data: string;
+    questions: { id: string; text: string; points: number }[];
+  }>({
+    name: '',
+    type: 'Assignment',
+    max_score: '100',
+    due_date: '',
+    description: '',
+    attachment_name: '',
+    attachment_data: '',
+    questions: [],
+  });
+
+  const [activeSubmissionsModal, setActiveSubmissionsModal] = useState<any | null>(null);
+  const [submissionsList, setSubmissionsList] = useState<any[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [submissionGrading, setSubmissionGrading] = useState<{ studentId: number; score: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -92,6 +115,65 @@ export default function ClassesPage() {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) {
+      alert('File size exceeds 20MB limit.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setNewAssessment(prev => ({
+        ...prev,
+        attachment_name: file.name,
+        attachment_data: reader.result as string,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addQuestion = () => {
+    const newQ = {
+      id: Math.random().toString(36).substring(2, 9),
+      text: '',
+      points: 10,
+    };
+    setNewAssessment(prev => {
+      const updated = [...prev.questions, newQ];
+      const totalPoints = updated.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
+      return {
+        ...prev,
+        questions: updated,
+        max_score: totalPoints > 0 ? String(totalPoints) : prev.max_score,
+      };
+    });
+  };
+
+  const updateQuestion = (id: string, text: string, points: number) => {
+    setNewAssessment(prev => {
+      const updated = prev.questions.map(q => q.id === id ? { ...q, text, points } : q);
+      const totalPoints = updated.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
+      return {
+        ...prev,
+        questions: updated,
+        max_score: totalPoints > 0 ? String(totalPoints) : prev.max_score,
+      };
+    });
+  };
+
+  const removeQuestion = (id: string) => {
+    setNewAssessment(prev => {
+      const updated = prev.questions.filter(q => q.id !== id);
+      const totalPoints = updated.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
+      return {
+        ...prev,
+        questions: updated,
+        max_score: totalPoints > 0 ? String(totalPoints) : prev.max_score,
+      };
+    });
+  };
+
   const handleAddAssessment = async () => {
     if (!newAssessment.name.trim() || !selectedClass) return;
     try {
@@ -99,12 +181,60 @@ export default function ClassesPage() {
         name: newAssessment.name,
         type: newAssessment.type,
         max_score: parseInt(newAssessment.max_score) || 100,
+        due_date: newAssessment.due_date || null,
+        description: newAssessment.description || '',
+        questions: newAssessment.questions,
+        attachment_name: newAssessment.attachment_name || null,
+        attachment_data: newAssessment.attachment_data || null,
       });
       setShowAssessmentModal(false);
-      setNewAssessment({ name: '', type: 'Quiz', max_score: '100' });
+      setNewAssessment({
+        name: '',
+        type: 'Assignment',
+        max_score: '100',
+        due_date: '',
+        description: '',
+        attachment_name: '',
+        attachment_data: '',
+        questions: [],
+      });
       fetchGradebook(selectedClass.id);
     } catch {
       alert('Failed to add assessment');
+    }
+  };
+
+  const openSubmissionsModal = async (assessment: any) => {
+    setActiveSubmissionsModal(assessment);
+    setSubmissionsLoading(true);
+    try {
+      const res = await api.get(`/academic/assessments/${assessment.id}/submissions`);
+      setSubmissionsList(res.data || []);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load submissions');
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  };
+
+  const saveSubmissionGrade = async (studentId: number, assessmentId: number, scoreStr: string) => {
+    const num = Number(scoreStr);
+    if (isNaN(num) || num < 0) {
+      alert('Please enter a valid number score');
+      return;
+    }
+    try {
+      await api.put('/academic/grades', { assessment_id: assessmentId, student_id: studentId, score: num });
+      setGrades(prev => {
+        const existing = prev.find(g => g.student_id === studentId && g.assessment_id === assessmentId);
+        if (existing) return prev.map(g => g === existing ? { ...g, score: num } : g);
+        return [...prev, { student_id: studentId, assessment_id: assessmentId, score: num }];
+      });
+      setSubmissionsList(prev => prev.map(s => s.student_id === studentId ? { ...s, grade: num } : s));
+      setSubmissionGrading(null);
+    } catch {
+      alert('Failed to save score');
     }
   };
 
@@ -296,9 +426,21 @@ export default function ClassesPage() {
                         </th>
                       )}
                       {assessments.map(a => (
-                        <th key={a.id} className="px-4 py-3.5 text-center min-w-[110px]">
+                        <th key={a.id} className="px-4 py-3 text-center min-w-[130px]">
                           <div className="font-bold text-xs text-zinc-700">{a.name}</div>
                           <div className="text-[10px] font-semibold text-zinc-400 mt-0.5">{a.type} · /{a.max_score}</div>
+                          <button
+                            onClick={() => openSubmissionsModal(a)}
+                            className={`mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                              (a.submission_count || 0) > 0
+                                ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-xs'
+                                : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
+                            }`}
+                            title="View student submissions & files"
+                          >
+                            <FileText size={10} />
+                            {a.submission_count || 0} submitted
+                          </button>
                         </th>
                       ))}
                       <th className="px-5 py-3.5 font-bold text-xs text-zinc-500 text-center min-w-[110px]">My Subject Avg</th>
@@ -319,7 +461,13 @@ export default function ClassesPage() {
                                 </div>
                               )}
                               <div>
-                                <div className="font-semibold text-zinc-800 text-sm">{student.name}</div>
+                                <Link
+                                  to={`/students/${student.id}`}
+                                  className="font-semibold text-zinc-800 text-sm hover:text-[#3b3dbf] hover:underline transition-colors block"
+                                  title="View Student Profile"
+                                >
+                                  {student.name}
+                                </Link>
                                 <div className="text-[10px] text-zinc-400">ID: #{student.id}</div>
                               </div>
                             </div>
@@ -394,53 +542,334 @@ export default function ClassesPage() {
 
       {/* Add Assessment Modal */}
       {showAssessmentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowAssessmentModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-            <h3 className="text-xl font-bold text-zinc-900 mb-1">New Assessment</h3>
-            <p className="text-xs text-zinc-400 font-medium mb-5">for {selectedClass?.name}</p>
-            <div className="flex flex-col gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setShowAssessmentModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-7 w-full max-w-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
               <div>
-                <label className="block text-xs font-bold text-zinc-600 mb-1.5">Assessment Name *</label>
-                <input
-                  autoFocus
-                  value={newAssessment.name}
-                  onChange={e => setNewAssessment({ ...newAssessment, name: e.target.value })}
-                  onKeyDown={e => e.key === 'Enter' && handleAddAssessment()}
-                  placeholder="e.g. Midterm Exam, Lab 3..."
-                  className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                <h3 className="text-xl font-bold text-zinc-900">New Assignment / Assessment</h3>
+                <p className="text-xs text-zinc-400 font-medium">for {selectedClass?.name}</p>
+              </div>
+              <button onClick={() => setShowAssessmentModal(false)} className="text-zinc-400 hover:text-zinc-700 p-1 rounded-lg">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">Assessment Name *</label>
+                  <input
+                    autoFocus
+                    value={newAssessment.name}
+                    onChange={e => setNewAssessment({ ...newAssessment, name: e.target.value })}
+                    placeholder="e.g. Physics Assignment 1, Quiz 2..."
+                    className="w-full px-3.5 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">Type</label>
+                  <select
+                    value={newAssessment.type}
+                    onChange={e => setNewAssessment({ ...newAssessment, type: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                  >
+                    <option>Assignment</option>
+                    <option>Quiz</option>
+                    <option>Exam</option>
+                    <option>Lab</option>
+                    <option>Project</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">Max Score (Total Points)</label>
+                  <input
+                    type="number"
+                    value={newAssessment.max_score}
+                    onChange={e => setNewAssessment({ ...newAssessment, max_score: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">Due Date</label>
+                  <input
+                    type="date"
+                    value={newAssessment.due_date}
+                    onChange={e => setNewAssessment({ ...newAssessment, due_date: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 mb-1.5">Instructions / Description</label>
+                <textarea
+                  rows={2}
+                  value={newAssessment.description}
+                  onChange={e => setNewAssessment({ ...newAssessment, description: e.target.value })}
+                  placeholder="Instructions for students regarding homework, guidelines, or submission rules..."
+                  className="w-full px-3.5 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors resize-none"
                 />
               </div>
+
+              {/* Upload Option (Question Paper / Reference Material) */}
+              <div className="border border-zinc-200 rounded-xl p-4 bg-zinc-50/50">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <Paperclip size={14} className="text-[#3b3dbf]" />
+                      Attach Question Paper or Reference Material (Upload Option)
+                    </span>
+                    <p className="text-[11px] text-zinc-400">PDF, Word doc, or image students can view and download</p>
+                  </div>
+                  {newAssessment.attachment_name && (
+                    <button
+                      type="button"
+                      onClick={() => setNewAssessment(prev => ({ ...prev, attachment_name: '', attachment_data: '' }))}
+                      className="text-xs text-red-500 hover:underline font-semibold"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                {newAssessment.attachment_name ? (
+                  <div className="flex items-center gap-2 p-2.5 bg-indigo-50 border border-indigo-200 rounded-lg text-xs font-bold text-indigo-700">
+                    <FileText size={16} />
+                    <span className="truncate flex-1">{newAssessment.attachment_name}</span>
+                    <span className="text-[10px] text-indigo-400 uppercase font-semibold">Attached</span>
+                  </div>
+                ) : (
+                  <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-zinc-300 hover:border-[#3b3dbf] rounded-xl cursor-pointer bg-white transition-colors group">
+                    <Upload size={16} className="text-zinc-400 group-hover:text-[#3b3dbf]" />
+                    <span className="text-xs font-semibold text-zinc-600 group-hover:text-[#3b3dbf]">
+                      Click to upload question file (PDF, Doc, Image)
+                    </span>
+                    <input
+                      type="file"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip"
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Making Questions Builder */}
+              <div className="border border-zinc-200 rounded-xl p-4 bg-zinc-50/50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                      <BookOpen size={14} className="text-[#3b3dbf]" />
+                      Making Questions (Question List)
+                    </span>
+                    <p className="text-[11px] text-zinc-400">Create questions directly for this assignment</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addQuestion}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#3b3dbf] text-white text-xs font-bold rounded-lg hover:bg-[#2c2eb5] transition-colors shadow-xs"
+                  >
+                    <Plus size={14} /> Add Question
+                  </button>
+                </div>
+
+                {newAssessment.questions.length === 0 ? (
+                  <div className="p-4 text-center border border-dashed border-zinc-200 rounded-lg bg-white text-zinc-400 text-xs">
+                    No individual questions added. Click <strong>"Add Question"</strong> to build structured questions, or attach a question file above.
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                    {newAssessment.questions.map((q, idx) => (
+                      <div key={q.id} className="p-3 bg-white border border-zinc-200 rounded-xl shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
+                            Q{idx + 1}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <label className="text-[11px] font-semibold text-zinc-500">Points:</label>
+                            <input
+                              type="number"
+                              value={q.points}
+                              onChange={e => updateQuestion(q.id, q.text, Number(e.target.value))}
+                              className="w-16 px-2 py-1 text-xs border border-zinc-200 rounded-lg text-center font-bold"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeQuestion(q.id)}
+                              className="p-1 text-zinc-400 hover:text-red-500 transition-colors"
+                              title="Delete question"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                        <textarea
+                          rows={2}
+                          value={q.text}
+                          onChange={e => updateQuestion(q.id, e.target.value, q.points)}
+                          placeholder={`Enter question ${idx + 1} prompt...`}
+                          className="w-full px-3 py-2 text-xs border border-zinc-200 rounded-lg focus:border-[#3b3dbf] focus:outline-none transition-colors resize-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-3 border-t border-zinc-100 mt-2">
+              <button
+                type="button"
+                onClick={() => setShowAssessmentModal(false)}
+                className="flex-1 px-4 py-2.5 border border-zinc-200 text-zinc-600 rounded-xl text-sm font-bold hover:bg-zinc-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddAssessment}
+                className="flex-1 px-4 py-2.5 bg-[#3b3dbf] text-white rounded-xl text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm"
+              >
+                Create Assignment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submissions Review Modal */}
+      {activeSubmissionsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setActiveSubmissionsModal(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-7 w-full max-w-3xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
               <div>
-                <label className="block text-xs font-bold text-zinc-600 mb-1.5">Type</label>
-                <select
-                  value={newAssessment.type}
-                  onChange={e => setNewAssessment({ ...newAssessment, type: e.target.value })}
-                  className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
-                >
-                  <option>Quiz</option>
-                  <option>Exam</option>
-                  <option>Assignment</option>
-                  <option>Lab</option>
-                  <option>Project</option>
-                </select>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700">
+                    {activeSubmissionsModal.type || 'Assignment'}
+                  </span>
+                  <h3 className="text-xl font-bold text-zinc-900">{activeSubmissionsModal.name}</h3>
+                </div>
+                <p className="text-xs text-zinc-400 font-medium mt-0.5">
+                  Submissions & student uploaded work · Max Score: {activeSubmissionsModal.max_score}
+                </p>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-zinc-600 mb-1.5">Max Score</label>
-                <input
-                  type="number"
-                  value={newAssessment.max_score}
-                  onChange={e => setNewAssessment({ ...newAssessment, max_score: e.target.value })}
-                  className="w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-xl focus:border-[#3b3dbf] focus:outline-none transition-colors"
-                />
-              </div>
-              <div className="flex gap-3 mt-2">
-                <button onClick={() => setShowAssessmentModal(false)} className="flex-1 px-4 py-2.5 border border-zinc-200 text-zinc-600 rounded-xl text-sm font-bold hover:bg-zinc-50 transition-colors">
-                  Cancel
-                </button>
-                <button onClick={handleAddAssessment} className="flex-1 px-4 py-2.5 bg-[#3b3dbf] text-white rounded-xl text-sm font-bold hover:bg-[#2c2eb5] transition-colors shadow-sm">
-                  Add Assessment
-                </button>
-              </div>
+              <button onClick={() => setActiveSubmissionsModal(null)} className="text-zinc-400 hover:text-zinc-700 p-1 rounded-lg">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 pr-1">
+              {submissionsLoading ? (
+                <div className="p-12 text-center text-zinc-400">
+                  <div className="w-8 h-8 border-4 border-[#3b3dbf]/30 border-t-[#3b3dbf] rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-sm font-semibold">Loading submissions...</p>
+                </div>
+              ) : submissionsList.length === 0 ? (
+                <div className="p-12 text-center text-zinc-400">
+                  <FileText size={36} className="mx-auto mb-2 opacity-40" />
+                  <p className="font-bold text-zinc-700">No submissions yet</p>
+                  <p className="text-xs mt-1">Students enrolled in this class haven't submitted their files yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {submissionsList.map((sub) => (
+                    <div key={sub.id} className="p-4 rounded-xl border border-zinc-200 bg-white hover:border-indigo-200 transition-all space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-zinc-100">
+                        <div>
+                          <div className="font-bold text-sm text-zinc-900">{sub.student_name}</div>
+                          <div className="text-xs text-zinc-400">Roll: {sub.roll_number || 'N/A'} · {sub.student_email}</div>
+                        </div>
+                        <div className="text-xs text-zinc-500 flex items-center gap-1.5">
+                          <Clock size={13} />
+                          Submitted {new Date(sub.submitted_at).toLocaleString()}
+                        </div>
+                      </div>
+
+                      {/* Notes / Text response */}
+                      {sub.notes && (
+                        <div className="p-2.5 bg-zinc-50 rounded-lg text-xs text-zinc-700">
+                          <strong className="text-zinc-900 block mb-0.5">Student Notes / Answer:</strong>
+                          {sub.notes}
+                        </div>
+                      )}
+
+                      {/* File Attachment */}
+                      {sub.file_data && (
+                        <div className="flex items-center justify-between p-2.5 bg-indigo-50/60 border border-indigo-100 rounded-lg">
+                          <div className="flex items-center gap-2 text-xs font-semibold text-indigo-900">
+                            <FileText size={16} className="text-indigo-600" />
+                            <span className="truncate max-w-xs">{sub.file_name || 'Uploaded Submission'}</span>
+                            {sub.file_size && <span className="text-[10px] text-zinc-400">({sub.file_size})</span>}
+                          </div>
+                          <a
+                            href={sub.file_data}
+                            download={sub.file_name || 'submission'}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-indigo-200 rounded-lg text-xs font-bold text-indigo-600 hover:bg-indigo-50 shadow-2xs transition-colors"
+                          >
+                            <Download size={13} /> Download Work
+                          </a>
+                        </div>
+                      )}
+
+                      {/* Grading row */}
+                      <div className="flex items-center justify-between pt-1">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="font-bold text-zinc-600">Current Score:</span>
+                          <span className="font-black text-sm text-indigo-600">
+                            {sub.grade !== null ? `${sub.grade} / ${activeSubmissionsModal.max_score}` : 'Not graded yet'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {submissionGrading && submissionGrading.studentId === sub.student_id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                autoFocus
+                                type="number"
+                                value={submissionGrading.score}
+                                onChange={e => setSubmissionGrading({ studentId: sub.student_id, score: e.target.value })}
+                                placeholder="Score"
+                                className="w-20 px-2 py-1 text-xs border border-zinc-300 rounded-lg text-center font-bold"
+                              />
+                              <button
+                                onClick={() => saveSubmissionGrade(sub.student_id, activeSubmissionsModal.id, submissionGrading.score)}
+                                className="px-3 py-1 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setSubmissionGrading(null)}
+                                className="px-2 py-1 text-xs text-zinc-500 hover:text-zinc-800"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setSubmissionGrading({ studentId: sub.student_id, score: sub.grade !== null ? String(sub.grade) : '' })}
+                              className="px-3 py-1 bg-zinc-100 hover:bg-zinc-200 rounded-lg text-xs font-bold text-zinc-700 transition-colors"
+                            >
+                              {sub.grade !== null ? 'Update Grade' : 'Grade Submission'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-zinc-100 flex justify-end">
+              <button
+                onClick={() => setActiveSubmissionsModal(null)}
+                className="px-5 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold rounded-xl transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

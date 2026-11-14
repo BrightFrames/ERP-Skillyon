@@ -4,16 +4,16 @@ import bcrypt from 'bcrypt';
 
 // Zod schemas for validation
 const studentSchema = z.object({
-  name: z.string().min(2),
-  father_name: z.string().optional().nullable(),
-  email: z.string().email().optional().nullable(),
-  parent_email: z.string().email().optional().nullable(),
-  class_id: z.number().int().positive().optional().nullable(),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  father_name: z.string().optional().nullable().or(z.literal("")),
+  email: z.string().email("Invalid email format").optional().nullable().or(z.literal("")),
+  parent_email: z.string().email("Invalid parent email format").optional().nullable().or(z.literal("")),
+  class_id: z.union([z.number().int().positive(), z.string().regex(/^\d+$/).transform(Number)]).optional().nullable().or(z.literal("")),
   gender: z.string().optional().nullable(),
   status: z.string().optional().nullable(),
   avatar: z.string().optional().nullable(),
-  password: z.string().min(6).optional().nullable(),
-  parent_password: z.string().min(6).optional().nullable()
+  password: z.string().min(6, "Password must be at least 6 characters").optional().nullable().or(z.literal("")),
+  parent_password: z.string().min(6, "Parent password must be at least 6 characters").optional().nullable().or(z.literal(""))
 });
 
 // Admin ONLY: Create Student
@@ -54,8 +54,11 @@ export const createStudent = async (req, res, next) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation Error', details: error.errors });
     }
+    if (error.code === '23505') {
+      return res.status(409).json({ error: 'Conflict', message: 'A student with this email already exists.' });
+    }
     console.error("DB Query Error [createStudent]:", error);
-    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to create student' });
+    res.status(500).json({ error: 'Internal Server Error', message: error.detail || error.message || 'Failed to create student' });
   }
 };
 
@@ -178,6 +181,32 @@ export const getStudents = async (req, res, next) => {
   }
 };
 
+// Admin & Teacher: Get Student by ID
+export const getStudentById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    let query = `
+      SELECT s.*, c.name as class_name 
+      FROM students s 
+      LEFT JOIN classes c ON s.class_id = c.id 
+      WHERE s.id = $1
+    `;
+    let params = [id];
+    if (req.school_id) {
+      query += ` AND s.school_id = $2`;
+      params.push(req.school_id);
+    }
+    const { rows } = await pool.query(query, params);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Not Found', message: 'Student not found' });
+    }
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    console.error("DB Query Error [getStudentById]:", error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to retrieve student' });
+  }
+};
+
 // Admin ONLY: Delete Student
 export const deleteStudent = async (req, res, next) => {
   try {
@@ -262,7 +291,10 @@ export const updateStudent = async (req, res, next) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation Error', details: error.errors });
     }
+    if (error.code === '23505') {
+      return res.status(409).json({ error: 'Conflict', message: 'A student with this email already exists.' });
+    }
     console.error("DB Query Error [updateStudent]:", error);
-    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to update student' });
+    res.status(500).json({ error: 'Internal Server Error', message: error.detail || error.message || 'Failed to update student' });
   }
 };

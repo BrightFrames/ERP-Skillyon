@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { GraduationCap, Mail, Hash, AtSign, ArrowRight, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
+import PortalSwitcher from "./components/PortalSwitcher";
 
 export default function ParentLogin({ onSuccess }) {
   const [email, setEmail] = useState("");
@@ -232,6 +233,10 @@ export default function ParentLogin({ onSuccess }) {
             >
               {isSignup ? "← Back to Sign In" : "New parent? Link account →"}
             </button>
+          </div>
+
+          <div className="p-6 pt-0">
+            <PortalSwitcher current="parent" />
           </div>
         </div>
       </div>

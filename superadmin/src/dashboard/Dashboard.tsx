@@ -16,6 +16,8 @@ import {
   GraduationCap,
   Activity,
   TrendingUp,
+  CreditCard,
+  HeartPulse,
   Zap,
   Globe,
   Key,
@@ -32,6 +34,10 @@ import {
 } from 'lucide-react'
 import api from '../lib/api'
 import SchoolsList from './SchoolsList'
+import UsersList from './UsersList'
+import SubscriptionsView from './SubscriptionsView'
+import SystemHealthView from './SystemHealthView'
+import SchoolDetailModal from './SchoolDetailModal'
 import { fetchAndApplySettings, applySettings } from '../lib/settings'
 import { useLanguage, t } from '../lib/i18n'
 import ThemeToggle from '../components/ThemeToggle'
@@ -55,11 +61,14 @@ interface StatCard {
   iconBg: string
 }
 
-type NavView = 'dashboard' | 'schools' | 'settings'
+type NavView = 'dashboard' | 'schools' | 'users' | 'subscriptions' | 'health' | 'settings'
 
-const NAV_ITEMS: { label: string; icon: typeof LayoutDashboard; view: NavView }[] = [
+const NAV_ITEMS: { label: string; icon: any; view: NavView }[] = [
   { label: 'Dashboard', icon: LayoutDashboard, view: 'dashboard' },
   { label: 'Schools', icon: School, view: 'schools' },
+  { label: 'Staff Directory', icon: Users, view: 'users' },
+  { label: 'Subscriptions', icon: CreditCard, view: 'subscriptions' },
+  { label: 'System Health', icon: HeartPulse, view: 'health' },
   { label: 'Settings', icon: Settings, view: 'settings' },
 ]
 
@@ -78,6 +87,7 @@ export default function Dashboard() {
   const [activeView, setActiveView] = useState<NavView>('dashboard')
   const [refreshing, setRefreshing] = useState(false)
   const [platformStats, setPlatformStats] = useState({ total_staff: 0, total_students: 0 })
+  const [selectedModalSchoolId, setSelectedModalSchoolId] = useState<number | null>(null)
 
   const user = JSON.parse(localStorage.getItem('sa_user') || '{}')
 
@@ -161,6 +171,9 @@ export default function Dashboard() {
   const viewTitle: Record<NavView, { title: string; subtitle: string }> = {
     dashboard: { title: 'Dashboard', subtitle: 'Platform overview & analytics' },
     schools: { title: 'Schools Management', subtitle: 'Manage all registered schools' },
+    users: { title: 'Platform Directory', subtitle: 'Staff and principals across all tenants' },
+    subscriptions: { title: 'Subscriptions & Renewals', subtitle: 'SaaS tenancy and license control' },
+    health: { title: 'System Health & Diagnostics', subtitle: 'Live engine metrics and database latency' },
     settings: { title: 'Settings', subtitle: 'Platform configuration & profile' },
   }
 
@@ -292,19 +305,22 @@ export default function Dashboard() {
               {activeView === 'dashboard' && (
                 <div className="animate-fade-in space-y-8 max-w-7xl mx-auto">
                   {/* Hero Banner */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
                         {getGreeting()}, {user?.name || 'Super Admin'}
                       </h3>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm">
-                        You are currently managing <span className="font-medium text-slate-900 dark:text-white">{totalSchools}</span> schools serving <span className="font-medium text-slate-900 dark:text-white">{platformStats.total_students}</span> students.
+                      <p className="text-slate-500 dark:text-slate-400 text-xs">
+                        Managing <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{totalSchools} schools</strong> serving <strong className="text-slate-800 dark:text-slate-200 font-bold">{platformStats.total_students} students</strong> across the multi-tenant platform.
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      All systems operational
-                    </div>
+                    <button
+                      onClick={() => setActiveView('health')}
+                      className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold hover:bg-emerald-100 transition-all cursor-pointer shadow-2xs"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      All engines operational · View diagnostics →
+                    </button>
                   </div>
 
                   {/* Stat Cards */}
@@ -329,33 +345,45 @@ export default function Dashboard() {
 
                   {/* Quick Metrics */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-                      <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                    <div 
+                      onClick={() => setActiveView('users')}
+                      className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 transition-all group"
+                    >
+                      <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 group-hover:scale-105 transition-transform">
                         <Users className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Platform Staff</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Platform Staff</p>
                         <p className="text-xl font-bold text-slate-900 dark:text-slate-100">{platformStats.total_staff}</p>
+                        <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold mt-0.5">View Staff Directory →</p>
                       </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-                      <div className="p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">
+                    <div 
+                      onClick={() => setActiveView('schools')}
+                      className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 cursor-pointer hover:border-cyan-300 dark:hover:border-cyan-700 transition-all group"
+                    >
+                      <div className="p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 group-hover:scale-105 transition-transform">
                         <GraduationCap className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Students</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Students</p>
                         <p className="text-xl font-bold text-slate-900 dark:text-slate-100">{platformStats.total_students}</p>
+                        <p className="text-[10px] text-cyan-600 dark:text-cyan-400 font-bold mt-0.5">Across All Schools →</p>
                       </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-                      <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                    <div 
+                      onClick={() => setActiveView('subscriptions')}
+                      className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 cursor-pointer hover:border-emerald-300 dark:hover:border-emerald-700 transition-all group"
+                    >
+                      <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform">
                         <TrendingUp className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Rate</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Active Rate</p>
                         <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
                           {totalSchools > 0 ? Math.round((activeSchools / totalSchools) * 100) : 0}%
                         </p>
+                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Manage Plans & Renewals →</p>
                       </div>
                     </div>
                   </div>
@@ -385,6 +413,27 @@ export default function Dashboard() {
                 </div>
               )}
 
+              {/* ───── USERS / STAFF DIRECTORY VIEW ───── */}
+              {activeView === 'users' && (
+                <div className="animate-fade-in max-w-7xl mx-auto">
+                  <UsersList onSelectSchool={(id) => setSelectedModalSchoolId(id)} />
+                </div>
+              )}
+
+              {/* ───── SUBSCRIPTIONS & RENEWALS VIEW ───── */}
+              {activeView === 'subscriptions' && (
+                <div className="animate-fade-in max-w-7xl mx-auto">
+                  <SubscriptionsView />
+                </div>
+              )}
+
+              {/* ───── SYSTEM HEALTH & DIAGNOSTICS VIEW ───── */}
+              {activeView === 'health' && (
+                <div className="animate-fade-in max-w-7xl mx-auto">
+                  <SystemHealthView />
+                </div>
+              )}
+
               {/* ───── SETTINGS VIEW ───── */}
               {activeView === 'settings' && (
                 <div className="animate-fade-in max-w-4xl mx-auto">
@@ -395,6 +444,13 @@ export default function Dashboard() {
           )}
         </main>
       </div>
+
+      {selectedModalSchoolId && (
+        <SchoolDetailModal
+          schoolId={selectedModalSchoolId}
+          onClose={() => setSelectedModalSchoolId(null)}
+        />
+      )}
     </div>
   )
 }

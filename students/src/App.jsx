@@ -13,6 +13,14 @@ import {
   Settings,
   Menu,
   X,
+  BookOpen,
+  Award,
+  Upload,
+  Download,
+  Paperclip,
+  AlertCircle,
+  ArrowLeft,
+  Send,
 } from "lucide-react";
 import StudentSettings from "./StudentSettings";
 import { fetchAndApplySettings } from "./settings";
@@ -50,6 +58,7 @@ export default function App() {
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "assignments", label: "Assignments", icon: FileText },
     { id: "attendance", label: "Attendance", icon: Calendar },
     { id: "academics", label: "Academics", icon: GraduationCap },
     { id: "fees", label: "Fees", icon: CreditCard },
@@ -167,6 +176,7 @@ export default function App() {
           <div className="max-w-5xl mx-auto h-full">
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
               {tab === "dashboard" && <Dashboard user={user} setTab={setTab} />}
+              {tab === "assignments" && <Assignments />}
               {tab === "attendance" && <Attendance />}
               {tab === "academics" && <Academics />}
               {tab === "fees" && <Fees />}
@@ -194,18 +204,33 @@ function Dashboard({ user, setTab }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Quick Link Cards */}
         <button
-          onClick={() => setTab("attendance")}
-          className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4 hover:border-sky-200 hover:shadow-md transition-all group text-left"
+          onClick={() => setTab("assignments")}
+          className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4 hover:border-indigo-200 hover:shadow-md transition-all group text-left dark:bg-slate-900 dark:border-slate-800"
         >
-          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform dark:bg-indigo-950/40 dark:text-indigo-400">
+            <FileText size={24} />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">Assignments</h3>
+            <p className="text-sm text-slate-500 mt-0.5 dark:text-slate-400">
+              Check tasks & homework.
+            </p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setTab("attendance")}
+          className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4 hover:border-sky-200 hover:shadow-md transition-all group text-left dark:bg-slate-900 dark:border-slate-800"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-500 flex items-center justify-center group-hover:scale-110 transition-transform dark:bg-teal-950/40 dark:text-teal-400">
             <Calendar size={24} />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Attendance</h3>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">Attendance</h3>
+            <p className="text-sm text-slate-500 mt-0.5 dark:text-slate-400">
               Check your daily presence.
             </p>
           </div>
@@ -213,31 +238,699 @@ function Dashboard({ user, setTab }) {
 
         <button
           onClick={() => setTab("academics")}
-          className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4 hover:border-sky-200 hover:shadow-md transition-all group text-left"
+          className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4 hover:border-sky-200 hover:shadow-md transition-all group text-left dark:bg-slate-900 dark:border-slate-800"
         >
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <FileText size={24} />
+          <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-500 flex items-center justify-center group-hover:scale-110 transition-transform dark:bg-sky-950/40 dark:text-sky-400">
+            <GraduationCap size={24} />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Academics</h3>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">Academics</h3>
+            <p className="text-sm text-slate-500 mt-0.5 dark:text-slate-400">
               View your exam results.
             </p>
           </div>
         </button>
 
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center">
+        <div className="bg-white p-5 rounded-[20px] border border-slate-100 flex flex-col items-start gap-4 dark:bg-slate-900 dark:border-slate-800">
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center dark:bg-orange-950/40 dark:text-orange-400">
             <Clock size={24} />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Today's Tip</h3>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">Today's Tip</h3>
+            <p className="text-sm text-slate-500 mt-0.5 dark:text-slate-400">
               Stay consistent with your homework to keep stress away!
             </p>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Assignments() {
+  const [data, setData] = useState({ list: [], summary: { total: 0, pending: 0, submitted: 0, completed: 0 } });
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("ALL");
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+
+  // Student upload & submission form state
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadData, setUploadData] = useState("");
+  const [uploadSize, setUploadSize] = useState("");
+  const [studentNotes, setStudentNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const fetchAssignments = () => {
+    setLoading(true);
+    fetch("/api/student-portal/assignments", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("student_token")}`,
+      },
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        setData({
+          list: res.data || [],
+          summary: res.summary || { total: 0, pending: 0, submitted: 0, completed: 0 },
+        });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
+
+  const openAssignmentModal = (item) => {
+    setSelectedAssignment(item);
+    setUploadFile(null);
+    setUploadData("");
+    setUploadSize("");
+    setStudentNotes(item.submission_notes || "");
+    setSubmitSuccess(false);
+  };
+
+  const handleStudentFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 25 * 1024 * 1024) {
+      alert("File size exceeds 25MB limit.");
+      return;
+    }
+    const sizeStr = file.size > 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+      : `${Math.round(file.size / 1024)} KB`;
+
+    setUploadFile(file.name);
+    setUploadSize(sizeStr);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setUploadData(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmitAssignment = async (e) => {
+    e.preventDefault();
+    if (!uploadData && !studentNotes.trim()) {
+      alert("Please upload an assignment file or enter your written answers/notes.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/student-portal/assignments/${selectedAssignment.id}/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("student_token")}`,
+        },
+        body: JSON.stringify({
+          file_name: uploadFile || selectedAssignment.submission_file_name,
+          file_data: uploadData || selectedAssignment.submission_file_data,
+          file_size: uploadSize || selectedAssignment.submission_file_size,
+          notes: studentNotes,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Submission failed");
+      }
+      setSubmitSuccess(true);
+      fetchAssignments();
+      // Update current modal state
+      setSelectedAssignment((prev) => ({
+        ...prev,
+        status: prev.status === "Graded" ? "Graded" : "Submitted",
+        submission_file_name: uploadFile || prev.submission_file_name,
+        submission_file_data: uploadData || prev.submission_file_data,
+        submission_file_size: uploadSize || prev.submission_file_size,
+        submission_notes: studentNotes,
+        submitted_at: new Date().toISOString(),
+      }));
+    } catch (err) {
+      alert(err.message || "Failed to submit assignment");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const filtered = data.list.filter((item) => {
+    if (filter === "PENDING") return item.status === "Pending";
+    if (filter === "SUBMITTED") return item.status === "Submitted";
+    if (filter === "GRADED") return item.status === "Graded";
+    return true;
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+          Assignments & Tasks
+        </h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Assignments, homework, and projects assigned by your teachers.
+        </p>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-[20px] border border-slate-100 dark:bg-slate-900 dark:border-slate-800 flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold shrink-0">
+            <FileText size={20} />
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Total
+            </div>
+            <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+              {data.summary.total}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-[20px] border border-slate-100 dark:bg-slate-900 dark:border-slate-800 flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
+            <Clock size={20} />
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Pending
+            </div>
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {data.summary.pending}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-[20px] border border-slate-100 dark:bg-slate-900 dark:border-slate-800 flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold shrink-0">
+            <Upload size={20} />
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Submitted
+            </div>
+            <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">
+              {data.summary.submitted || 0}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-[20px] border border-slate-100 dark:bg-slate-900 dark:border-slate-800 flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
+            <CheckCircle2 size={20} />
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Graded
+            </div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {data.summary.completed}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+        <button
+          onClick={() => setFilter("ALL")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            filter === "ALL"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20"
+              : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          }`}
+        >
+          All ({data.summary.total})
+        </button>
+        <button
+          onClick={() => setFilter("PENDING")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            filter === "PENDING"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20"
+              : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          }`}
+        >
+          Pending ({data.summary.pending})
+        </button>
+        <button
+          onClick={() => setFilter("SUBMITTED")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            filter === "SUBMITTED"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20"
+              : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          }`}
+        >
+          Submitted ({data.summary.submitted || 0})
+        </button>
+        <button
+          onClick={() => setFilter("GRADED")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            filter === "GRADED"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20"
+              : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          }`}
+        >
+          Graded ({data.summary.completed})
+        </button>
+      </div>
+
+      {/* Assignments List */}
+      <div className="space-y-3">
+        {loading ? (
+          <div className="bg-white dark:bg-slate-900 rounded-[20px] border border-slate-100 dark:border-slate-800 p-12 flex flex-col items-center justify-center gap-3">
+            <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-indigo-500 animate-spin"></div>
+            <span className="text-xs font-semibold text-slate-400">Loading assignments...</span>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-white dark:bg-slate-900 rounded-[20px] border border-slate-100 dark:border-slate-800 p-12 text-center">
+            <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 mx-auto rounded-2xl flex items-center justify-center mb-3">
+              <FileText size={28} />
+            </div>
+            <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-1">
+              No assignments found
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+              {filter === "ALL"
+                ? "Your teachers haven't assigned any homework or tasks yet."
+                : `No assignments matching the "${filter.toLowerCase()}" filter.`}
+            </p>
+          </div>
+        ) : (
+          filtered.map((item) => {
+            const isGraded = item.status === "Graded";
+            const isSubmitted = item.status === "Submitted";
+            const scorePct =
+              isGraded && item.max_score > 0
+                ? Math.round((Number(item.my_score) / Number(item.max_score)) * 100)
+                : null;
+
+            const questionsCount = Array.isArray(item.questions)
+              ? item.questions.length
+              : typeof item.questions === "string"
+              ? (JSON.parse(item.questions || "[]") || []).length
+              : 0;
+
+            return (
+              <div
+                key={item.id}
+                onClick={() => openAssignmentModal(item)}
+                className="bg-white dark:bg-slate-900 rounded-[20px] border border-slate-100 dark:border-slate-800 p-5 sm:p-6 hover:shadow-md hover:border-indigo-200 dark:hover:border-slate-700 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+              >
+                <div className="space-y-2 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+                      {item.type || "Assignment"}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      {item.subject}
+                    </span>
+                    {item.class_name && (
+                      <span className="text-xs text-slate-400">
+                        • {item.class_name}
+                      </span>
+                    )}
+                    {questionsCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 flex items-center gap-1">
+                        <BookOpen size={12} /> {questionsCount} {questionsCount === 1 ? "Question" : "Questions"}
+                      </span>
+                    )}
+                    {item.attachment_name && (
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-400 flex items-center gap-1">
+                        <Paperclip size={12} /> Question Paper Attached
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    {item.name}
+                  </h3>
+
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                    <span>
+                      Teacher: <strong className="text-slate-700 dark:text-slate-200">{item.teacher_name}</strong>
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Calendar size={13} />
+                      {item.due_date ? (
+                        <span className="text-rose-500 font-bold">
+                          Due: {new Date(item.due_date).toLocaleDateString()}
+                        </span>
+                      ) : (
+                        <span>Assigned: {item.date ? new Date(item.date).toLocaleDateString() : "Recent"}</span>
+                      )}
+                    </span>
+                    <span>•</span>
+                    <span>Max Marks: <strong>{item.max_score || 100}</strong></span>
+                  </div>
+                </div>
+
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800 shrink-0">
+                  {isGraded ? (
+                    <div className="text-right">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                        <CheckCircle2 size={13} />
+                        Graded
+                      </div>
+                      <div className="mt-1 font-black text-lg text-slate-900 dark:text-slate-100">
+                        {item.my_score} <span className="text-xs font-semibold text-slate-400">/ {item.max_score}</span>
+                        {scorePct !== null && (
+                          <span className={`ml-2 text-xs font-bold ${scorePct >= 75 ? "text-emerald-500" : scorePct >= 50 ? "text-amber-500" : "text-rose-500"}`}>
+                            ({scorePct}%)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ) : isSubmitted ? (
+                    <div className="text-right">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-400">
+                        <CheckCircle2 size={13} />
+                        Submitted
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">Pending Grading</div>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400">
+                      <Clock size={13} />
+                      Pending Submission
+                    </div>
+                  )}
+
+                  <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform mt-1">
+                    View & Submit <ChevronRight size={14} />
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Assignment Detail & Upload Modal */}
+      {selectedAssignment && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={() => setSelectedAssignment(null)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-100 dark:border-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+                    {selectedAssignment.type || "Assignment"}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    {selectedAssignment.subject}
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    Teacher: {selectedAssignment.teacher_name}
+                  </span>
+                </div>
+                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">
+                  {selectedAssignment.name}
+                </h3>
+                <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <span>Max Marks: <strong>{selectedAssignment.max_score}</strong></span>
+                  {selectedAssignment.due_date && (
+                    <span>• Due: <strong className="text-rose-500">{new Date(selectedAssignment.due_date).toLocaleDateString()}</strong></span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedAssignment(null)}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto py-5 space-y-5 pr-1">
+              {/* Instructions */}
+              {selectedAssignment.description && (
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                  <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Teacher's Instructions
+                  </h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap">
+                    {selectedAssignment.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Teacher Attached Question Paper / Material */}
+              {selectedAssignment.attachment_name && selectedAssignment.attachment_data && (
+                <div className="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                      <FileText size={20} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                        Teacher's Attached Question Paper
+                      </div>
+                      <div className="text-xs text-indigo-700 dark:text-indigo-400 truncate max-w-xs sm:max-w-sm">
+                        {selectedAssignment.attachment_name}
+                      </div>
+                    </div>
+                  </div>
+                  <a
+                    href={selectedAssignment.attachment_data}
+                    download={selectedAssignment.attachment_name}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors shrink-0"
+                  >
+                    <Download size={14} /> Download Question Paper
+                  </a>
+                </div>
+              )}
+
+              {/* Questions List (Making Questions) */}
+              {(() => {
+                const questions = Array.isArray(selectedAssignment.questions)
+                  ? selectedAssignment.questions
+                  : typeof selectedAssignment.questions === "string"
+                  ? JSON.parse(selectedAssignment.questions || "[]")
+                  : [];
+
+                if (questions.length === 0) return null;
+
+                return (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                        <BookOpen size={15} className="text-indigo-600" />
+                        Questions ({questions.length})
+                      </h4>
+                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                        Total {questions.reduce((sum, q) => sum + (Number(q.points) || 0), 0)} pts
+                      </span>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {questions.map((q, idx) => (
+                        <div
+                          key={q.id || idx}
+                          className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs space-y-1.5"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md">
+                              Question {idx + 1}
+                            </span>
+                            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                              {q.points || 10} marks
+                            </span>
+                          </div>
+                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            {q.text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Status Banner */}
+              {selectedAssignment.status === "Graded" ? (
+                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                      <Award size={20} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
+                        Graded by Teacher
+                      </div>
+                      <div className="text-sm font-black text-emerald-700 dark:text-emerald-400">
+                        Your Score: {selectedAssignment.my_score} / {selectedAssignment.max_score}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-lg">
+                    {Math.round((Number(selectedAssignment.my_score) / Number(selectedAssignment.max_score)) * 100)}%
+                  </span>
+                </div>
+              ) : selectedAssignment.status === "Submitted" ? (
+                <div className="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/50 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shrink-0">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-sky-900 dark:text-sky-200">
+                      Work Submitted Successfully
+                    </div>
+                    <div className="text-xs text-sky-700 dark:text-sky-400">
+                      {selectedAssignment.submitted_at
+                        ? `Submitted on ${new Date(selectedAssignment.submitted_at).toLocaleString()}`
+                        : "Awaiting teacher review and grading."}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Previous Submission View (if submitted) */}
+              {selectedAssignment.submission_file_name && (
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-2">
+                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Your Uploaded Work
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                      <FileText size={16} className="text-indigo-600 shrink-0" />
+                      <span className="truncate">{selectedAssignment.submission_file_name}</span>
+                      {selectedAssignment.submission_file_size && (
+                        <span className="text-[10px] text-slate-400">({selectedAssignment.submission_file_size})</span>
+                      )}
+                    </div>
+                    {selectedAssignment.submission_file_data && (
+                      <a
+                        href={selectedAssignment.submission_file_data}
+                        download={selectedAssignment.submission_file_name}
+                        className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1 shrink-0 ml-2"
+                      >
+                        <Download size={13} /> View File
+                      </a>
+                    )}
+                  </div>
+                  {selectedAssignment.submission_notes && (
+                    <div className="text-xs text-slate-600 dark:text-slate-300 pt-1 border-t border-slate-200 dark:border-slate-700">
+                      <strong className="block text-[11px] text-slate-500">Your notes/answers:</strong>
+                      {selectedAssignment.submission_notes}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Student Upload Option & Submit Form (Available if pending, or allows re-uploading if not graded) */}
+              {selectedAssignment.status !== "Graded" && (
+                <form onSubmit={handleSubmitAssignment} className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                      <Upload size={14} className="text-indigo-600" />
+                      {selectedAssignment.status === "Submitted" ? "Re-upload / Update Submission" : "Upload Your Assignment (Submission Option)"}
+                    </h4>
+                  </div>
+
+                  {/* File Upload Box */}
+                  <div>
+                    {uploadFile ? (
+                      <div className="flex items-center justify-between p-3.5 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-2xl">
+                        <div className="flex items-center gap-2.5 text-xs font-bold text-indigo-900 dark:text-indigo-300 truncate">
+                          <FileText size={18} className="text-indigo-600 shrink-0" />
+                          <span className="truncate">{uploadFile}</span>
+                          <span className="text-[10px] text-indigo-400 font-semibold">({uploadSize})</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUploadFile(null);
+                            setUploadData("");
+                            setUploadSize("");
+                          }}
+                          className="text-xs font-bold text-rose-500 hover:underline shrink-0 ml-2"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-500 rounded-2xl cursor-pointer bg-slate-50/50 dark:bg-slate-900 hover:bg-indigo-50/20 transition-all group">
+                        <Upload size={24} className="text-slate-400 group-hover:text-indigo-600 mb-1.5 transition-colors" />
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600">
+                          Click to upload your solution / homework file
+                        </span>
+                        <span className="text-xs text-slate-400 mt-0.5">
+                          PDF, Word documents, images, or ZIP up to 25MB
+                        </span>
+                        <input
+                          type="file"
+                          onChange={handleStudentFileSelect}
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.txt"
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Notes / Written Answer */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Written Answers / Submission Notes (Optional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={studentNotes}
+                      onChange={(e) => setStudentNotes(e.target.value)}
+                      placeholder="Type answers to the questions, or leave notes for your teacher..."
+                      className="w-full px-4 py-3 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 rounded-2xl focus:border-indigo-500 focus:outline-none dark:bg-slate-900 dark:text-slate-100 transition-colors resize-none"
+                    />
+                  </div>
+
+                  {submitSuccess && (
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-xl flex items-center gap-2">
+                      <CheckCircle2 size={16} /> Assignment uploaded and submitted successfully!
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAssignment(null)}
+                      className="px-5 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      Close
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50 cursor-pointer"
+                    >
+                      {submitting ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={14} />
+                          {selectedAssignment.status === "Submitted" ? "Update Submission" : "Upload & Submit Assignment"}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -91,7 +91,16 @@ export const getGradebook = async (req, res) => {
     }
 
     const { rows: students } = await pool.query('SELECT id, name, avatar FROM students WHERE class_id = $1 ORDER BY name ASC', [numericClassId]);
-    const { rows: assessments } = await pool.query('SELECT id, name, type, max_score FROM assessments WHERE class_id = $1 AND teacher_id = $2 ORDER BY id ASC', [numericClassId, req.user.id]);
+    const { rows: assessments } = await pool.query(`
+      SELECT 
+        a.id, a.name, a.type, a.max_score, a.date, a.due_date, a.description, a.questions, a.attachment_name, a.attachment_data,
+        COUNT(sub.id)::int AS submission_count
+      FROM assessments a
+      LEFT JOIN assignment_submissions sub ON sub.assessment_id = a.id
+      WHERE a.class_id = $1 AND a.teacher_id = $2
+      GROUP BY a.id
+      ORDER BY a.id ASC
+    `, [numericClassId, req.user.id]);
     const { rows: grades } = await pool.query(`
       SELECT g.student_id, g.assessment_id, g.score 
       FROM grades g 
@@ -126,13 +135,56 @@ export const updateGrade = async (req, res) => {
 // POST /api/academic/classes/:classId/assessments
 export const createAssessment = async (req, res) => {
   const { classId } = req.params;
-  const { name, type, max_score } = req.body;
+  const { name, type, max_score, due_date, description, questions, attachment_name, attachment_data } = req.body;
+  try {
+    const questionsJson = Array.isArray(questions) ? JSON.stringify(questions) : (questions ? JSON.stringify([questions]) : '[]');
+    const { rows } = await pool.query(`
+      INSERT INTO assessments (class_id, teacher_id, name, type, max_score, date, due_date, description, questions, attachment_name, attachment_data) 
+      VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, $6, $7, $8, $9, $10) RETURNING *
+    `, [
+      classId, 
+      req.user.id, 
+      name, 
+      type || 'Assignment', 
+      parseInt(max_score) || 100,
+      due_date || null,
+      description || '',
+      questionsJson,
+      attachment_name || null,
+      attachment_data || null
+    ]);
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// GET /api/academic/assessments/:assessmentId/submissions
+export const getAssessmentSubmissions = async (req, res) => {
+  const { assessmentId } = req.params;
   try {
     const { rows } = await pool.query(`
-      INSERT INTO assessments (class_id, teacher_id, name, type, max_score, date) 
-      VALUES ($1, $2, $3, $4, $5, CURRENT_DATE) RETURNING *
-    `, [classId, req.user.id, name, type || 'Quiz', max_score || 100]);
-    res.status(201).json(rows[0]);
+      SELECT 
+        sub.id,
+        sub.assessment_id,
+        sub.student_id,
+        stu.name AS student_name,
+        stu.roll_number,
+        stu.email AS student_email,
+        sub.file_name,
+        sub.file_data,
+        sub.file_size,
+        sub.notes,
+        sub.submitted_at,
+        g.score AS grade
+      FROM assignment_submissions sub
+      JOIN students stu ON sub.student_id = stu.id
+      LEFT JOIN grades g ON g.assessment_id = sub.assessment_id AND g.student_id = sub.student_id
+      WHERE sub.assessment_id = $1
+      ORDER BY sub.submitted_at DESC
+    `, [assessmentId]);
+    res.status(200).json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

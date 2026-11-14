@@ -4,6 +4,7 @@ import { getAppearance } from './settings';
 export const translations = {
   Hindi: {
     "Dashboard": "डैशबोर्ड",
+    "Assignments": "असाइनमेंट्स",
     "Attendance": "उपस्थिति",
     "Academics": "शैक्षणिक",
     "Fees": "फीस",
@@ -26,6 +27,7 @@ export const translations = {
   },
   Marathi: {
     "Dashboard": "डॅशबोर्ड",
+    "Assignments": "असाइनमेंट्स",
     "Attendance": "हजेरी",
     "Academics": "शैक्षणिक",
     "Fees": "फी / शुल्क",
@@ -48,6 +50,7 @@ export const translations = {
   },
   Gujarati: {
     "Dashboard": "ડેશબોર્ડ",
+    "Assignments": "અસાઇનમેન્ટ્સ",
     "Attendance": "હાજરી",
     "Academics": "શૈક્ષણિક",
     "Fees": "ફી",
@@ -70,6 +73,7 @@ export const translations = {
   },
   Tamil: {
     "Dashboard": "டாஷ்போர்டு",
+    "Assignments": "பணிகள்",
     "Attendance": "வருகை",
     "Academics": "கல்வி",
     "Fees": "கட்டணம்",
@@ -92,6 +96,7 @@ export const translations = {
   },
   Telugu: {
     "Dashboard": "డాష్‌బోర్డ్",
+    "Assignments": "అసైన్‌మెంట్లు",
     "Attendance": "హాజరు",
     "Academics": "విద్యా విషయాలు",
     "Fees": "ఫీజులు",

@@ -21,20 +21,23 @@ export const login = async (req, res, next) => {
        FROM staff s 
        LEFT JOIN schools sc ON s.school_id = sc.id 
        LEFT JOIN classes c ON s.class_teacher_of = c.id
-       WHERE s.email = $1`,
+       WHERE LOWER(TRIM(s.email)) = LOWER(TRIM($1))`,
       [email]
     );
     if (rows.length === 0) {
+      console.warn(`[Login Failed] User not found: ${email}`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     user = rows[0];
 
     if (!user.password || !password) {
+      console.warn(`[Login Failed] Missing password for: ${email}`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      console.warn(`[Login Failed] Password mismatch for: ${email}`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -150,19 +153,32 @@ export const studentLogin = async (req, res, next) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const { rows } = await pool.query('SELECT id, name, email, class_id, password FROM students WHERE email = $1', [email]);
+    const { rows } = await pool.query(
+      `SELECT s.id, s.name, s.email, s.class_id, s.password, s.school_id, s.status, s.avatar, c.name as class_name 
+       FROM students s 
+       LEFT JOIN classes c ON s.class_id = c.id 
+       WHERE LOWER(TRIM(s.email)) = LOWER(TRIM($1))`, 
+      [email]
+    );
     if (!rows || rows.length === 0) {
+      console.warn(`[Student Login Failed] Student not found with email: ${email}`);
       return res.status(401).json({ error: 'Student not found with this email' });
     }
 
     const student = rows[0];
     if (!student.password) {
+      console.warn(`[Student Login Failed] No password set for student: ${email}`);
       return res.status(401).json({ error: 'Invalid credentials or password not set' });
     }
 
     const isMatch = await bcrypt.compare(password, student.password);
     if (!isMatch) {
+      console.warn(`[Student Login Failed] Password mismatch for student: ${email}`);
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (student.status && student.status.toLowerCase() === 'inactive') {
+      return res.status(403).json({ error: 'Your student account is currently inactive. Please contact school administration.' });
     }
 
     const user = { 
@@ -170,14 +186,18 @@ export const studentLogin = async (req, res, next) => {
       name: student.name, 
       email: student.email, 
       class_id: student.class_id, 
+      class_name: student.class_name || null,
+      school_id: student.school_id || null,
+      avatar: student.avatar || null,
       role: 'STUDENT' 
     };
 
     const token = jwt.sign(
-      { id: user.id, role: user.role, email: user.email },
+      { id: user.id, role: user.role, email: user.email, school_id: user.school_id },
       JWT_SECRET,
       { expiresIn: '8h' }
     );
+    console.log(`[Student Login Success] Student logged in: ${student.email} (ID: ${student.id})`);
     res.status(200).json({ message: 'Login successful', token, user });
   } catch (error) {
     console.error('Student Login Error:', error);
@@ -189,6 +209,21 @@ export const getProfile = async (req, res, next) => {
   const userId = req.user.id;
 
   try {
+    // If student role, return student profile
+    if (req.user && req.user.role === 'STUDENT') {
+      const { rows } = await pool.query(
+        `SELECT s.id, s.name, s.email, s.class_id, s.school_id, s.gender, s.status, s.avatar, s.enrollment_date, c.name as class_name 
+         FROM students s 
+         LEFT JOIN classes c ON s.class_id = c.id 
+         WHERE s.id = $1`,
+        [userId]
+      );
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Student not found' });
+      }
+      return res.status(200).json({ ...rows[0], role: 'STUDENT' });
+    }
+
     // If parent role, return parent profile with children
     if (req.user && req.user.role === 'PARENT') {
       const email = req.user.email || req.user.id;

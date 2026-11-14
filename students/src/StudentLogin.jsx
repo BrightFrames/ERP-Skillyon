@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { GraduationCap, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import ThemeToggle from "./components/ThemeToggle";
+import PortalSwitcher from "./components/PortalSwitcher";
 
 export default function StudentLogin({ onSuccess }) {
   const [email, setEmail] = useState("");
@@ -142,10 +143,10 @@ export default function StudentLogin({ onSuccess }) {
                     </>
                   )}
                 </button>
-
-
               </div>
             </form>
+
+            <PortalSwitcher current="student" />
           </div>
         </div>
       </div>

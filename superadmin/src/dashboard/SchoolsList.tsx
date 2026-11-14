@@ -14,10 +14,12 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  XCircle
+  XCircle,
+  Eye,
 } from 'lucide-react'
 import SchoolForm from './SchoolForm'
 import SubscriptionModal from './SubscriptionModal'
+import SchoolDetailModal from './SchoolDetailModal'
 import api from '../lib/api'
 
 interface School {
@@ -72,6 +74,7 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
   
   const [showForm, setShowForm] = useState(false)
   const [editSchool, setEditSchool] = useState<School | null>(null)
+  const [detailSchoolId, setDetailSchoolId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
 
   const filtered = useMemo(() => {
@@ -229,12 +232,15 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
                     >
                       {/* School Name & ID */}
                       <td className="px-6 py-4 align-middle">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 dark:bg-indigo-950/40 dark:border-indigo-900/50">
+                        <div 
+                          onClick={() => setDetailSchoolId(school.id)}
+                          className="flex items-center gap-3 cursor-pointer group/title"
+                        >
+                          <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 dark:bg-indigo-950/40 dark:border-indigo-900/50 group-hover/title:bg-indigo-100 dark:group-hover/title:bg-indigo-900/60 transition-colors">
                             <Building2 className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover/title:text-indigo-600 dark:group-hover/title:text-indigo-400 transition-colors">
                               {school.name}
                             </p>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -288,6 +294,13 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
                       {/* Actions */}
                       <td className="px-6 py-4 align-middle text-right">
                         <div className="inline-flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setDetailSchoolId(school.id)}
+                            title="View School Details"
+                            className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer dark:hover:text-indigo-400 dark:hover:bg-indigo-950/30"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => setEditSchool(school)}
                             title="Edit Subscription"
@@ -364,6 +377,17 @@ export default function SchoolsList({ schools, onRefresh, compact = false }: Pro
           onUpdated={() => {
             setEditSchool(null)
             onRefresh()
+          }}
+        />
+      )}
+
+      {detailSchoolId && (
+        <SchoolDetailModal
+          schoolId={detailSchoolId}
+          onClose={() => setDetailSchoolId(null)}
+          onUpdateSubscription={(s) => {
+            setDetailSchoolId(null)
+            setEditSchool(s)
           }}
         />
       )}

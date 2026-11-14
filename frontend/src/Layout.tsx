@@ -22,6 +22,7 @@ import {
 import { useLanguage, t } from './lib/i18n';
 import { fetchAndApplySettings } from './lib/settings';
 import ThemeToggle from './components/ThemeToggle';
+import PortalSwitcher from './components/PortalSwitcher';
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
@@ -204,7 +205,8 @@ export default function Layout() {
             </div>
           </div>
           
-          <div className="flex items-center gap-4 lg:gap-6 ml-4">
+          <div className="flex items-center gap-3 lg:gap-4 ml-4">
+            <PortalSwitcher currentPortalId="school" />
             <ThemeToggle />
 
             <button className="flex items-center gap-3 pl-2 group">

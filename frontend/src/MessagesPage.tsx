@@ -8,6 +8,7 @@ import {
   Users
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import api from './lib/api';
 
 interface Student {
@@ -123,9 +124,26 @@ export default function MessagesPage() {
     }
   };
 
+  const [searchParams] = useSearchParams();
+  const urlStudentId = searchParams.get('studentId');
+
   useEffect(() => {
     fetchRecentChats();
   }, []);
+
+  useEffect(() => {
+    if (urlStudentId) {
+      const idNum = parseInt(urlStudentId, 10);
+      if (!isNaN(idNum)) {
+        api.get('/students?limit=200').then((res) => {
+          const found = (res.data.data || []).find((s: any) => s.id === idNum);
+          if (found) {
+            handleSelectStudent(found);
+          }
+        }).catch(console.error);
+      }
+    }
+  }, [urlStudentId]);
 
   // Search students when query changes
   useEffect(() => {
@@ -360,11 +378,16 @@ export default function MessagesPage() {
                   <ChevronLeft size={20} />
                 </button>
                 
-                <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 dark:bg-slate-800 dark:text-indigo-300">
-                  {selectedStudent.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()}
-                </div>
+                <Link to={`/students/${selectedStudent.id}`} className="hover:opacity-80 transition-opacity">
+                  <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0 dark:bg-slate-800 dark:text-indigo-300">
+                    {selectedStudent.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()}
+                  </div>
+                </Link>
                 <div>
-                  <h2 className="font-semibold text-sm md:text-base text-slate-900 dark:text-slate-100">{selectedStudent.name}</h2>
+                  <Link to={`/students/${selectedStudent.id}`} className="hover:text-indigo-600 hover:underline transition-colors flex items-center gap-1.5">
+                    <h2 className="font-semibold text-sm md:text-base text-slate-900 dark:text-slate-100">{selectedStudent.name}</h2>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 font-bold dark:bg-indigo-950/50 dark:text-indigo-300">Profile →</span>
+                  </Link>
                   <div className="text-sm text-slate-500 flex items-center gap-2 mt-0.5">
                     <span>Class: {selectedStudent.class_name || 'N/A'}</span>
                     {selectedStudent.father_name && (

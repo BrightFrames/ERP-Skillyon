@@ -6,7 +6,10 @@ import "./styles.css";
 const originalFetch = window.fetch;
 window.fetch = function (url, options) {
   if (typeof url === 'string' && url.startsWith('/api/')) {
-    const apiBase = (import.meta.env.VITE_API_URL || 'https://erp-skillyon-b.vercel.app').replace(/\/$/, '');
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const apiBase = isLocal 
+      ? 'http://localhost:5001' 
+      : (import.meta.env.VITE_API_URL || 'https://erp-skillyon-b.vercel.app').replace(/\/$/, '');
     url = `${apiBase}${url}`;
   }
   return originalFetch(url, options);

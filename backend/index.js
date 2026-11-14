@@ -1,5 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { initializeDatabase } from './db/migrate.js';
+
 import userRoutes from './routes/user.js';
 import studentRoutes from './routes/students.js';
 import staffRoutes from './routes/staff.js';
@@ -11,13 +15,14 @@ import studentPortalRoutes from './routes/studentPortal.js';
 import messagesRoutes from './routes/messages.js';
 import superadminRoutes from './routes/superadmin/index.js';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
-
-// CORS Middleware - manual implementation for Vercel compatibility
+// CORS Middleware
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -28,16 +33,17 @@ const allowedOrigins = [
   'https://erp-skillyon-super.vercel.app',
   'https://erp-skillyon-sa.vercel.app',
   'https://erp-skillyon-pare.vercel.app',
-  'https://erp-skillyon-student.vercel.app'
+  'https://erp-skillyon-student.vercel.app',
+  'http://localhost:5000'
 ];
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin) {
-    const isAllowed = allowedOrigins.includes(origin) || 
-                      origin.includes('localhost') || 
-                      origin.includes('vercel.app') || 
-                      origin.includes('skillyon');
+    const isAllowed = allowedOrigins.includes(origin) ||
+      origin.includes('localhost') ||
+      origin.includes('vercel.app') ||
+      origin.includes('skillyon');
     if (isAllowed) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     }
@@ -46,22 +52,21 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-  // Handle preflight OPTIONS request immediately
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
   next();
 });
 
-app.use(express.json());
-
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Health Check
 app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'Skillyon ERP Backend API is running securely.' });
 });
 
-// Routes
+// Mount Routes
 app.use('/api/user', userRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/staff', staffRoutes);
@@ -73,7 +78,7 @@ app.use('/api/student-portal', studentPortalRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/superadmin', superadminRoutes);
 
-// Global Error Handler (secure-fullstack-dev requirement: No sensitive DB fields are leaked)
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error('[Error]:', err.message);
   res.status(err.status || 500).json({
@@ -81,6 +86,9 @@ app.use((err, req, res, next) => {
     message: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred.' : err.message
   });
 });
+
+// Initialize database schema and verify superadmin on startup
+initializeDatabase();
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   app.listen(PORT, () => {

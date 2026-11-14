@@ -31,7 +31,9 @@ export default function LoginPage() {
       setError(
         err.response?.data?.error ||
         err.response?.data?.message ||
-        'Invalid credentials. Please try again.'
+        (err.code === 'ERR_NETWORK' || !err.response
+          ? 'Cannot connect to backend server. Make sure the backend is running on port 5001.'
+          : 'Invalid credentials. Please try again.')
       )
     } finally {
       setLoading(false)
@@ -70,11 +72,25 @@ export default function LoginPage() {
 
         {/* Login Card */}
         <div className="bg-white dark:bg-[#0b0f19] border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-8 shadow-2xl shadow-slate-100 dark:shadow-black/50 animate-slide-up">
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1.5">Welcome back</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              Sign in with your platform owner credentials
-            </p>
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Welcome back</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-xs">
+                Sign in with platform owner credentials
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('superadmin@erp.com')
+                setPassword('password123')
+                setError('')
+              }}
+              className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-2xs hover:scale-102"
+              title="Click to fill default credentials"
+            >
+              Fill Demo Login
+            </button>
           </div>
 
           {error && (
@@ -146,7 +162,15 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <div className="text-center mt-10 animate-fade-in">
+        <div className="text-center mt-6 space-y-2 animate-fade-in">
+          <div>
+            <a
+              href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5173' : 'https://erp-skillyon-frontend.vercel.app'}
+              className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1"
+            >
+              ← Go to School ERP Portal
+            </a>
+          </div>
           <div className="inline-flex items-center gap-2 text-slate-500 text-[11px] font-medium tracking-wide">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse" />
             <span>Secured access · Skillyon ERP Platform</span>

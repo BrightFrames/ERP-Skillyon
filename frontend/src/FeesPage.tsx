@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import {
   FileText, Banknote, ClipboardList, Award,
   Filter, Download, MoreVertical, Plus, X, Search,
@@ -27,7 +28,9 @@ export default function FeesPage() {
   const [saving, setSaving] = useState(false);
 
   // Filters & Searches
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search');
+  const [searchQuery, setSearchQuery] = useState(urlSearch || '');
   const [statusFilter, setStatusFilter] = useState('');
   const [feeTypeFilter, setFeeTypeFilter] = useState('');
   const [classFilter, setClassFilter] = useState('');
@@ -341,7 +344,15 @@ export default function FeesPage() {
                     payments.map(p => (
                       <tr key={p.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors">
                         <td className="px-6 py-4 text-zinc-400">#{p.receipt_number}</td>
-                        <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">{p.student_name}</td>
+                        <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">
+                          {p.student_id ? (
+                            <Link to={`/students/${p.student_id}`} className="hover:text-indigo-600 hover:underline">
+                              {p.student_name}
+                            </Link>
+                          ) : (
+                            p.student_name
+                          )}
+                        </td>
                         <td className="px-6 py-4">{p.class_name}</td>
                         <td className="px-6 py-4">{p.fee_type_name}</td>
                         <td className="px-6 py-4">
@@ -423,7 +434,15 @@ export default function FeesPage() {
                   invoices.map(i => (
                     <tr key={i.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors">
                       <td className="px-6 py-4 text-zinc-400">#{i.invoice_number}</td>
-                      <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">{i.student_name}</td>
+                      <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">
+                        {i.student_id ? (
+                          <Link to={`/students/${i.student_id}`} className="hover:text-indigo-600 hover:underline">
+                            {i.student_name}
+                          </Link>
+                        ) : (
+                          i.student_name
+                        )}
+                      </td>
                       <td className="px-6 py-4">{i.class_name}</td>
                       <td className="px-6 py-4">{i.fee_type_name}</td>
                       <td className="px-6 py-4 text-zinc-400">{new Date(i.generated_date).toLocaleDateString()}</td>
@@ -512,7 +531,15 @@ export default function FeesPage() {
                 ) : (
                   assignments.map(a => (
                     <tr key={a.id} className="hover:bg-indigo-500/5 dark:hover:bg-indigo-500/10 transition-colors">
-                      <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">{a.student_name}</td>
+                      <td className="px-6 py-4 text-zinc-800 dark:text-slate-200 font-bold">
+                        {a.student_id ? (
+                          <Link to={`/students/${a.student_id}`} className="hover:text-indigo-600 hover:underline">
+                            {a.student_name}
+                          </Link>
+                        ) : (
+                          a.student_name
+                        )}
+                      </td>
                       <td className="px-6 py-4">{a.class_name}</td>
                       <td className="px-6 py-4">{a.fee_type_name}</td>
                       <td className="px-6 py-4">₹{Number(a.amount).toLocaleString()}</td>

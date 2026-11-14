@@ -1,7 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
 import {
   Mail, TrendingUp, Award, BookText, Plus, ChevronLeft,
-  User, Phone, MapPin, Calendar, GraduationCap, Edit2, X, AlertTriangle
+  User, Phone, MapPin, Calendar, GraduationCap, Edit2, X, AlertTriangle,
+  MessageSquare, CreditCard, BookOpen
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import api from './lib/api';
@@ -134,10 +135,29 @@ export default function StudentProfilePage() {
                 <h1 className="text-3xl font-bold text-[#3b3dbf] leading-tight">{student.name}</h1>
                 <p className="text-xs font-bold text-zinc-400 mt-1">ID: #{String(student.id).padStart(4, '0')}</p>
               </div>
-              <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#3b3dbf] text-white rounded-xl text-sm font-bold shadow-sm hover:bg-[#2c2eb5] transition-colors shrink-0">
-                <Mail size={16} />
-                Message Parent
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  to={`/messages?studentId=${student.id}`}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-[#3b3dbf] text-white rounded-xl text-xs font-bold shadow-sm hover:bg-[#2c2eb5] transition-colors shrink-0"
+                >
+                  <MessageSquare size={14} />
+                  Message Parent
+                </Link>
+                <Link
+                  to={`/fees?search=${encodeURIComponent(student.name)}`}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-colors shrink-0 border border-emerald-200"
+                >
+                  <CreditCard size={14} />
+                  Fees
+                </Link>
+                <Link
+                  to="/classes"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors shrink-0"
+                >
+                  <BookOpen size={14} />
+                  Gradebook
+                </Link>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-5">
