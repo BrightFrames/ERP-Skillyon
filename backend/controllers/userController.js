@@ -1,6 +1,7 @@
 import pool from '../db/index.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { getUserPermissions } from '../middleware/permissions.js';
 
 // Use a fallback secret for development if not in .env
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
@@ -16,6 +17,7 @@ export const login = async (req, res, next) => {
       `SELECT 
         s.id, s.name, s.email, s.role, s.subject, s.password, s.school_id,
         s.is_class_teacher, s.class_teacher_of, s.assigned_classes, s.assigned_subjects,
+        s.permissions,
         sc.name as school_name, sc.subscription_status,
         c.name AS class_teacher_of_name
        FROM staff s 
@@ -45,10 +47,23 @@ export const login = async (req, res, next) => {
     if (user.role !== 'SUPER_ADMIN' && user.subscription_status === 'SUSPENDED') {
       return res.status(403).json({ error: 'Your school subscription has been suspended. Please contact the platform administrator.' });
     }
+
+    const effectivePermissions = getUserPermissions({
+      role: user.role,
+      permissions: user.permissions,
+    });
     
-    // Generate JWT Token — include school context for tenant isolation
+    // Generate JWT Token — include school context and effective permissions
     const token = jwt.sign(
-      { id: user.id, role: user.role, name: user.name, email: user.email, school_id: user.school_id || null, school_name: user.school_name || null },
+      { 
+        id: user.id, 
+        role: user.role, 
+        name: user.name, 
+        email: user.email, 
+        school_id: user.school_id || null, 
+        school_name: user.school_name || null,
+        permissions: effectivePermissions
+      },
       JWT_SECRET,
       { expiresIn: '8h' }
     );
@@ -61,6 +76,7 @@ export const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        permissions: effectivePermissions,
         subject: user.subject || null,
         school_id: user.school_id || null,
         school_name: user.school_name || null,

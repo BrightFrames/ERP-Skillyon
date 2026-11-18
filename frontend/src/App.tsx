@@ -14,6 +14,7 @@ import StudentProfilePage from "./StudentProfilePage";
 import TeachersPage from "./TeachersPage";
 import WorkersPage from "./WorkersPage";
 import ClassesPage from "./ClassesPage";
+import AttendancePage from "./AttendancePage";
 import MessagesPage from "./MessagesPage";
 import FeesPage from "./FeesPage";
 import ReportsPage from "./ReportsPage";
@@ -122,6 +123,14 @@ function App() {
             }
           />
           <Route
+            path="attendance"
+            element={
+              <ProtectedRoute roles={["ADMIN", "TEACHER"]}>
+                <AttendancePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="departments"
             element={
               <div className="p-8">
@@ -163,34 +172,34 @@ function App() {
           <Route
             path="reports"
             element={
-              <ProtectedRoute roles={["ADMIN"]}>
-                <ReportsPage />
-              </ProtectedRoute>
+                <ProtectedRoute roles={["ADMIN", "TEACHER"]}>
+                  <ReportsPage />
+                </ProtectedRoute>
             }
           />
-          <Route
-            path="settings"
-            element={
-              <ProtectedRoute roles={["ADMIN"]}>
-                <SettingsPage />
-              </ProtectedRoute>
+                <Route
+                  path="settings"
+                  element={
+                      <ProtectedRoute roles={["ADMIN", "TEACHER", "STAFF"]}>
+                        <SettingsPage />
+                      </ProtectedRoute>
             }
           />
-          <Route
-            path="notices"
-            element={
-              <div className="p-8">
-                <h1 className="text-3xl font-bold tracking-tight mb-2">
-                  Notice Board
-                </h1>
-                <p className="text-zinc-500">Coming soon.</p>
-              </div>
-            }
-          />
-        </Route>
+                      <Route
+                        path="notices"
+                        element={
+                          <div className="p-8">
+                            <h1 className="text-3xl font-bold tracking-tight mb-2">
+                              Notice Board
+                            </h1>
+                            <p className="text-zinc-500">Coming soon.</p>
+                          </div>
+                        }
+                      />
+                    </Route>
       </Routes>
     </Router>
-  );
+        );
 }
 
-export default App;
+        export default App;

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, requireRole, requireSchool } from '../middleware/auth.js';
+import { authenticate, requireSchool, requirePermission } from '../middleware/auth.js';
 import {
   getFeeStats,
   getFees,
@@ -12,15 +12,15 @@ import {
 } from '../controllers/feesController.js';
 
 const router = Router();
-router.use(authenticate, requireSchool, requireRole(['ADMIN', 'STAFF']));
+router.use(authenticate, requireSchool);
 
-router.get('/stats', getFeeStats);
-router.get('/', getFees);
-router.post('/', createFee);
-router.get('/payments', getPayments);
-router.get('/invoices', getInvoices);
-router.get('/rules', getFineRules);
-router.post('/rules', updateFineRules);
-router.get('/types', getFeeTypes);
+router.get('/stats', requirePermission('fees:read'), getFeeStats);
+router.get('/', requirePermission('fees:read'), getFees);
+router.post('/', requirePermission('fees:create'), createFee);
+router.get('/payments', requirePermission('fees:read'), getPayments);
+router.get('/invoices', requirePermission('fees:read'), getInvoices);
+router.get('/rules', requirePermission('fees:read'), getFineRules);
+router.post('/rules', requirePermission('fees:rules'), updateFineRules);
+router.get('/types', requirePermission('fees:read'), getFeeTypes);
 
 export default router;

@@ -1,5 +1,5 @@
-﻿import express from 'express';
-import { authenticate, requireRole, validateQuery, validatePaginationSchema } from '../middleware/auth.js';
+import express from 'express';
+import { authenticate, requireRole, validateQuery, validatePaginationSchema, getUserPermissions, PERMISSIONS } from '../middleware/auth.js';
 import { getProfile, getActivities, login, parentLogin, parentSignup, studentLogin, getSettings, updateSettings } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -17,6 +17,16 @@ router.post('/student-login', studentLogin);
 // @route   GET /api/user/profile
 // @access  Private (Admin, Teacher, Parent)
 router.get('/profile', authenticate, getProfile);
+
+// @route   GET /api/user/permissions
+// @access  Private
+router.get('/permissions', authenticate, (req, res) => {
+  res.json({
+    role: req.user.role,
+    permissions: getUserPermissions(req.user),
+    available_permissions: Object.values(PERMISSIONS),
+  });
+});
 
 // @route   GET /api/user/activities
 // @access  Private (Teacher)

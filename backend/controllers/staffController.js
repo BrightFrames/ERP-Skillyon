@@ -10,6 +10,7 @@ export const getStaff = async (req, res) => {
       SELECT 
         s.id, s.name, s.email, s.role, s.subject, s.join_date,
         s.is_class_teacher, s.class_teacher_of, s.assigned_classes, s.assigned_subjects,
+        s.permissions,
         c.name AS class_teacher_of_name
       FROM staff s
       LEFT JOIN classes c ON s.class_teacher_of = c.id
@@ -50,7 +51,8 @@ export const createStaff = async (req, res) => {
     is_class_teacher, 
     class_teacher_of, 
     assigned_classes, 
-    assigned_subjects 
+    assigned_subjects,
+    permissions
   } = req.body;
 
   if (!name || !email || !role || !password) {
@@ -78,14 +80,15 @@ export const createStaff = async (req, res) => {
     const finalAssignedClasses = Array.from(classSet);
     const assignedClassesJSON = JSON.stringify(finalAssignedClasses);
     const assignedSubjectsJSON = JSON.stringify(Array.isArray(assigned_subjects) ? assigned_subjects : []);
+    const permissionsJSON = JSON.stringify(Array.isArray(permissions) ? permissions : []);
 
     const result = await pool.query(
       `INSERT INTO staff (
         name, email, role, subject, password, join_date, school_id,
-        is_class_teacher, class_teacher_of, assigned_classes, assigned_subjects
+        is_class_teacher, class_teacher_of, assigned_classes, assigned_subjects, permissions
        )
-       VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, $6, $7, $8, $9::jsonb, $10::jsonb)
-       RETURNING id, name, email, role, subject, join_date, is_class_teacher, class_teacher_of, assigned_classes, assigned_subjects`,
+       VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, $6, $7, $8, $9::jsonb, $10::jsonb, $11::jsonb)
+       RETURNING id, name, email, role, subject, join_date, is_class_teacher, class_teacher_of, assigned_classes, assigned_subjects, permissions`,
       [
         name, 
         email, 
@@ -96,7 +99,8 @@ export const createStaff = async (req, res) => {
         isClassTeacher,
         classTeacherOf,
         assignedClassesJSON,
-        assignedSubjectsJSON
+        assignedSubjectsJSON,
+        permissionsJSON
       ]
     );
 
@@ -126,7 +130,8 @@ export const updateStaff = async (req, res) => {
     is_class_teacher, 
     class_teacher_of, 
     assigned_classes, 
-    assigned_subjects 
+    assigned_subjects,
+    permissions 
   } = req.body;
 
   if (!name || !email || !role) {
@@ -151,6 +156,7 @@ export const updateStaff = async (req, res) => {
     const finalAssignedClasses = Array.from(classSet);
     const assignedClassesJSON = JSON.stringify(finalAssignedClasses);
     const assignedSubjectsJSON = JSON.stringify(Array.isArray(assigned_subjects) ? assigned_subjects : []);
+    const permissionsJSON = permissions !== undefined ? JSON.stringify(Array.isArray(permissions) ? permissions : []) : null;
 
     let query = `
       UPDATE staff 
@@ -163,6 +169,11 @@ export const updateStaff = async (req, res) => {
       isClassTeacher, classTeacherOf, assignedClassesJSON, assignedSubjectsJSON
     ];
 
+    if (permissionsJSON !== null) {
+      query += `, permissions = $${params.length + 1}::jsonb`;
+      params.push(permissionsJSON);
+    }
+
     if (password && password.trim().length >= 6) {
       const passwordHash = await bcrypt.hash(password, 10);
       query += `, password = $${params.length + 1}`;
@@ -172,7 +183,7 @@ export const updateStaff = async (req, res) => {
     query += ` WHERE id = $${params.length + 1}`;
     params.push(id);
 
-    query += ` RETURNING id, name, email, role, subject, is_class_teacher, class_teacher_of, assigned_classes, assigned_subjects`;
+    query += ` RETURNING id, name, email, role, subject, is_class_teacher, class_teacher_of, assigned_classes, assigned_subjects, permissions`;
 
     const result = await pool.query(query, params);
     if (result.rowCount === 0) {

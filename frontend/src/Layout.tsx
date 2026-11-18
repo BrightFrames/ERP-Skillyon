@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
+import {
+  LayoutDashboard,
   Users,
   BookOpen,
   MessageSquare,
@@ -17,7 +17,8 @@ import {
   CircleHelp,
   Grid,
   GraduationCap,
-  UserCheck
+  UserCheck,
+  CalendarCheck
 } from 'lucide-react';
 import { useLanguage, t } from './lib/i18n';
 import { fetchAndApplySettings } from './lib/settings';
@@ -27,12 +28,13 @@ import PortalSwitcher from './components/PortalSwitcher';
 const navItems = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
   { name: 'Students', path: '/students', icon: Users, roles: ['ADMIN', 'TEACHER'] },
+  { name: 'Attendance', path: '/attendance', icon: CalendarCheck, roles: ['ADMIN', 'TEACHER'] },
   { name: 'Academic', path: '/classes', icon: BookOpen, roles: ['ADMIN', 'TEACHER'] },
   { name: 'Staff', path: '/teachers', icon: UserCheck, roles: ['ADMIN'] },
   { name: 'Fees', path: '/fees', icon: CreditCard, roles: ['ADMIN', 'STAFF'] },
   { name: 'Messages', path: '/messages', icon: MessageSquare, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
-  { name: 'Reports', path: '/reports', icon: BarChart2, roles: ['ADMIN'] },
-  { name: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN'] },
+  { name: 'Reports', path: '/reports', icon: BarChart2, roles: ['ADMIN', 'TEACHER'] },
+  { name: 'Settings', path: '/settings', icon: Settings, roles: ['ADMIN', 'TEACHER', 'STAFF'] },
 ];
 
 export default function Layout() {
@@ -57,9 +59,9 @@ export default function Layout() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { 
-        e.preventDefault(); 
-        searchInputRef.current?.focus(); 
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
       }
     };
     document.addEventListener('keydown', handleKey);
@@ -68,6 +70,7 @@ export default function Layout() {
 
   const QUICK_LINKS = [
     { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { label: 'Attendance Register', path: '/attendance', icon: CalendarCheck },
     { label: 'Students', path: '/students', icon: Users },
     { label: 'Academic / Gradebook', path: '/classes', icon: BookOpen },
     { label: 'Staff Management', path: '/teachers', icon: UserCheck },
@@ -106,7 +109,7 @@ export default function Layout() {
     <div className="flex h-screen bg-[#f8fafc] dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 overflow-hidden selection:bg-indigo-500/30">
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -125,7 +128,7 @@ export default function Layout() {
               </h2>
               <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">{roleDisplay}</p>
             </div>
-            <button 
+            <button
               className="md:hidden text-zinc-400 hover:text-white ml-auto"
               onClick={() => setSidebarOpen(false)}
             >
@@ -133,7 +136,7 @@ export default function Layout() {
             </button>
           </div>
         </div>
-        
+
         <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto mt-2">
           {filteredNavItems.map((item) => (
             <NavLink
@@ -141,10 +144,9 @@ export default function Layout() {
               to={item.path}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group ${
-                  isActive
-                    ? 'text-indigo-300 bg-indigo-500/12 border border-indigo-500/30 shadow-[0_4px_12px_rgba(99,102,241,0.08)]'
-                    : 'text-slate-400 hover:bg-indigo-500/5 hover:text-indigo-300'
+                `flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all text-sm font-semibold relative overflow-hidden group ${isActive
+                  ? 'text-indigo-300 bg-indigo-500/12 border border-indigo-500/30 shadow-[0_4px_12px_rgba(99,102,241,0.08)]'
+                  : 'text-slate-400 hover:bg-indigo-500/5 hover:text-indigo-300'
                 }`
               }
             >
@@ -164,7 +166,7 @@ export default function Layout() {
             <Headset size={18} />
             {t("Support Center", lang)}
           </button>
-          <button 
+          <button
             onClick={() => {
               localStorage.removeItem('token');
               localStorage.removeItem('user');
@@ -183,13 +185,13 @@ export default function Layout() {
         {/* Top Header */}
         <header className="h-20 shrink-0 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-6 lg:px-10 z-10 sticky top-0">
           <div className="flex items-center flex-1 gap-4">
-            <button 
+            <button
               className="md:hidden p-2 -ml-2 text-zinc-600 hover:text-zinc-900 bg-zinc-100 rounded-lg"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={20} />
             </button>
-            
+
             {/* Search Input */}
             <div className="hidden sm:flex items-center relative w-full max-w-md bg-white border border-slate-200 shadow-sm focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 rounded-2xl transition-all group">
               <Search size={18} className="text-slate-400 absolute left-4 group-focus-within:text-indigo-500 transition-colors" />
@@ -204,7 +206,7 @@ export default function Layout() {
               <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold bg-slate-50 border border-slate-200 text-slate-400 px-2 py-1 rounded-md shadow-sm">⌘K</kbd>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 lg:gap-4 ml-4">
             <PortalSwitcher currentPortalId="school" />
             <ThemeToggle />

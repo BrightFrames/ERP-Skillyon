@@ -1,19 +1,21 @@
 import { Router } from 'express';
-import { authenticate, requireRole, requireSchool } from '../middleware/auth.js';
+import { authenticate, requireSchool, requirePermission } from '../middleware/auth.js';
 import { createStudent, getStudents, deleteStudent, updateStudent } from '../controllers/studentController.js';
 
 const router = Router();
 
-// Retrieve all students - Accessible by Admin and Teacher roles
-router.get('/', authenticate, requireSchool, requireRole(['ADMIN', 'TEACHER']), getStudents);
+router.use(authenticate, requireSchool);
 
-// Create single student - Accessible by Admin only
-router.post('/', authenticate, requireSchool, requireRole(['ADMIN']), createStudent);
+// Retrieve all students - requires students:read permission
+router.get('/', requirePermission('students:read'), getStudents);
 
-// Update single student - Accessible by Admin only
-router.put('/:id', authenticate, requireSchool, requireRole(['ADMIN']), updateStudent);
+// Create single student - requires students:create permission
+router.post('/', requirePermission('students:create'), createStudent);
 
-// Delete student - Accessible by Admin only
-router.delete('/:id', authenticate, requireSchool, requireRole(['ADMIN']), deleteStudent);
+// Update single student - requires students:update permission
+router.put('/:id', requirePermission('students:update'), updateStudent);
+
+// Delete student - requires students:delete permission
+router.delete('/:id', requirePermission('students:delete'), deleteStudent);
 
 export default router;

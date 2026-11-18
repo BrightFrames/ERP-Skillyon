@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS staff (
     class_teacher_of INTEGER REFERENCES classes(id) ON DELETE SET NULL,
     assigned_classes JSONB DEFAULT '[]'::jsonb,
     assigned_subjects JSONB DEFAULT '[]'::jsonb,
+    permissions JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

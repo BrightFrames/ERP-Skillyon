@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "./lib/api";
+import { hasPermission } from "./lib/permissions";
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -54,6 +55,18 @@ export default function StudentsPage() {
   const searchQuery = searchParams.get("search") || "";
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+
+  const canAdd = hasPermission(user, "students:create");
+  const canEdit = hasPermission(user, "students:update");
+  const canDelete = hasPermission(user, "students:delete");
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -213,13 +226,15 @@ export default function StudentsPage() {
             enrollment.
           </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors shadow-sm"
-        >
-          <UserPlus size={18} />
-          Add New Student
-        </button>
+        {canAdd && (
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors shadow-sm cursor-pointer"
+          >
+            <UserPlus size={18} />
+            Add New Student
+          </button>
+        )}
       </div>
 
       {/* Top Metrics Cards */}
@@ -491,17 +506,19 @@ export default function StudentsPage() {
                         >
                           <CreditCard size={16} />
                         </Link>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditModal(student);
-                          }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-400 dark:hover:bg-indigo-900/50 rounded-lg transition-colors cursor-pointer shadow-xs"
-                          title="Edit Student"
-                        >
-                          <Edit2 size={13} />
-                          <span>Edit</span>
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditModal(student);
+                            }}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-400 dark:hover:bg-indigo-900/50 rounded-lg transition-colors cursor-pointer shadow-xs"
+                            title="Edit Student"
+                          >
+                            <Edit2 size={13} />
+                            <span>Edit</span>
+                          </button>
+                        )}
                         <Link
                           to={`/students/${student.id}`}
                           className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-slate-200 rounded-lg transition-colors"
@@ -509,16 +526,18 @@ export default function StudentsPage() {
                         >
                           <Eye size={16} />
                         </Link>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(student.id);
-                          }}
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400 rounded-lg transition-colors cursor-pointer"
-                          title="Delete Student"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {canDelete && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(student.id);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400 rounded-lg transition-colors cursor-pointer"
+                            title="Delete Student"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

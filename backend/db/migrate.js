@@ -20,6 +20,7 @@ export async function initializeDatabase() {
       ALTER TABLE students ADD COLUMN IF NOT EXISTS father_name VARCHAR(255);
       ALTER TABLE staff DROP CONSTRAINT IF EXISTS staff_role_check;
       ALTER TABLE staff ADD CONSTRAINT staff_role_check CHECK (role IN ('SUPER_ADMIN', 'ADMIN', 'TEACHER', 'STAFF', 'SECURITY'));
+      ALTER TABLE staff ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '[]'::jsonb;
       ALTER TABLE assessments ADD COLUMN IF NOT EXISTS description TEXT;
       ALTER TABLE assessments ADD COLUMN IF NOT EXISTS questions JSONB DEFAULT '[]'::jsonb;
       ALTER TABLE assessments ADD COLUMN IF NOT EXISTS due_date DATE;

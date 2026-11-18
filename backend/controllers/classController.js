@@ -73,3 +73,49 @@ export const createClass = async (req, res) => {
   }
 };
 
+// PUT /api/classes/:id
+export const updateClass = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, teacher_id } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Class name is required' });
+    }
+
+    const { rows } = await pool.query(
+      'UPDATE classes SET name = $1, teacher_id = $2 WHERE id = $3 AND school_id = $4 RETURNING *',
+      [name, teacher_id || null, id, req.school_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    console.error("DB Query Error [updateClass]:", error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// DELETE /api/classes/:id
+export const deleteClass = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rows } = await pool.query(
+      'DELETE FROM classes WHERE id = $1 AND school_id = $2 RETURNING id',
+      [id, req.school_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    res.status(200).json({ message: 'Class deleted successfully' });
+  } catch (error) {
+    console.error("DB Query Error [deleteClass]:", error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+

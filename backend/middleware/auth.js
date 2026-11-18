@@ -51,3 +51,13 @@ export const validateQuery = (schema) => (req, res, next) => {
     res.status(400).json({ error: 'Bad Request', message: error.errors });
   }
 };
+
+// Re-export granular permissions helpers
+export {
+  PERMISSIONS,
+  DEFAULT_ROLE_PERMISSIONS,
+  getUserPermissions,
+  hasPermission,
+  requirePermission,
+  requireAllPermissions,
+} from './permissions.js';
